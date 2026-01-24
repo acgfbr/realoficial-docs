@@ -1,0 +1,11 @@
+<svg width="800" height="400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.1" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" fill="url(#bgGradient)" rx="16"/>
+  <text x="400" y="180" font-family="system-ui, sans-serif" font-size="48" font-weight="bold" fill="#6366f1" text-anchor="middle">Real Oficial API</text>
+  <text x="400" y="240" font-family="system-ui, sans-serif" font-size="24" fill="#64748b" text-anchor="middle">Cortes de video automaticos com IA</text>
+</svg>

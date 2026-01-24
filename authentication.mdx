@@ -1,0 +1,145 @@
+---
+title: 'Autenticacao'
+description: 'Aprenda como autenticar suas requisicoes na API'
+---
+
+## Metodo de Autenticacao
+
+A API do Real Oficial utiliza **Bearer Token** para autenticacao. Apos fazer login, voce recebera um token que deve ser enviado em todas as requisicoes subsequentes.
+
+## Obtendo seu Token
+
+<Steps>
+  <Step title="Crie uma conta">
+    Registre-se em [app.realoficial.com.br](https://app.realoficial.com.br).
+  </Step>
+  <Step title="Obtenha seu token">
+    Use o endpoint `/login` para obter seu token ou acesse **Configuracoes > Perfil** no dashboard.
+  </Step>
+  <Step title="Use o token">
+    Inclua o token no header `Authorization` de todas as requisicoes.
+  </Step>
+</Steps>
+
+## Formato do Header
+
+Todas as requisicoes autenticadas devem incluir o header `Authorization`:
+
+```bash
+Authorization: Bearer SEU_TOKEN_AQUI
+```
+
+## Exemplo de Requisicao
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://api.realoficial.com.br/api/v1/user" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.realoficial.com.br/api/v1/user', {
+  method: 'GET',
+  headers: {
+    'Authorization': 'Bearer seu_token_aqui',
+    'Content-Type': 'application/json'
+  }
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+headers = {
+    'Authorization': 'Bearer seu_token_aqui',
+    'Content-Type': 'application/json'
+}
+
+response = requests.get(
+    'https://api.realoficial.com.br/api/v1/user',
+    headers=headers
+)
+
+data = response.json()
+```
+
+```php PHP
+$ch = curl_init();
+
+curl_setopt_array($ch, [
+    CURLOPT_URL => 'https://api.realoficial.com.br/api/v1/user',
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer seu_token_aqui',
+        'Content-Type: application/json'
+    ]
+]);
+
+$response = curl_exec($ch);
+$data = json_decode($response, true);
+```
+</CodeGroup>
+
+## Tokens e Seguranca
+
+<Info>
+  **Seu token e permanente.** Uma vez gerado, seu token nao expira e permanece o mesmo. Guarde-o em um local seguro.
+</Info>
+
+<Warning>
+  **Mantenha seu token seguro!** Nunca compartilhe ou exponha seu token em codigo publico, repositorios Git ou logs.
+</Warning>
+
+### Boas praticas
+
+<CardGroup cols={2}>
+  <Card title="Variaveis de ambiente" icon="lock">
+    Armazene tokens em variaveis de ambiente, nunca no codigo
+  </Card>
+  <Card title="HTTPS apenas" icon="shield">
+    Sempre use HTTPS para todas as requisicoes
+  </Card>
+  <Card title="Token fixo" icon="lock-keyhole">
+    Seu token e permanente e nao expira, guarde-o com seguranca
+  </Card>
+  <Card title="Monitoramento" icon="eye">
+    Monitore o uso da sua conta para detectar acessos nao autorizados
+  </Card>
+</CardGroup>
+
+## Codigos de Erro de Autenticacao
+
+| Codigo | Descricao |
+|--------|-----------|
+| `401` | Token invalido ou ausente |
+| `403` | Token valido mas sem permissao para o recurso |
+
+### Exemplo de resposta de erro
+
+```json
+{
+  "error": "Token invalido ou expirado"
+}
+```
+
+## Proximos passos
+
+<CardGroup cols={2}>
+  <Card
+    title="Login"
+    icon="right-to-bracket"
+    href="/api-reference/auth/login"
+  >
+    Faca login e obtenha seu token
+  </Card>
+  <Card
+    title="Criar Projeto"
+    icon="folder-plus"
+    href="/api-reference/projects/create"
+  >
+    Comece criando seu primeiro projeto
+  </Card>
+</CardGroup>

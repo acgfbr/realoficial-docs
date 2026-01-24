@@ -1,101 +1,85 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "AbacatePay",
+  "name": "Real Oficial API",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#6366f1",
+    "light": "#818cf8",
+    "dark": "#4f46e5"
   },
-  "favicon": "/favicon.ico",
+  "favicon": "https://realoficial.com.br/favicon.ico",
   "api": {
     "mdx": {
-      "server": "https://api.abacatepay.com/v1",
+      "server": "https://api.realoficial.com.br/api/v1",
       "auth": {
         "method": "bearer"
       }
     }
   },
   "navigation": {
-    "tabs": [
+    "groups": [
       {
-        "tab": "Documentação",
-        "groups": [
-          {
-            "group": "Introdução",
-            "pages": [
-              "pages/introduction",
-              "pages/devmode",
-              "pages/authentication",
-              "pages/webhooks",
-              "pages/production",
-              "pages/sdks",
-              "pages/trustMRR"
-            ]
-          },
-          {
-            "group": "Cliente",
-            "pages": ["pages/client/reference", "pages/client/create", "pages/client/list"]
-          },
-          {
-            "group": "Cobrança",
-            "pages": ["pages/payment/reference", "pages/payment/create", "pages/payment/list"]
-          },
-          {
-            "group": "Pix QRCode",
-            "pages": [
-              "pages/pix-qrcode/reference",
-              "pages/pix-qrcode/create",
-              "pages/pix-qrcode/simulate-payment",
-              "pages/pix-qrcode/check"
-            ]
-          },
-          {
-            "group": "Cupom",
-            "pages": ["pages/coupon/reference", "pages/coupon/create", "pages/coupon/list"]
-          },
-          {
-            "group": "Saque",
-            "pages": ["pages/withdraw/reference", "pages/withdraw/create", "pages/withdraw/get", "pages/withdraw/list"]
-          },
-          {
-            "group": "Loja",
-            "pages": ["pages/store/reference", "pages/store/get"]
-          },
-          {
-            "group": "Trust MRR",
-            "pages": ["pages/trustMRR/reference", "pages/trustMRR/mrr", "pages/trustMRR/get", "pages/trustMRR/list"]
-          }
+        "group": "Comece Aqui",
+        "pages": [
+          "introduction",
+          "authentication",
+          "api-reference/overview"
         ]
       },
       {
-        "tab": "Referência da API",
-        "openapi": "openapi.yaml"
+        "group": "Autenticacao",
+        "pages": [
+          "api-reference/auth/login",
+          "api-reference/auth/user"
+        ]
+      },
+      {
+        "group": "Projetos",
+        "pages": [
+          "api-reference/projects/create",
+          "api-reference/projects/list"
+        ]
+      },
+      {
+        "group": "Shorts",
+        "pages": [
+          "api-reference/shorts/list"
+        ]
+      },
+      {
+        "group": "Renders",
+        "pages": [
+          "api-reference/renders/create",
+          "api-reference/renders/list"
+        ]
       }
     ]
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "https://cdn.realoficial.com.br/logo_v2.png",
+    "dark": "https://cdn.realoficial.com.br/logo_v2.png"
   },
   "navbar": {
     "links": [
       {
-        "label": "Repositorio",
-        "href": "https://github.com/AbacatePay/documentation"
+        "label": "Comunidade",
+        "href": "https://discord.gg/realoficial"
+      },
+      {
+        "label": "Status",
+        "href": "https://status.realoficial.com.br"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://www.abacatepay.com/app"
+      "href": "https://app.realoficial.com.br"
     }
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/abacatepay",
-      "github": "https://github.com/AbacatePay",
-      "linkedin": "https://br.linkedin.com/company/abacatepay?trk=public_post_feed-actor-name"
+      "instagram": "https://instagram.com/realoficialbr",
+      "youtube": "https://youtube.com/@realoficialbr"
     }
   }
 }

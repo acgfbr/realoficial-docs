@@ -1,0 +1,284 @@
+---
+title: 'Criar Projeto'
+api: 'POST /createShorts'
+description: 'Crie um novo projeto a partir de uma URL de video e gere cortes automaticamente'
+---
+
+## Endpoint
+
+```
+POST https://api.realoficial.com.br/api/v1/createShorts
+```
+
+<Note>
+Este endpoint requer autenticacao e consome creditos do usuario.
+</Note>
+
+## Body Parameters
+
+<ParamField body="url" type="string" required>
+  URL do video (YouTube, Google Drive ou link direto .mp4)
+</ParamField>
+
+<ParamField body="clipDuration" type="string" required>
+  Duracao alvo dos cortes: `30`, `60`, `90`, `120` ou `auto`
+</ParamField>
+
+<ParamField body="startTime" type="number" required>
+  Tempo inicial do trecho a processar (em segundos)
+</ParamField>
+
+<ParamField body="endTime" type="number" required>
+  Tempo final do trecho a processar (em segundos)
+</ParamField>
+
+<ParamField body="aspect_ratio" type="string" required>
+  Formato do video: `vertical` (9:16) ou `horizontal` (16:9)
+</ParamField>
+
+<ParamField body="layout" type="string">
+  Layout do video: `single`, `split`, `react`, `gaming`
+
+  - `single`: Video unico com face tracking
+  - `split`: Tela dividida (face + conteudo)
+  - `center`: Vídeo centralizado na tela
+  - `react`: Estilo reacao
+  - `gaming`: Para gameplays
+</ParamField>
+
+<ParamField body="video_type" type="string">
+  Tipo de processamento: `shorts` (padrao) ou `reframe`
+</ParamField>
+
+<ParamField body="title" type="string">
+  Titulo personalizado do projeto (usa titulo do video se nao informado)
+</ParamField>
+
+<ParamField body="captionFont" type="string">
+  Fonte padrao para legendas
+</ParamField>
+
+<ParamField body="captionTemplate" type="string">
+  Template de estilo de legendas
+</ParamField>
+
+<ParamField body="ignoreCaptions" type="boolean">
+  Se deve ignorar legendas automaticas (padrao: false)
+</ParamField>
+
+## Custo em Creditos
+
+<Warning>
+**1 credito = 1 minuto de video processado**
+
+O custo e calculado automaticamente com base no intervalo `endTime - startTime`.
+</Warning>
+
+## Validacoes
+
+| Regra | Limite |
+|-------|--------|
+| Intervalo minimo | 10 minutos (600 segundos) |
+| Intervalo maximo modo reframe | 5 minutos (300 segundos) |
+| Duracao maxima do video | 10 horas |
+| Videos > 5h | Intervalo minimo de 1 hora |
+| Videos > 3h | Requer assinatura ativa |
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/createShorts" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "clipDuration": "60",
+    "startTime": 0,
+    "endTime": 1800,
+    "aspect_ratio": "vertical",
+    "layout": "single"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.realoficial.com.br/api/v1/createShorts', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer seu_token_aqui',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    clipDuration: '60',
+    startTime: 0,
+    endTime: 1800,
+    aspect_ratio: 'vertical',
+    layout: 'single'
+  })
+});
+
+const project = await response.json();
+console.log(project.id); // ID do projeto criado
+```
+
+```python Python
+import requests
+
+headers = {
+    'Authorization': 'Bearer seu_token_aqui',
+    'Content-Type': 'application/json'
+}
+
+data = {
+    'url': 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    'clipDuration': '60',
+    'startTime': 0,
+    'endTime': 1800,
+    'aspect_ratio': 'vertical',
+    'layout': 'single'
+}
+
+response = requests.post(
+    'https://api.realoficial.com.br/api/v1/createShorts',
+    headers=headers,
+    json=data
+)
+
+project = response.json()
+```
+
+```php PHP
+$ch = curl_init();
+
+curl_setopt_array($ch, [
+    CURLOPT_URL => 'https://api.realoficial.com.br/api/v1/createShorts',
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer seu_token_aqui',
+        'Content-Type: application/json'
+    ],
+    CURLOPT_POSTFIELDS => json_encode([
+        'url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        'clipDuration' => '60',
+        'startTime' => 0,
+        'endTime' => 1800,
+        'aspect_ratio' => 'vertical',
+        'layout' => 'single'
+    ])
+]);
+
+$response = curl_exec($ch);
+$project = json_decode($response, true);
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "data": {
+    "id": "01k3ab12yqtsyrzjb0fveqy5zx",
+    "title": "Titulo do Video",
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "status": "pending",
+    "goal": "shorts",
+    "video_layout": "single",
+    "aspect_ratio": "vertical",
+    "clip_duration": "60",
+    "start_time": 0,
+    "end_time": 1800,
+    "created_at": "2025-01-24T10:30:00.000000Z",
+    "thumbnail_url": "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+    "metadata": {
+      "title": "Titulo do Video",
+      "duration": "45:30",
+      "channel_title": "Canal do Autor"
+    }
+  }
+}
+```
+
+```json 400 - Creditos Insuficientes
+{
+  "error": "Créditos insuficientes para gerar os cortes. Atualize seu plano ou compre mais créditos para continuar."
+}
+```
+
+```json 400 - Intervalo Invalido
+{
+  "error": "Você precisa selecionar um intervalo de pelo menos 10 minutos."
+}
+```
+
+```json 403 - Assinatura Necessaria
+{
+  "error": "Você precisa de uma assinatura ativa para processar vídeos maiores que 3 horas."
+}
+```
+</ResponseExample>
+
+## Status do Projeto
+
+Apos criar o projeto, ele passara pelos seguintes status:
+
+| Status | Descricao |
+|--------|-----------|
+| `pending` | Aguardando processamento |
+| `downloading` | Baixando o video |
+| `transcribing` | Transcrevendo audio |
+| `transcribed` | Transcricao concluida |
+| `shorts_created` | Cortes identificados |
+| `face_analysis_done` | Pronto para uso |
+| `refunded` | Reembolsado |
+
+<Info>
+**Polling recomendado**: Consulte `GET /shorts/{projectId}` a cada 10-30 segundos para verificar quando os cortes estao prontos.
+</Info>
+
+## Visualizar Cortes
+
+Apos o projeto ser processado, voce pode visualizar os cortes gerados atraves de uma pagina de preview:
+
+```
+https://app.realoficial.com.br/share/{projectId}?token={seu_token}
+```
+
+<Frame>
+  <img src="/images/preview_share.jpeg" alt="Pagina de preview dos cortes" />
+</Frame>
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto retornado na criacao
+</ParamField>
+
+<ParamField query="token" type="string" required>
+  Seu token de autenticacao (o mesmo usado nas requisicoes da API)
+</ParamField>
+
+### Exemplo de URL
+
+```
+https://app.realoficial.com.br/share/01k3ab12yqtsyrzjb0fveqy5zx?token=seu_token_aqui
+```
+
+<Tip>
+Use essa URL para compartilhar a previa dos cortes com sua equipe ou integrar em sua aplicacao via iframe. Nenhuma menção ao real oficial é feita nela
+</Tip>
+
+## URLs Suportadas
+
+<AccordionGroup>
+  <Accordion title="YouTube">
+    - `https://www.youtube.com/watch?v=VIDEO_ID`
+    - `https://youtu.be/VIDEO_ID`
+    - Videos com mais de 10 minutos de duracao
+    - YouTube Shorts **nao** sao suportados
+  </Accordion>
+  <Accordion title="Google Drive">
+    - Links de compartilhamento publico
+    - Maximo 10GB por arquivo
+  </Accordion>
+  <Accordion title="Link Direto">
+    - URLs terminando em `.mp4`
+    - Maximo 10GB por arquivo
+  </Accordion>
+</AccordionGroup>

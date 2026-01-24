@@ -1,0 +1,355 @@
+---
+title: 'Listar Renders'
+api: 'GET /renders'
+description: 'Liste todas as renderizacoes do usuario'
+---
+
+## Endpoint
+
+```
+GET https://api.realoficial.com.br/api/v1/renders
+```
+
+<Note>
+Este endpoint requer autenticacao via Bearer Token.
+</Note>
+
+## Query Parameters
+
+<ParamField query="page" type="integer">
+  Numero da pagina (padrao: 1)
+</ParamField>
+
+<ParamField query="limit" type="integer">
+  Quantidade de itens por pagina (padrao: 20)
+</ParamField>
+
+<ParamField query="project_id" type="string">
+  Filtrar por ID de projeto especifico
+</ParamField>
+
+<ParamField query="fromPublishScreen" type="boolean">
+  Otimiza resposta para listagem de videos prontos (apenas status `done`)
+</ParamField>
+
+## Resposta de Sucesso
+
+<ResponseField name="message" type="string">
+  Mensagem de confirmacao
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  Objeto paginado com os renders
+  <Expandable title="Propriedades do render">
+    <ResponseField name="id" type="string">
+      ID unico da renderizacao (ULID)
+    </ResponseField>
+    <ResponseField name="short_id" type="string">
+      ID do short renderizado
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      Status: `pending`, `processing`, `done`, `error`
+    </ResponseField>
+    <ResponseField name="download_url" type="string">
+      URL para download do video (quando status = `done`)
+    </ResponseField>
+    <ResponseField name="render_hash" type="string">
+      Hash unico da configuracao (para detectar alteracoes)
+    </ResponseField>
+    <ResponseField name="storage_provider" type="string">
+      Provider de armazenamento: `r2` ou `wasabi`
+    </ResponseField>
+    <ResponseField name="created_at" type="string">
+      Data de criacao (ISO 8601)
+    </ResponseField>
+    <ResponseField name="short" type="object">
+      Dados do short associado
+      <Expandable title="Propriedades do short">
+        <ResponseField name="id" type="string">
+          ID do short
+        </ResponseField>
+        <ResponseField name="title" type="string">
+          Titulo do corte
+        </ResponseField>
+        <ResponseField name="start_time" type="number">
+          Tempo de inicio
+        </ResponseField>
+        <ResponseField name="end_time" type="number">
+          Tempo de fim
+        </ResponseField>
+        <ResponseField name="thumbnail_url" type="string">
+          URL da thumbnail
+        </ResponseField>
+        <ResponseField name="project" type="object">
+          Dados basicos do projeto
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="published_platforms" type="array">
+      Plataformas onde o video ja foi publicado
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.realoficial.com.br/api/v1/renders?limit=20&page=1" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json"
+```
+
+```javascript JavaScript
+const response = await fetch(
+  'https://api.realoficial.com.br/api/v1/renders?limit=20&page=1',
+  {
+    method: 'GET',
+    headers: {
+      'Authorization': 'Bearer seu_token_aqui',
+      'Content-Type': 'application/json'
+    }
+  }
+);
+
+const data = await response.json();
+const renders = data.data.data;
+
+// Filtrar apenas renders prontos
+const readyRenders = renders.filter(r => r.status === 'done');
+
+// Obter URLs de download
+readyRenders.forEach(r => {
+  console.log(`${r.short.title}: ${r.download_url}`);
+});
+```
+
+```python Python
+import requests
+
+headers = {
+    'Authorization': 'Bearer seu_token_aqui',
+    'Content-Type': 'application/json'
+}
+
+params = {
+    'limit': 20,
+    'page': 1
+}
+
+response = requests.get(
+    'https://api.realoficial.com.br/api/v1/renders',
+    headers=headers,
+    params=params
+)
+
+data = response.json()
+renders = data['data']['data']
+
+# Filtrar renders prontos
+ready_renders = [r for r in renders if r['status'] == 'done']
+```
+
+```php PHP
+$ch = curl_init();
+
+curl_setopt_array($ch, [
+    CURLOPT_URL => 'https://api.realoficial.com.br/api/v1/renders?limit=20&page=1',
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer seu_token_aqui',
+        'Content-Type: application/json'
+    ]
+]);
+
+$response = curl_exec($ch);
+$data = json_decode($response, true);
+$renders = $data['data']['data'];
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "message": "Lista de renders obtida com sucesso.",
+  "data": {
+    "current_page": 1,
+    "data": [
+      {
+        "id": "01k6ij90yqtsyrzjb0hveqy9ef",
+        "short_id": "01k4ef56yqtsyrzjb0gveqy7cd",
+        "status": "done",
+        "download_url": "https://cdn-wasabi.realoficial.com.br/renders/01k6ij90yqtsyrzjb0hveqy9ef.mp4?v=20250124",
+        "render_hash": "a1b2c3d4e5f6...",
+        "storage_provider": "wasabi",
+        "created_at": "2025-01-24T11:00:00.000000Z",
+        "short": {
+          "id": "01k4ef56yqtsyrzjb0gveqy7cd",
+          "title": "Momento viral #1",
+          "start_time": 245.5,
+          "end_time": 305.2,
+          "thumbnail_url": "https://img.youtube.com/vi/abc123/maxresdefault.jpg",
+          "project": {
+            "id": "01k3ab12yqtsyrzjb0fveqy5zx",
+            "url": "https://www.youtube.com/watch?v=abc123"
+          },
+          "renders": [
+            {
+              "id": "01k6ij90yqtsyrzjb0hveqy9ef",
+              "created_at": "2025-01-24T11:00:00.000000Z"
+            }
+          ]
+        },
+        "published_platforms": ["tiktok", "instagram"]
+      },
+      {
+        "id": "01k6ij91yqtsyrzjb0hveqy0gh",
+        "short_id": "01k4ef57yqtsyrzjb0gveqy8de",
+        "status": "processing",
+        "download_url": null,
+        "render_hash": "b2c3d4e5f6g7...",
+        "storage_provider": "wasabi",
+        "created_at": "2025-01-24T11:05:00.000000Z",
+        "short": {
+          "id": "01k4ef57yqtsyrzjb0gveqy8de",
+          "title": "Momento viral #2",
+          "start_time": 512.0,
+          "end_time": 571.5,
+          "thumbnail_url": "https://img.youtube.com/vi/abc123/maxresdefault.jpg",
+          "project": {
+            "id": "01k3ab12yqtsyrzjb0fveqy5zx",
+            "url": "https://www.youtube.com/watch?v=abc123"
+          }
+        },
+        "published_platforms": []
+      }
+    ],
+    "first_page_url": "https://api.realoficial.com.br/api/v1/renders?page=1",
+    "from": 1,
+    "last_page": 5,
+    "per_page": 20,
+    "to": 20,
+    "total": 87
+  }
+}
+```
+</ResponseExample>
+
+## Filtrar por Projeto
+
+Para listar renders de um projeto especifico:
+
+```bash
+GET /renders?project_id=01k3ab12yqtsyrzjb0fveqy5zx
+```
+
+## Download do Video
+
+Quando o status e `done`, o campo `download_url` contem a URL direta para o arquivo MP4:
+
+```javascript
+// Baixar video programaticamente
+async function downloadVideo(render) {
+  if (render.status !== 'done') {
+    throw new Error('Render ainda nao concluido');
+  }
+
+  const response = await fetch(render.download_url);
+  const blob = await response.blob();
+
+  // Salvar localmente
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${render.short.title}.mp4`;
+  a.click();
+}
+```
+
+## Status dos Renders
+
+<CardGroup cols={2}>
+  <Card title="pending" icon="clock">
+    Na fila de processamento. Aguardando worker disponivel.
+  </Card>
+  <Card title="processing" icon="spinner">
+    Sendo renderizado. Pode levar de 30s a 2 minutos.
+  </Card>
+  <Card title="done" icon="check">
+    Concluido! Campo `download_url` disponivel.
+  </Card>
+  <Card title="error" icon="xmark">
+    Erro durante renderizacao. Tente novamente.
+  </Card>
+</CardGroup>
+
+## CDN e Cache
+
+<Info>
+Os videos sao armazenados em CDN global (Wasabi) e ficam disponiveis por tempo indeterminado. As URLs incluem um parametro de versao para cache busting.
+</Info>
+
+## Exemplo de Integracao Completa
+
+```javascript
+// Fluxo completo: criar projeto -> aguardar cortes -> renderizar -> baixar
+async function processVideo(youtubeUrl) {
+  const token = 'seu_token_aqui';
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+
+  // 1. Criar projeto
+  const createResponse = await fetch('https://api.realoficial.com.br/api/v1/createShorts', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      url: youtubeUrl,
+      clipDuration: '60',
+      startTime: 0,
+      endTime: 1800,
+      aspect_ratio: 'vertical',
+      layout: 'single'
+    })
+  });
+  const project = await createResponse.json();
+
+  // 2. Aguardar processamento (polling)
+  let shorts = [];
+  while (shorts.length === 0) {
+    await new Promise(r => setTimeout(r, 30000)); // 30 segundos
+
+    const shortsResponse = await fetch(
+      `https://api.realoficial.com.br/api/v1/shorts/${project.data.id}?sort=score`,
+      { headers }
+    );
+    const shortsData = await shortsResponse.json();
+
+    if (shortsData.project?.status === 'face_analysis_done') {
+      shorts = shortsData.data.data;
+    }
+  }
+
+  // 3. Renderizar os 3 melhores cortes
+  const topShorts = shorts.slice(0, 3);
+  for (const short of topShorts) {
+    await fetch(
+      `https://api.realoficial.com.br/api/v1/shorts/${project.data.id}/${short.id}/render`,
+      { method: 'POST', headers }
+    );
+  }
+
+  // 4. Aguardar renders
+  await new Promise(r => setTimeout(r, 120000)); // 2 minutos
+
+  // 5. Obter URLs dos videos
+  const rendersResponse = await fetch(
+    `https://api.realoficial.com.br/api/v1/renders?project_id=${project.data.id}`,
+    { headers }
+  );
+  const renders = await rendersResponse.json();
+
+  return renders.data.data
+    .filter(r => r.status === 'done')
+    .map(r => r.download_url);
+}
+```

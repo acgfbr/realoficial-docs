@@ -1,0 +1,243 @@
+---
+title: 'Renderizar Short'
+api: 'POST /shorts/{projectId}/{shortId}/render'
+description: 'Inicie a renderizacao de um corte para gerar o video final'
+---
+
+## Endpoint
+
+```
+POST https://api.realoficial.com.br/api/v1/shorts/{projectId}/{shortId}/render
+```
+
+<Note>
+Este endpoint requer autenticacao via Bearer Token.
+</Note>
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID)
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short a ser renderizado (ULID)
+</ParamField>
+
+## Rate Limits
+
+<Warning>
+**Limites de renderizacao por hora:**
+- Usuarios gratuitos: 3 cortes/hora
+- Usuarios pagantes: 30 cortes/hora
+
+Usuarios que nunca fizeram deposito terao **marca d'agua** nos videos.
+</Warning>
+
+## Resposta de Sucesso
+
+<ResponseField name="message" type="string">
+  Mensagem de confirmacao
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  Dados da renderizacao iniciada
+  <Expandable title="Propriedades">
+    <ResponseField name="render_id" type="string">
+      ID unico da renderizacao (ULID)
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      Status inicial: `pending`
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/shorts/PROJECT_ID/SHORT_ID/render" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json"
+```
+
+```javascript JavaScript
+const projectId = '01k3ab12yqtsyrzjb0fveqy5zx';
+const shortId = '01k4ef56yqtsyrzjb0gveqy7cd';
+
+const response = await fetch(
+  `https://api.realoficial.com.br/api/v1/shorts/${projectId}/${shortId}/render`,
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer seu_token_aqui',
+      'Content-Type': 'application/json'
+    }
+  }
+);
+
+const data = await response.json();
+console.log(data.data.render_id); // ID da renderizacao
+```
+
+```python Python
+import requests
+
+project_id = '01k3ab12yqtsyrzjb0fveqy5zx'
+short_id = '01k4ef56yqtsyrzjb0gveqy7cd'
+
+headers = {
+    'Authorization': 'Bearer seu_token_aqui',
+    'Content-Type': 'application/json'
+}
+
+response = requests.post(
+    f'https://api.realoficial.com.br/api/v1/shorts/{project_id}/{short_id}/render',
+    headers=headers
+)
+
+data = response.json()
+render_id = data['data']['render_id']
+```
+
+```php PHP
+$projectId = '01k3ab12yqtsyrzjb0fveqy5zx';
+$shortId = '01k4ef56yqtsyrzjb0gveqy7cd';
+
+$ch = curl_init();
+
+curl_setopt_array($ch, [
+    CURLOPT_URL => "https://api.realoficial.com.br/api/v1/shorts/{$projectId}/{$shortId}/render",
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer seu_token_aqui',
+        'Content-Type: application/json'
+    ]
+]);
+
+$response = curl_exec($ch);
+$data = json_decode($response, true);
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Renderizacao Iniciada
+{
+  "message": "Renderização iniciada com sucesso, você pode acompanhar o progresso no menu \"Meus Vídeos\".",
+  "data": {
+    "render_id": "01k6ij90yqtsyrzjb0hveqy9ef",
+    "status": "pending"
+  }
+}
+```
+
+```json 208 - Renderizacao Ja Existente
+{
+  "message": "Renderização já feita para este corte.",
+  "data": {
+    "render_id": "01k6ij90yqtsyrzjb0hveqy9ef",
+    "url": "https://cdn-wasabi.realoficial.com.br/renders/01k6ij90yqtsyrzjb0hveqy9ef.mp4"
+  }
+}
+```
+
+```json 400 - Rate Limit Atingido
+{
+  "error": "Usuários do plano gratuito não podem renderizar mais de 3 cortes por hora."
+}
+```
+
+```json 400 - Renderizacao em Progresso
+{
+  "error": "Renderização já está em progresso para este corte. Acompanhe o progresso no menu \"Meus Vídeos\"."
+}
+```
+
+```json 404 - Short Nao Encontrado
+{
+  "error": "Short não encontrado."
+}
+```
+</ResponseExample>
+
+## Renderizacao em Lote
+
+Para renderizar multiplos shorts de uma vez:
+
+```
+POST https://api.realoficial.com.br/api/v1/renders/bulk
+```
+
+### Body Parameters
+
+<ParamField body="short_ids" type="array" required>
+  Array de IDs dos shorts a renderizar
+</ParamField>
+
+<RequestExample>
+```bash cURL - Bulk
+curl -X POST "https://api.realoficial.com.br/api/v1/renders/bulk" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "short_ids": [
+      "01k4ef56yqtsyrzjb0gveqy7cd",
+      "01k4ef57yqtsyrzjb0gveqy8de",
+      "01k4ef58yqtsyrzjb0gveqy9fg"
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Bulk Sucesso
+{
+  "message": "Acompanhe na tela de meus vídeos :)"
+}
+```
+</ResponseExample>
+
+<Warning>
+**Requisitos para renderizacao em lote:**
+- Usuario deve ter feito pelo menos um deposito real
+- Limite de 30 renderizacoes por hora continua valido
+</Warning>
+
+## Status da Renderizacao
+
+| Status | Descricao |
+|--------|-----------|
+| `pending` | Na fila de processamento |
+| `processing` | Sendo renderizado |
+| `done` | Concluido - video disponivel |
+| `error` | Erro durante renderizacao |
+
+## Tempo de Processamento
+
+<Info>
+O tempo medio de renderizacao e de **30 segundos a 2 minutos** por corte, dependendo da duracao e complexidade.
+</Info>
+
+## Polling de Status
+
+Apos iniciar a renderizacao, consulte o endpoint `GET /renders` para verificar quando o video esta pronto:
+
+```javascript
+async function waitForRender(renderId, maxAttempts = 30) {
+  for (let i = 0; i < maxAttempts; i++) {
+    const response = await fetch('https://api.realoficial.com.br/api/v1/renders', {
+      headers: { 'Authorization': 'Bearer seu_token' }
+    });
+
+    const data = await response.json();
+    const render = data.data.data.find(r => r.id === renderId);
+
+    if (render?.status === 'done') {
+      return render.download_url;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 5000)); // 5 segundos
+  }
+
+  throw new Error('Timeout aguardando renderizacao');
+}
+```

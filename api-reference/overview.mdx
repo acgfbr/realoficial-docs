@@ -1,0 +1,112 @@
+---
+title: 'Visao Geral'
+description: 'Referencia completa da API Real Oficial'
+---
+
+## Base URL
+
+Todas as requisicoes devem ser feitas para:
+
+```
+https://api.realoficial.com.br/api/v1
+```
+
+## Headers Padrao
+
+Todas as requisicoes devem incluir os seguintes headers:
+
+| Header | Valor | Obrigatorio |
+|--------|-------|-------------|
+| `Authorization` | `Bearer {token}` | Sim (exceto login) |
+| `Content-Type` | `application/json` | Sim para POST/PUT |
+| `Accept` | `application/json` | Recomendado |
+
+## Formato de Resposta
+
+Todas as respostas sao retornadas em JSON.
+
+### Resposta de Sucesso
+
+```json
+{
+  "message": "Operacao realizada com sucesso",
+  "data": { ... }
+}
+```
+
+### Resposta de Erro
+
+```json
+{
+  "error": "Descricao do erro"
+}
+```
+
+## Codigos HTTP
+
+| Codigo | Descricao |
+|--------|-----------|
+| `200` | Sucesso |
+| `201` | Criado com sucesso |
+| `202` | Aceito (processamento assincrono) |
+| `400` | Requisicao invalida |
+| `401` | Nao autenticado |
+| `403` | Sem permissao |
+| `404` | Nao encontrado |
+| `429` | Muitas requisicoes (rate limit) |
+| `500` | Erro interno do servidor |
+
+## Paginacao
+
+Endpoints que retornam listas utilizam paginacao:
+
+```json
+{
+  "data": [...],
+  "links": {
+    "first": "https://api.realoficial.com.br/api/v1/projects?page=1",
+    "last": "https://api.realoficial.com.br/api/v1/projects?page=10",
+    "prev": null,
+    "next": "https://api.realoficial.com.br/api/v1/projects?page=2"
+  },
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "last_page": 10,
+    "per_page": 20,
+    "to": 20,
+    "total": 200
+  }
+}
+```
+
+### Parametros de Paginacao
+
+| Parametro | Tipo | Descricao | Padrao |
+|-----------|------|-----------|--------|
+| `page` | integer | Numero da pagina | 1 |
+| `per_page` | integer | Itens por pagina (max: 100) | 20 |
+
+## Endpoints Disponiveis
+
+<CardGroup cols={2}>
+  <Card title="Autenticacao" icon="key" href="/api-reference/auth/login">
+    - POST /login
+    - POST /social/callback/email
+    - GET /user
+  </Card>
+  <Card title="Projetos" icon="folder" href="/api-reference/projects/list">
+    - POST /projects
+    - GET /projects
+    - POST /createShorts
+  </Card>
+  <Card title="Shorts" icon="scissors" href="/api-reference/shorts/list">
+    - GET /shorts/{projectId}
+    - GET /shorts/{projectId}/{shortId}
+  </Card>
+  <Card title="Renders" icon="video" href="/api-reference/renders/list">
+    - POST /shorts/{projectId}/{shortId}/render
+    - POST /renders/bulk
+    - GET /renders
+  </Card>
+</CardGroup>

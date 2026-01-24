@@ -1,0 +1,203 @@
+---
+title: 'Detalhes do Usuario'
+api: 'GET /user'
+description: 'Obtenha os dados do usuario autenticado'
+---
+
+## Endpoint
+
+```
+GET https://api.realoficial.com.br/api/v1/user
+```
+
+<Note>
+Este endpoint requer autenticacao via Bearer Token.
+</Note>
+
+## Headers
+
+<ParamField header="Authorization" type="string" required>
+  Bearer Token do usuario
+</ParamField>
+
+## Resposta de Sucesso
+
+<ResponseField name="user" type="object">
+  Dados completos do usuario
+  <Expandable title="Propriedades do usuario">
+    <ResponseField name="id" type="string">
+      ID unico do usuario (ULID)
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Nome do usuario
+    </ResponseField>
+    <ResponseField name="email" type="string">
+      Email do usuario
+    </ResponseField>
+    <ResponseField name="token" type="string">
+      Token de autenticacao
+    </ResponseField>
+    <ResponseField name="balance" type="integer">
+      Saldo atual de creditos
+    </ResponseField>
+    <ResponseField name="phone" type="string">
+      Telefone do usuario (se cadastrado)
+    </ResponseField>
+    <ResponseField name="nickname" type="string">
+      Apelido do usuario
+    </ResponseField>
+    <ResponseField name="is_phone_confirmed" type="boolean">
+      Se o telefone foi confirmado
+    </ResponseField>
+    <ResponseField name="eligible_for_trial" type="boolean">
+      Se esta elegivel para trial
+    </ResponseField>
+    <ResponseField name="eligible_for_roulette" type="boolean">
+      Se pode girar a roleta de bonus
+    </ResponseField>
+    <ResponseField name="roulette_cooldown" type="integer">
+      Tempo restante para proxima roleta (segundos)
+    </ResponseField>
+    <ResponseField name="checkin_cooldown" type="integer">
+      Tempo restante para proximo check-in (segundos)
+    </ResponseField>
+    <ResponseField name="subscription" type="object">
+      Dados da assinatura ativa
+      <Expandable title="Propriedades da assinatura">
+        <ResponseField name="id" type="string">
+          ID da assinatura
+        </ResponseField>
+        <ResponseField name="status" type="string">
+          Status: `active`, `cancelled`, `expired`, `pending`, `trialing`
+        </ResponseField>
+        <ResponseField name="plan" type="object">
+          Dados do plano
+        </ResponseField>
+        <ResponseField name="ends_at" type="string">
+          Data de expiracao (ISO 8601)
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.realoficial.com.br/api/v1/user" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.realoficial.com.br/api/v1/user', {
+  method: 'GET',
+  headers: {
+    'Authorization': 'Bearer seu_token_aqui',
+    'Content-Type': 'application/json'
+  }
+});
+
+const data = await response.json();
+console.log(data.user);
+```
+
+```python Python
+import requests
+
+headers = {
+    'Authorization': 'Bearer seu_token_aqui',
+    'Content-Type': 'application/json'
+}
+
+response = requests.get(
+    'https://api.realoficial.com.br/api/v1/user',
+    headers=headers
+)
+
+data = response.json()
+print(data['user'])
+```
+
+```php PHP
+$ch = curl_init();
+
+curl_setopt_array($ch, [
+    CURLOPT_URL => 'https://api.realoficial.com.br/api/v1/user',
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer seu_token_aqui',
+        'Content-Type: application/json'
+    ]
+]);
+
+$response = curl_exec($ch);
+$data = json_decode($response, true);
+print_r($data['user']);
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "user": {
+    "id": "01k1kt05yqtsyrzjb0eveqy3wq",
+    "name": "Joao Silva",
+    "email": "joao@exemplo.com",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "balance": 450,
+    "phone": "11999999999",
+    "nickname": "joaosilva",
+    "is_phone_confirmed": true,
+    "eligible_for_trial": false,
+    "eligible_for_roulette": true,
+    "roulette_cooldown": 0,
+    "checkin_cooldown": 43200,
+    "subscription": {
+      "id": "01k2ab12yqtsyrzjb0eveqy4xw",
+      "status": "active",
+      "ends_at": "2025-02-15T23:59:59.000000Z",
+      "plan": {
+        "id": "01k0cd...",
+        "name": "Criador",
+        "slug": "criador",
+        "monthly_credits": 420
+      }
+    }
+  }
+}
+```
+
+```json 401 - Nao Autenticado
+{
+  "error": "Unauthenticated"
+}
+```
+
+```json 404 - Usuario Nao Encontrado
+{
+  "error": "Usuário não encontrado"
+}
+```
+</ResponseExample>
+
+## Sistema de Creditos
+
+<Info>
+**1 credito = 1 minuto de processamento de video**
+
+Os creditos sao usados para:
+- Processar novos videos (criar cortes)
+- Gerar imagens com IA
+</Info>
+
+### Fontes de Creditos
+
+| Fonte | Creditos |
+|-------|----------|
+| Bonus de registro | 60 |
+| Check-in diario | 2-4 |
+| Roleta  mensal| 150-1800 |
+| Plano Lite (mensal) | 180 |
+| Plano Criador (mensal) | 420 |
+| Plano Viral (mensal) | 900 |
+| Compra avulsa | Variavel |

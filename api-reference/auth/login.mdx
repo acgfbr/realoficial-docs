@@ -1,0 +1,164 @@
+---
+title: 'Login'
+api: 'POST /login'
+description: 'Autentique um usuario existente e obtenha o token de acesso'
+---
+
+## Endpoint
+
+```
+POST https://api.realoficial.com.br/api/v1/login
+```
+
+<Note>
+Este endpoint nao requer autenticacao.
+</Note>
+
+## Body Parameters
+
+<ParamField body="email" type="string" required>
+  Email do usuario
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  Senha do usuario
+</ParamField>
+
+<ParamField body="fingerprint" type="string">
+  Identificador unico do dispositivo (opcional, para tracking)
+</ParamField>
+
+## Resposta de Sucesso
+
+<ResponseField name="message" type="string">
+  Mensagem de confirmacao do login
+</ResponseField>
+
+<ResponseField name="user" type="object">
+  Objeto com dados do usuario
+  <Expandable title="Propriedades do usuario">
+    <ResponseField name="id" type="string">
+      ID unico do usuario (ULID)
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Nome do usuario
+    </ResponseField>
+    <ResponseField name="email" type="string">
+      Email do usuario
+    </ResponseField>
+    <ResponseField name="token" type="string">
+      Token de autenticacao para usar nas proximas requisicoes
+    </ResponseField>
+    <ResponseField name="balance" type="integer">
+      Saldo de creditos do usuario
+    </ResponseField>
+    <ResponseField name="subscription" type="object">
+      Dados da assinatura ativa (se houver)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "usuario@exemplo.com",
+    "password": "sua_senha"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.realoficial.com.br/api/v1/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    email: 'usuario@exemplo.com',
+    password: 'sua_senha'
+  })
+});
+
+const data = await response.json();
+console.log(data.user.token); // Use este token nas proximas requisicoes
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.realoficial.com.br/api/v1/login',
+    json={
+        'email': 'usuario@exemplo.com',
+        'password': 'sua_senha'
+    }
+)
+
+data = response.json()
+token = data['user']['token']  # Use este token nas proximas requisicoes
+```
+
+```php PHP
+$ch = curl_init();
+
+curl_setopt_array($ch, [
+    CURLOPT_URL => 'https://api.realoficial.com.br/api/v1/login',
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+    CURLOPT_POSTFIELDS => json_encode([
+        'email' => 'usuario@exemplo.com',
+        'password' => 'sua_senha'
+    ])
+]);
+
+$response = curl_exec($ch);
+$data = json_decode($response, true);
+$token = $data['user']['token']; // Use este token nas proximas requisicoes
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "message": "logado com sucesso!",
+  "user": {
+    "id": "01k1kt05yqtsyrzjb0eveqy3wq",
+    "name": "Joao Silva",
+    "email": "usuario@exemplo.com",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "balance": 120,
+    "eligible_for_trial": false,
+    "subscription": {
+      "id": "01k2ab...",
+      "status": "active",
+      "plan": {
+        "name": "Criador",
+        "slug": "criador"
+      }
+    }
+  }
+}
+```
+
+```json 400 - Credenciais Invalidas
+{
+  "error": "email ou senha incorreta"
+}
+```
+
+```json 403 - Usuario Bloqueado
+{
+  "error": "Entre em contato com o suporte e informe o erro #98465."
+}
+```
+</ResponseExample>
+
+## Proximos Passos
+
+Apos fazer login, use o `token` retornado no header `Authorization` de todas as requisicoes:
+
+```bash
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
