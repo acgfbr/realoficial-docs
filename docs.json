@@ -39,7 +39,7 @@
       },
       {
         "group": "Renders",
-        "pages": ["api-reference/renders/create", "api-reference/renders/list"]
+        "pages": ["api-reference/renders/create", "api-reference/renders/bulk", "api-reference/renders/list"]
       }
     ]
   },

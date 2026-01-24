@@ -1,0 +1,165 @@
+---
+title: 'Renderizar em Lote'
+api: 'POST /renders/bulk'
+description: 'Renderize multiplos shorts de uma vez'
+---
+
+## Endpoint
+
+```
+POST https://api.realoficial.com.br/api/v1/renders/bulk
+```
+
+<Note>
+Este endpoint requer autenticacao via Bearer Token.
+</Note>
+
+## Body Parameters
+
+<ParamField body="short_ids" type="array" required>
+  Array de IDs dos shorts a renderizar (ULIDs)
+</ParamField>
+
+## Requisitos
+
+<Warning>
+**Para usar renderizacao em lote:**
+- Usuario deve ter feito pelo menos um deposito real
+- Limite de 30 renderizacoes por hora continua valido
+- Usuarios que nunca fizeram deposito terao **marca d'agua** nos videos
+</Warning>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/renders/bulk" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "short_ids": [
+      "01k4ef56yqtsyrzjb0gveqy7cd",
+      "01k4ef57yqtsyrzjb0gveqy8de",
+      "01k4ef58yqtsyrzjb0gveqy9fg"
+    ]
+  }'
+```
+
+```javascript JavaScript
+const shortIds = [
+  '01k4ef56yqtsyrzjb0gveqy7cd',
+  '01k4ef57yqtsyrzjb0gveqy8de',
+  '01k4ef58yqtsyrzjb0gveqy9fg'
+];
+
+const response = await fetch('https://api.realoficial.com.br/api/v1/renders/bulk', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer seu_token_aqui',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ short_ids: shortIds })
+});
+
+const data = await response.json();
+console.log(data.message);
+```
+
+```python Python
+import requests
+
+headers = {
+    'Authorization': 'Bearer seu_token_aqui',
+    'Content-Type': 'application/json'
+}
+
+data = {
+    'short_ids': [
+        '01k4ef56yqtsyrzjb0gveqy7cd',
+        '01k4ef57yqtsyrzjb0gveqy8de',
+        '01k4ef58yqtsyrzjb0gveqy9fg'
+    ]
+}
+
+response = requests.post(
+    'https://api.realoficial.com.br/api/v1/renders/bulk',
+    headers=headers,
+    json=data
+)
+
+result = response.json()
+print(result['message'])
+```
+
+```php PHP
+$ch = curl_init();
+
+$shortIds = [
+    '01k4ef56yqtsyrzjb0gveqy7cd',
+    '01k4ef57yqtsyrzjb0gveqy8de',
+    '01k4ef58yqtsyrzjb0gveqy9fg'
+];
+
+curl_setopt_array($ch, [
+    CURLOPT_URL => 'https://api.realoficial.com.br/api/v1/renders/bulk',
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer seu_token_aqui',
+        'Content-Type: application/json'
+    ],
+    CURLOPT_POSTFIELDS => json_encode(['short_ids' => $shortIds])
+]);
+
+$response = curl_exec($ch);
+$data = json_decode($response, true);
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "message": "Acompanhe na tela de meus vídeos :)"
+}
+```
+
+```json 400 - Rate Limit
+{
+  "error": "Limite de renderizações por hora atingido."
+}
+```
+
+```json 403 - Sem Deposito
+{
+  "error": "Para renderizar em lote, é necessário ter feito pelo menos um depósito."
+}
+```
+</ResponseExample>
+
+## Acompanhando o Progresso
+
+Apos iniciar a renderizacao em lote, acompanhe o progresso consultando o endpoint `GET /renders`:
+
+```javascript
+async function checkBulkRenders() {
+  const response = await fetch('https://api.realoficial.com.br/api/v1/renders', {
+    headers: { 'Authorization': 'Bearer seu_token_aqui' }
+  });
+
+  const { data } = await response.json();
+
+  // Filtrar renders recentes
+  const pendingRenders = data.data.filter(r =>
+    r.status === 'pending' || r.status === 'processing'
+  );
+
+  const completedRenders = data.data.filter(r => r.status === 'done');
+
+  console.log(`Pendentes: ${pendingRenders.length}`);
+  console.log(`Concluidos: ${completedRenders.length}`);
+
+  return { pendingRenders, completedRenders };
+}
+```
+
+<Info>
+O tempo medio de renderizacao e de **30 segundos a 2 minutos** por corte. Em lote, os cortes sao processados em paralelo quando possivel.
+</Info>
