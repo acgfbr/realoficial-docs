@@ -10,10 +10,7 @@
   "favicon": "/favicon.ico",
   "api": {
     "mdx": {
-      "server": "https://api.realoficial.com.br/api/v1",
-      "auth": {
-        "method": "bearer"
-      }
+      "server": "https://api.realoficial.com.br/api/v1"
     }
   },
   "navigation": {

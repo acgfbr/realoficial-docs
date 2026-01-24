@@ -2,7 +2,8 @@
 title: 'Login'
 api: 'POST /login'
 description: 'Autentique um usuario existente e obtenha o token de acesso'
-auth: none
+authMethod: "none"
+hideApiMarker: true
 ---
 
 ## Endpoint
@@ -23,10 +24,6 @@ Este endpoint nao requer autenticacao.
 
 <ParamField body="password" type="string" required>
   Senha do usuario
-</ParamField>
-
-<ParamField body="fingerprint" type="string">
-  Identificador unico do dispositivo (opcional, para tracking)
 </ParamField>
 
 ## Resposta de Sucesso
