@@ -7,7 +7,7 @@
     "light": "#818cf8",
     "dark": "#4f46e5"
   },
-  "favicon": "https://realoficial.com.br/favicon.ico",
+  "favicon": "/favicon.ico",
   "api": {
     "mdx": {
       "server": "https://api.realoficial.com.br/api/v1",
@@ -20,18 +20,11 @@
     "groups": [
       {
         "group": "Comece Aqui",
-        "pages": [
-          "introduction",
-          "authentication",
-          "api-reference/overview"
-        ]
+        "pages": ["introduction", "authentication", "api-reference/overview"]
       },
       {
         "group": "Autenticacao",
-        "pages": [
-          "api-reference/auth/login",
-          "api-reference/auth/user"
-        ]
+        "pages": ["api-reference/auth/login", "api-reference/auth/user"]
       },
       {
         "group": "Projetos",
@@ -42,16 +35,11 @@
       },
       {
         "group": "Shorts",
-        "pages": [
-          "api-reference/shorts/list"
-        ]
+        "pages": ["api-reference/shorts/list"]
       },
       {
         "group": "Renders",
-        "pages": [
-          "api-reference/renders/create",
-          "api-reference/renders/list"
-        ]
+        "pages": ["api-reference/renders/create", "api-reference/renders/list"]
       }
     ]
   },
