@@ -39,7 +39,11 @@
       },
       {
         "group": "Renders",
-        "pages": ["api-reference/renders/create", "api-reference/renders/bulk", "api-reference/renders/list"]
+        "pages": [
+          "api-reference/renders/create",
+          "api-reference/renders/bulk",
+          "api-reference/renders/list"
+        ]
       }
     ]
   },
@@ -62,8 +66,10 @@
   },
   "footer": {
     "socials": {
-      "instagram": "https://instagram.com/realoficialbr",
-      "youtube": "https://youtube.com/@realoficialbr"
+      "instagram": "https://instagram.com/dosilencioaoviral",
+      "youtube": "https://youtube.com/@dosilencioaoviral",
+      "discord": "https://discord.gg/realoficial",
+      "twitter": "https://twitter.com/acgfbr"
     }
   }
 }
