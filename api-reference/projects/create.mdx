@@ -37,8 +37,9 @@ Este endpoint requer autenticacao e consome creditos do usuario.
 </ParamField>
 
 <ParamField body="layout" type="string">
-  Layout do video: `single`, `split`, `react`, `gaming`
+  Layout do video: `auto`, `single`, `split`, `react`, `gaming`
 
+  - `auto`: Layout combinado entre single / split e center
   - `single`: Video unico com face tracking
   - `split`: Tela dividida (face + conteudo)
   - `center`: Vídeo centralizado na tela
@@ -58,8 +59,8 @@ Este endpoint requer autenticacao e consome creditos do usuario.
   Fonte padrao para legendas
 </ParamField>
 
-<ParamField body="captionTemplate" type="string">
-  Template de estilo de legendas
+<ParamField body="captionTemplate" type="json">
+  Template de estilo de legendas. Você pode obter o JSON do template em [app.realoficial.com.br/docs/caption-templates](https://app.realoficial.com.br/docs/caption-templates)
 </ParamField>
 
 <ParamField body="ignoreCaptions" type="boolean">
