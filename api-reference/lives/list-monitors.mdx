@@ -1,0 +1,57 @@
+---
+title: 'Listar Meus Monitors'
+api: 'GET /lives/monitors'
+description: 'Lista os monitors do usuario autenticado'
+---
+
+## Endpoint
+
+```
+GET https://api.realoficial.com.br/api/v1/lives/monitors
+```
+
+<Note>
+Este endpoint requer autenticacao via Bearer Token.
+</Note>
+
+Retorna os monitors do usuario autenticado, paginados (20 por pagina).
+
+## Query Parameters
+
+<ParamField query="visibility" type="string">
+  Filtrar por visibilidade: `public` ou `private`
+</ParamField>
+
+<ParamField query="page" type="integer">
+  Numero da pagina (padrao: 1)
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.realoficial.com.br/api/v1/lives/monitors?visibility=public" \
+  -H "Authorization: Bearer seu_token_aqui"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "data": [
+    {
+      "id": "01abc...",
+      "name": "Gaules ao vivo",
+      "visibility": "public",
+      "paused_at": null,
+      "live": {
+        "id": "01def...",
+        "platform": "twitch",
+        "channel": "gaules",
+        "status": "monitoring"
+      },
+      "live_shorts_count": 45,
+      "is_favorited": true
+    }
+  ]
+}
+```
+</ResponseExample>

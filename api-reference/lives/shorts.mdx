@@ -1,0 +1,30 @@
+---
+title: 'Shorts de uma Live'
+api: 'GET /lives/{liveId}/shorts'
+description: 'Retorna shorts paginados de uma live'
+---
+
+## Endpoint
+
+```
+GET https://api.realoficial.com.br/api/v1/lives/{liveId}/shorts
+```
+
+Retorna shorts paginados (20 por pagina) de todos os projetos de uma live.
+
+## Path Parameters
+
+<ParamField path="liveId" type="string" required>
+  ID da live (ULID)
+</ParamField>
+
+<ParamField query="page" type="integer">
+  Numero da pagina (padrao: 1)
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.realoficial.com.br/api/v1/lives/01def.../shorts" \
+  -H "Authorization: Bearer seu_token_aqui"
+```
+</RequestExample>

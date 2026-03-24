@@ -44,6 +44,34 @@
           "api-reference/renders/bulk",
           "api-reference/renders/list"
         ]
+      },
+      {
+        "group": "Lives - Monitoramento",
+        "pages": [
+          "api-reference/lives/monitor",
+          "api-reference/lives/pause",
+          "api-reference/lives/resume",
+          "api-reference/lives/delete"
+        ]
+      },
+      {
+        "group": "Lives - Listagem",
+        "pages": [
+          "api-reference/lives/list-monitors",
+          "api-reference/lives/monitor-detail",
+          "api-reference/lives/public",
+          "api-reference/lives/detail",
+          "api-reference/lives/shorts"
+        ]
+      },
+      {
+        "group": "Lives - Shorts & Outros",
+        "pages": [
+          "api-reference/lives/copy-short",
+          "api-reference/lives/my-shorts",
+          "api-reference/lives/favorite",
+          "api-reference/lives/clips"
+        ]
       }
     ]
   },

@@ -1,0 +1,38 @@
+---
+title: 'Favoritar/Desfavoritar Live'
+api: 'POST /lives/{liveId}/favorite'
+description: 'Toggle de favorito em uma live'
+---
+
+## Endpoint
+
+```
+POST https://api.realoficial.com.br/api/v1/lives/{liveId}/favorite
+```
+
+<Note>
+Este endpoint requer autenticacao via Bearer Token.
+</Note>
+
+Toggle — favorita se nao estava, desfavorita se ja estava.
+
+## Path Parameters
+
+<ParamField path="liveId" type="string" required>
+  ID da live (ULID)
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/lives/01def.../favorite" \
+  -H "Authorization: Bearer seu_token_aqui"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "is_favorited": true
+}
+```
+</ResponseExample>

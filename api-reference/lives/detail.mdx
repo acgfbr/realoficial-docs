@@ -1,0 +1,62 @@
+---
+title: 'Detalhes de uma Live'
+api: 'GET /lives/{liveId}/detail'
+description: 'Retorna shorts e clips de uma live especifica'
+---
+
+## Endpoint
+
+```
+GET https://api.realoficial.com.br/api/v1/lives/{liveId}/detail
+```
+
+Retorna shorts e clips de uma live especifica.
+
+## Path Parameters
+
+<ParamField path="liveId" type="string" required>
+  ID da live (ULID)
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="sort" type="string">
+  Ordenacao: `score` ou `id` (padrao: `id`)
+</ParamField>
+
+<ParamField query="shorts_page" type="integer">
+  Pagina dos shorts
+</ParamField>
+
+<ParamField query="clips_page" type="integer">
+  Pagina dos clips
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.realoficial.com.br/api/v1/lives/01def.../detail?sort=score" \
+  -H "Authorization: Bearer seu_token_aqui"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "live": { "..." },
+  "shorts": {
+    "data": [
+      {
+        "id": "01short...",
+        "title": "Momento viral",
+        "score": 8.5,
+        "status": "face_analysis_done",
+        "already_copied": false
+      }
+    ]
+  },
+  "clips": {
+    "data": ["..."]
+  }
+}
+```
+</ResponseExample>

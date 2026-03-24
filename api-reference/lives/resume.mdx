@@ -1,0 +1,44 @@
+---
+title: 'Retomar Monitoramento'
+api: 'POST /lives/monitors/{id}/resume'
+description: 'Retoma um monitoramento pausado'
+---
+
+## Endpoint
+
+```
+POST https://api.realoficial.com.br/api/v1/lives/monitors/{id}/resume
+```
+
+<Note>
+Este endpoint requer autenticacao via Bearer Token.
+</Note>
+
+Retoma um monitoramento pausado. Se a live estiver inativa, reenvia o comando de start para o worker.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  ID do monitor (ULID)
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/lives/monitors/01abc.../resume" \
+  -H "Authorization: Bearer seu_token_aqui"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "status": "resumed"
+}
+```
+
+```json 402 - Saldo Insuficiente
+{
+  "error": "Saldo insuficiente para retomar"
+}
+```
+</ResponseExample>

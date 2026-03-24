@@ -1,0 +1,30 @@
+---
+title: 'Detalhes de um Monitor'
+api: 'GET /lives/monitors/{id}'
+description: 'Retorna detalhes de um monitor especifico'
+---
+
+## Endpoint
+
+```
+GET https://api.realoficial.com.br/api/v1/lives/monitors/{id}
+```
+
+<Note>
+Este endpoint requer autenticacao via Bearer Token.
+</Note>
+
+Retorna detalhes de um monitor especifico. Funciona para monitors proprios ou publicos.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  ID do monitor (ULID)
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.realoficial.com.br/api/v1/lives/monitors/01abc..." \
+  -H "Authorization: Bearer seu_token_aqui"
+```
+</RequestExample>

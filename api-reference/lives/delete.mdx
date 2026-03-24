@@ -1,0 +1,38 @@
+---
+title: 'Excluir Monitoramento'
+api: 'DELETE /lives/monitors/{id}'
+description: 'Remove um monitoramento'
+---
+
+## Endpoint
+
+```
+DELETE https://api.realoficial.com.br/api/v1/lives/monitors/{id}
+```
+
+<Note>
+Este endpoint requer autenticacao via Bearer Token.
+</Note>
+
+Remove (soft delete) o monitoramento do usuario.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  ID do monitor (ULID)
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X DELETE "https://api.realoficial.com.br/api/v1/lives/monitors/01abc..." \
+  -H "Authorization: Bearer seu_token_aqui"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "status": "deleted"
+}
+```
+</ResponseExample>

@@ -1,0 +1,78 @@
+---
+title: 'Copiar Short'
+api: 'POST /lives/shorts/{id}/copy'
+description: 'Copia um short publico para a conta do usuario'
+---
+
+## Endpoint
+
+```
+POST https://api.realoficial.com.br/api/v1/lives/shorts/{id}/copy
+```
+
+<Note>
+Este endpoint requer autenticacao via Bearer Token.
+</Note>
+
+Copia um short publico para a conta do usuario. Cria (ou reutiliza) um projeto vinculado a live.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  ID do short (ULID)
+</ParamField>
+
+## Regras
+
+- O short original precisa estar com status `face_analysis_done`
+- Nao e possivel copiar um short que ja e copia
+- Nao e possivel copiar o mesmo short duas vezes
+- **Custo: 1 credito** (gratuito se voce for o dono do monitor)
+- Requer assinatura ativa
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/lives/shorts/01short.../copy" \
+  -H "Authorization: Bearer seu_token_aqui"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 201 - Sucesso
+{
+  "short": {
+    "id": "01copy...",
+    "project_id": "01proj...",
+    "source_short_id": "01original...",
+    "title": "Momento viral",
+    "score": 8.5,
+    "status": "face_analysis_done"
+  },
+  "redirect_url": "https://app.realoficial.com.br/projects/01proj..."
+}
+```
+
+```json 402 - Sem Creditos
+{
+  "error": "Sem créditos suficientes"
+}
+```
+
+```json 403 - Sem Permissao
+{
+  "error": "Usuário bloqueado ou sem assinatura"
+}
+```
+
+```json 409 - Ja Copiado
+{
+  "error": "Short já copiado"
+}
+```
+
+```json 422 - Short Invalido
+{
+  "error": "Short não está pronto ou já é uma cópia"
+}
+```
+</ResponseExample>

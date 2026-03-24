@@ -1,0 +1,37 @@
+---
+title: 'Listar Lives Publicas'
+api: 'GET /lives/public'
+description: 'Lista todas as lives publicas com contagem de shorts'
+---
+
+## Endpoint
+
+```
+GET https://api.realoficial.com.br/api/v1/lives/public
+```
+
+Lista todas as lives publicas com contagem de shorts. Este endpoint nao requer autenticacao.
+
+## Query Parameters
+
+<ParamField query="platform" type="string">
+  Filtrar por plataforma: `twitch`, `kick` ou `youtube`
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filtrar por status (ex: `monitoring`)
+</ParamField>
+
+<ParamField query="filter" type="string">
+  Filtros especiais (ex: `transamazonica`)
+</ParamField>
+
+<ParamField query="favorites" type="boolean">
+  Mostrar apenas lives favoritadas
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.realoficial.com.br/api/v1/lives/public?platform=twitch"
+```
+</RequestExample>

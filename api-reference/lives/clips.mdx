@@ -1,0 +1,34 @@
+---
+title: 'Listar Clips'
+api: 'GET /lives/clips'
+description: 'Lista clips de plataforma'
+---
+
+## Endpoint
+
+```
+GET https://api.realoficial.com.br/api/v1/lives/clips
+```
+
+Lista clips de plataforma (20 por pagina).
+
+## Query Parameters
+
+<ParamField query="platform" type="string">
+  Filtrar por plataforma
+</ParamField>
+
+<ParamField query="channel" type="string">
+  Filtrar por canal
+</ParamField>
+
+<ParamField query="page" type="integer">
+  Numero da pagina (padrao: 1)
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.realoficial.com.br/api/v1/lives/clips?platform=twitch&channel=gaules" \
+  -H "Authorization: Bearer seu_token_aqui"
+```
+</RequestExample>

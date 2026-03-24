@@ -1,0 +1,30 @@
+---
+title: 'Meus Shorts Copiados'
+api: 'GET /lives/my-shorts'
+description: 'Lista shorts que o usuario copiou de lives'
+---
+
+## Endpoint
+
+```
+GET https://api.realoficial.com.br/api/v1/lives/my-shorts
+```
+
+<Note>
+Este endpoint requer autenticacao via Bearer Token.
+</Note>
+
+Lista todos os shorts que o usuario copiou de lives (20 por pagina). Inclui informacoes do short original e da live de origem.
+
+## Query Parameters
+
+<ParamField query="page" type="integer">
+  Numero da pagina (padrao: 1)
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.realoficial.com.br/api/v1/lives/my-shorts" \
+  -H "Authorization: Bearer seu_token_aqui"
+```
+</RequestExample>

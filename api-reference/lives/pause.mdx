@@ -1,0 +1,38 @@
+---
+title: 'Pausar Monitoramento'
+api: 'POST /lives/monitors/{id}/pause'
+description: 'Pausa o monitoramento de uma live'
+---
+
+## Endpoint
+
+```
+POST https://api.realoficial.com.br/api/v1/lives/monitors/{id}/pause
+```
+
+<Note>
+Este endpoint requer autenticacao via Bearer Token.
+</Note>
+
+Pausa o monitoramento. Enquanto pausado, nao consome saldo. Se for o ultimo monitor ativo da live, o worker e parado.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  ID do monitor (ULID)
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/lives/monitors/01abc.../pause" \
+  -H "Authorization: Bearer seu_token_aqui"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "status": "paused"
+}
+```
+</ResponseExample>
