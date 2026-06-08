@@ -29,6 +29,7 @@
       {
         "group": "Projetos",
         "pages": [
+          "api-reference/projects/video-metadata",
           "api-reference/projects/create",
           "api-reference/projects/list"
         ]

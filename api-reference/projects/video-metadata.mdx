@@ -1,0 +1,175 @@
+---
+title: 'Validar Video'
+api: 'POST /videoMetadata'
+description: 'Valida uma URL de video e retorna seus metadados (titulo, duracao, thumbnail) antes de criar um projeto'
+---
+
+## Endpoint
+
+```
+POST https://api.realoficial.com.br/api/v1/videoMetadata
+```
+
+<Note>
+Esta e a etapa de **pre-validacao**. Chame este endpoint quando o usuario colar um link para exibir o preview e barrar URLs invalidas **antes** de criar o projeto e gastar creditos.
+</Note>
+
+<Info>
+**Autenticacao obrigatoria** — `Authorization: Bearer <token>` (valor cru de `users.token`).
+</Info>
+
+## Body Parameters
+
+<ParamField body="url" type="string" required>
+  URL do video. Tipos suportados:
+
+  - **YouTube**
+  - **Google Drive**
+  - **Twitch VOD** (`twitch.tv/videos/{id}`)
+  - **Link direto de arquivo** (`.mp4`, `.mkv`, `.matroska`, `.mov`, `.qt`, `.quicktime`)
+</ParamField>
+
+<ParamField body="isReframe" type="boolean" default="false">
+  Quando `true`, ignora a validacao de duracao minima de 4 min do YouTube (fluxo de reframe).
+</ParamField>
+
+<ParamField body="uploadedDuration" type="number">
+  **Condicional** — apenas para `direct_link`. Duracao (em segundos) enviada pelo frontend. Se vier junto com `uploadedThumbnail`, o backend pula o fetch remoto e persiste os metadados direto.
+</ParamField>
+
+<ParamField body="uploadedThumbnail" type="string">
+  **Condicional** — apenas para `direct_link`. Thumbnail em data-URI base64 (`data:image/...;base64,...`). Salva no R2 e exposta via `cdn.realoficial.com.br`.
+</ParamField>
+
+## Validacoes
+
+Todas as regras abaixo retornam **`400`**.
+
+| Condicao | Mensagem |
+|----------|----------|
+| `url` vazia | URL cannot be empty. |
+| URL malformada / multiplos links concatenados | Invalid or malformed URL... |
+| URL nao passa em `FILTER_VALIDATE_URL` | Invalid URL. |
+| Tipo de URL nao suportado | Unsupported URL type. Only YouTube, Twitch VOD, direct video files... or Google Drive URLs are allowed. |
+| YouTube Shorts | YouTube Shorts URLs are not supported. |
+| Twitch VOD por usuario sem permissao | Twitch VOD support is not yet available for all users. |
+| YouTube com duracao 0 (livestream) | Livestreams are not allowed. |
+| YouTube ≤ 4 min e `isReframe=false` | mensagem de duracao minima |
+| Google Drive / `direct_link` > 10000 MB | mensagem de tamanho maximo |
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/videoMetadata" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.realoficial.com.br/api/v1/videoMetadata', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer seu_token_aqui',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+  })
+});
+
+const { data } = await response.json();
+console.log(data.title, data.duration);
+```
+
+```python Python
+import requests
+
+headers = {
+    'Authorization': 'Bearer seu_token_aqui',
+    'Content-Type': 'application/json'
+}
+
+data = {
+    'url': 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+}
+
+response = requests.post(
+    'https://api.realoficial.com.br/api/v1/videoMetadata',
+    headers=headers,
+    json=data
+)
+
+metadata = response.json()['data']
+```
+
+```php PHP
+$ch = curl_init();
+
+curl_setopt_array($ch, [
+    CURLOPT_URL => 'https://api.realoficial.com.br/api/v1/videoMetadata',
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer seu_token_aqui',
+        'Content-Type: application/json'
+    ],
+    CURLOPT_POSTFIELDS => json_encode([
+        'url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    ])
+]);
+
+$response = curl_exec($ch);
+$metadata = json_decode($response, true)['data'];
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "message": "...",
+  "data": {
+    "url": "https://...",
+    "video_id": "abc123",
+    "title": "Titulo do video",
+    "duration": "00:12:34",
+    "platform": "youtube",
+    "channel_title": "Canal",
+    "thumbnail_url": "https://...",
+    "size_in_mb": 0,
+    "description": "",
+    "published_at": null,
+    "channel_id": null,
+    "views": 0,
+    "comments": 0
+  }
+}
+```
+
+```json 400 - URL Vazia
+{
+  "error": "URL cannot be empty."
+}
+```
+
+```json 400 - Tipo Nao Suportado
+{
+  "error": "Unsupported URL type. Only YouTube, Twitch VOD, direct video files... or Google Drive URLs are allowed."
+}
+```
+
+```json 400 - Livestream
+{
+  "error": "Livestreams are not allowed."
+}
+```
+</ResponseExample>
+
+<Note>
+O objeto `data` e um registro **VideoMetadata**. Os campos exatos variam por plataforma — o YouTube preenche `channel_title` / `views`, enquanto o `direct_link` deixa muitos campos como `null` / `0`.
+</Note>
+
+## Proximo Passo
+
+Apos validar a URL e exibir o preview, use os metadados para chamar [`POST /createShorts`](/api-reference/projects/create) e criar o projeto.
