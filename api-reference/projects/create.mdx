@@ -63,8 +63,24 @@ Este endpoint requer autenticacao e consome creditos do usuario.
   Template de estilo de legendas. Você pode obter o JSON do template em [app.realoficial.com.br/docs/caption-templates](https://app.realoficial.com.br/docs/caption-templates)
 </ParamField>
 
-<ParamField body="ignoreCaptions" type="boolean">
-  Se deve ignorar legendas automaticas (padrao: false)
+<ParamField body="ignoreCaptions" type="boolean" default="false">
+  Se `true`, gera os cortes **sem legendas**.
+</ParamField>
+
+<ParamField body="prompt" type="string">
+  Prompt customizado para guiar a geracao dos cortes. Maximo de **1000 caracteres**.
+</ParamField>
+
+<ParamField body="emojisEnabled" type="boolean" default="false">
+  Se `true`, habilita emojis nas legendas.
+</ParamField>
+
+<ParamField body="show_in_content_hub" type="boolean" default="true">
+  Se `true`, compartilha os cortes no hub de conteudo.
+</ParamField>
+
+<ParamField body="autoCta" type="boolean" default="false">
+  Se `true`, adiciona uma chamada para acao (CTA) nos primeiros 3 segundos do corte.
 </ParamField>
 
 ## Custo em Creditos
