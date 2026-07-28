@@ -79,6 +79,19 @@ Este endpoint requer autenticacao via Bearer Token.
     <ResponseField name="has_render" type="boolean">
       Se ja foi renderizado
     </ResponseField>
+    <ResponseField name="thumbnail_url" type="string">
+      Imagem de capa **deste corte** (frame real do trecho).
+
+      Nao confunda com o `thumbnail_url` do nivel `project`, que e a capa do video
+      original e e igual para todos os cortes.
+    </ResponseField>
+    <ResponseField name="preview_thumbnail_url" type="string">
+      JPG de thumbnail do corte, servido pelo CDN publico:
+      `https://cdn.realoficial.com.br/shorts/{projectId}/{shortId}_thumbnail.jpg`
+
+      Veja [Preview do Short](/api-reference/shorts/preview) para o video MP4 de
+      pre-visualizacao equivalente.
+    </ResponseField>
     <ResponseField name="feedback" type="string">
       Feedback do usuario (`like`, `dislike`, ou array de motivos)
     </ResponseField>

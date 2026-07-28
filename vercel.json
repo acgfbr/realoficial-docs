@@ -1,0 +1,24 @@
+{
+  "rewrites": [
+    {
+      "source": "/docs",
+      "destination": "https://SEU-SUBDOMINIO.mintlify.site/docs"
+    },
+    {
+      "source": "/docs/:match*",
+      "destination": "https://SEU-SUBDOMINIO.mintlify.site/docs/:match*"
+    },
+    {
+      "source": "/_mintlify/:path*",
+      "destination": "https://SEU-SUBDOMINIO.mintlify.site/_mintlify/:path*"
+    },
+    {
+      "source": "/api/request",
+      "destination": "https://SEU-SUBDOMINIO.mintlify.site/api/request"
+    },
+    {
+      "source": "/mintlify-assets/:path*",
+      "destination": "https://SEU-SUBDOMINIO.mintlify.site/mintlify-assets/:path*"
+    }
+  ]
+}

@@ -47,8 +47,24 @@ Este endpoint requer autenticacao e consome creditos do usuario.
   - `gaming`: Para gameplays
 </ParamField>
 
-<ParamField body="video_type" type="string">
-  Tipo de processamento: `shorts` (padrao) ou `reframe`
+<ParamField body="video_type" type="string" required>
+  Tipo de processamento. Valores aceitos: `shorts` ou `reframe`.
+
+  <Warning>
+  Este campo e **obrigatorio**. Omiti-lo retorna `422`:
+
+  ```json
+  {
+    "message": "The video type field is required.",
+    "errors": {
+      "video_type": ["The video type field is required."]
+    }
+  }
+  ```
+  </Warning>
+
+  O modo escolhido muda as regras de duracao do intervalo — veja
+  [Validacoes](#validacoes).
 </ParamField>
 
 <ParamField body="title" type="string">
@@ -93,13 +109,42 @@ O custo e calculado automaticamente com base no intervalo `endTime - startTime`.
 
 ## Validacoes
 
+As regras de intervalo dependem do `video_type` (e, no modo `reframe`, tambem do
+`layout`). O intervalo e sempre `endTime - startTime`.
+
+### Modo `shorts`
+
 | Regra | Limite |
 |-------|--------|
-| Intervalo minimo | 10 minutos (600 segundos) |
-| Intervalo maximo modo reframe | 5 minutos (300 segundos) |
+| Intervalo minimo | **5 minutos** (300 segundos) |
+| Intervalo maximo | 20 horas (72000 segundos) |
 | Duracao maxima do video | 10 horas |
 | Videos > 5h | Intervalo minimo de 1 hora |
 | Videos > 3h | Requer assinatura ativa |
+
+Um intervalo de exatamente 300 segundos e aceito; 299 segundos ou menos retorna `400`:
+
+```json
+{ "error": "Você precisa selecionar um intervalo de pelo menos 5 minutos." }
+```
+
+### Modo `reframe`
+
+| Regra | Limite |
+|-------|--------|
+| Intervalo minimo | 15 segundos |
+| Intervalo maximo com `layout: center` | 60 minutos (3600 segundos) |
+| Intervalo maximo nos demais layouts | 5 minutos (300 segundos) |
+
+<Note>
+Repare que o intervalo de 5 minutos e o **piso** no modo `shorts` e o **teto** no modo
+`reframe` (fora do layout `center`).
+</Note>
+
+<Warning>
+Durante campanhas sazonais podem valer limites adicionais mais restritivos para o modo
+`shorts`. Nesses casos a resposta `400` inclui o campo `event_limit: true`.
+</Warning>
 
 <RequestExample>
 ```bash cURL
@@ -222,7 +267,7 @@ $project = json_decode($response, true);
 
 ```json 400 - Intervalo Invalido
 {
-  "error": "Você precisa selecionar um intervalo de pelo menos 10 minutos."
+  "error": "Você precisa selecionar um intervalo de pelo menos 5 minutos."
 }
 ```
 
@@ -287,7 +332,7 @@ Use essa URL para compartilhar a previa dos cortes com sua equipe ou integrar em
   <Accordion title="YouTube">
     - `https://www.youtube.com/watch?v=VIDEO_ID`
     - `https://youtu.be/VIDEO_ID`
-    - Videos com mais de 10 minutos de duracao
+    - Videos com duracao suficiente para o intervalo minimo (veja [Validacoes](#validacoes))
     - YouTube Shorts **nao** sao suportados
   </Accordion>
   <Accordion title="Google Drive">

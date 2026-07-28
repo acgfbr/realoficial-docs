@@ -1,0 +1,92 @@
+---
+title: 'Preview do Short'
+description: 'Video de preview (MP4) de cada corte, servido pelo CDN publico'
+---
+
+## Visao geral
+
+Cada corte gerado tem um **video de preview em MP4** publicado no CDN. Ele e uma versao
+comprimida e de baixa resolucao do corte, usada para pre-visualizacao — nao e o arquivo
+final de render.
+
+E o mesmo arquivo que o painel da Real Oficial usa para exibir os cards de cada corte na
+tela de projeto.
+
+## Padrao da URL
+
+```
+https://cdn.realoficial.com.br/shorts/{projectId}/{shortId}_preview.mp4
+```
+
+Onde `projectId` e `shortId` sao os mesmos ULIDs retornados por
+[Listar Shorts](/api-reference/shorts/list).
+
+<Note>
+O CDN e **publico**: a URL nao exige `Authorization`, token ou assinatura. Nao use estas
+URLs para conteudo que precise ser privado.
+</Note>
+
+## Verificando a disponibilidade
+
+```bash
+curl -I https://cdn.realoficial.com.br/shorts/PROJECT_ID/SHORT_ID_preview.mp4
+```
+
+```
+HTTP/2 200
+content-type: video/mp4
+content-length: 6756411
+accept-ranges: bytes
+etag: "f983f592a6a7b16ca646a2c35adcabdf"
+server: cloudflare
+cf-cache-status: DYNAMIC
+```
+
+Como o CDN responde `accept-ranges: bytes`, o player do navegador consegue baixar apenas
+o trecho inicial do arquivo em vez do MP4 inteiro.
+
+## Uso no cliente
+
+```html
+<video
+  src="https://cdn.realoficial.com.br/shorts/{projectId}/{shortId}_preview.mp4"
+  muted
+  playsinline
+  preload="metadata"
+/>
+```
+
+<Tip>
+`preload="metadata"` faz o navegador buscar apenas os metadados e o primeiro frame, sem
+baixar o video completo. E o que permite usar o preview como thumbnail sem custo de banda
+relevante.
+</Tip>
+
+## Thumbnail por corte
+
+Cada short tambem expoe um **JPG de thumbnail** proprio, no campo `preview_thumbnail_url`
+retornado pelos endpoints de short:
+
+```
+https://cdn.realoficial.com.br/shorts/{projectId}/{shortId}_thumbnail.jpg
+```
+
+Se voce so precisa de uma imagem estatica por corte, prefira esse campo — e mais leve que
+carregar metadados de um MP4.
+
+<Warning>
+Nao confunda com `thumbnail_url` no nivel do `project`: aquele e a capa do **video
+original**, igual para todos os cortes do mesmo projeto. O preview e o
+`preview_thumbnail_url` sao por corte, mostrando o frame real do trecho.
+</Warning>
+
+## Disponibilidade
+
+O preview e gerado durante o processamento do corte, junto com o proprio short. Ele fica
+disponivel a partir do momento em que o corte aparece na listagem.
+
+<Warning>
+Assim como os demais arquivos de um projeto, os previews seguem a politica de **retencao
+de 30 dias**. Depois disso a URL passa a responder `404`. Trate o erro no cliente em vez
+de assumir que o arquivo existe para sempre.
+</Warning>

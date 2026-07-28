@@ -29,13 +29,58 @@ Todas as requisicoes autenticadas devem incluir o header `Authorization`:
 Authorization: Bearer SEU_TOKEN_AQUI
 ```
 
+## Header `Accept` (obrigatorio)
+
+<Warning>
+Envie sempre `Accept: application/json`. Sem esse header, requisicoes que falham na
+validacao **nao retornam JSON** — elas respondem com um **redirect `302`**, que e o
+comportamento padrao do framework para clientes que nao pedem JSON explicitamente.
+</Warning>
+
+```bash
+Accept: application/json
+```
+
+O sintoma e enganoso porque nem todo erro se comporta igual: falhas de autenticacao
+(`401`) retornam JSON mesmo sem o header, enquanto erros de validacao viram `302`. Um
+SDK que esqueca o `Accept` funciona ate a primeira requisicao invalida e entao recebe um
+redirect sem corpo util para parsear.
+
+<CodeGroup>
+```bash Sem o header (incorreto)
+curl -X POST "https://api.realoficial.com.br/api/v1/createShorts" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -d '{ "url": "..." }'
+
+# HTTP/2 302  — redirect, sem JSON
+```
+
+```bash Com o header (correto)
+curl -X POST "https://api.realoficial.com.br/api/v1/createShorts" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{ "url": "..." }'
+
+# HTTP/2 201 — ou 422 com os erros por campo
+```
+</CodeGroup>
+
+<Note>
+`Content-Type: application/json` descreve o **corpo que voce envia** e e necessario em
+requisicoes com body (`POST`, `PUT`). `Accept: application/json` descreve a **resposta que
+voce espera** e deve ser enviado em todas as requisicoes, inclusive `GET`.
+</Note>
+
 ## Exemplo de Requisicao
 
 <CodeGroup>
 ```bash cURL
 curl -X GET "https://api.realoficial.com.br/api/v1/user" \
   -H "Authorization: Bearer seu_token_aqui" \
-  -H "Content-Type: application/json"
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json"
 ```
 
 ```javascript JavaScript
@@ -43,7 +88,8 @@ const response = await fetch('https://api.realoficial.com.br/api/v1/user', {
   method: 'GET',
   headers: {
     'Authorization': 'Bearer seu_token_aqui',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
   }
 });
 
@@ -55,7 +101,8 @@ import requests
 
 headers = {
     'Authorization': 'Bearer seu_token_aqui',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
 }
 
 response = requests.get(
@@ -74,7 +121,8 @@ curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_HTTPHEADER => [
         'Authorization: Bearer seu_token_aqui',
-        'Content-Type: application/json'
+        'Content-Type: application/json',
+        'Accept: application/json'
     ]
 ]);
 
