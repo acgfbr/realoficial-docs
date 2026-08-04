@@ -24,14 +24,19 @@
       },
       {
         "group": "Autenticacao",
-        "pages": ["api-reference/auth/login", "api-reference/auth/user"]
+        "pages": [
+          "api-reference/auth/login",
+          "api-reference/auth/user",
+          "api-reference/auth/profile"
+        ]
       },
       {
         "group": "Projetos",
         "pages": [
           "api-reference/projects/video-metadata",
           "api-reference/projects/create",
-          "api-reference/projects/list"
+          "api-reference/projects/list",
+          "api-reference/projects/reprompt"
         ]
       },
       {

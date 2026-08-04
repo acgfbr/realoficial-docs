@@ -28,8 +28,14 @@ Este endpoint requer autenticacao via Bearer Token.
 
 <Warning>
 **Limites de renderizacao por hora:**
-- Usuarios gratuitos: 3 cortes/hora
-- Usuarios pagantes: 30 cortes/hora
+
+| Plano | Limite |
+|-------|--------|
+| Sem plano | 15 cortes/hora |
+| Lite | 30 cortes/hora |
+| Criador | 60 cortes/hora |
+| Viral | 100 cortes/hora |
+| Business | 500 cortes/hora |
 
 Usuarios que nunca fizeram deposito terao **marca d'agua** nos videos.
 </Warning>
@@ -142,7 +148,7 @@ $data = json_decode($response, true);
 
 ```json 400 - Rate Limit Atingido
 {
-  "error": "Usuários do plano gratuito não podem renderizar mais de 3 cortes por hora."
+  "error": "Usuários do plano gratuito não podem renderizar mais de 15 cortes por hora."
 }
 ```
 

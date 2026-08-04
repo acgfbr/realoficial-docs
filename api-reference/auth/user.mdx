@@ -40,6 +40,24 @@ Este endpoint requer autenticacao via Bearer Token.
     <ResponseField name="balance" type="integer">
       Saldo atual de creditos
     </ResponseField>
+    <ResponseField name="webhook_url" type="string">
+      URL configurada para receber webhooks. `null` se nao configurada.
+      Editavel via [Atualizar Perfil](/api-reference/auth/profile).
+    </ResponseField>
+    <ResponseField name="reprompts_daily_limit" type="integer">
+      Quantidade de [reprompts](/api-reference/projects/reprompt) gratuitos por dia,
+      conforme o plano.
+    </ResponseField>
+    <ResponseField name="reprompts_today" type="integer">
+      Reprompts ja realizados hoje.
+    </ResponseField>
+    <ResponseField name="reprompts_free_remaining" type="integer">
+      Reprompts gratuitos restantes hoje. Chegando a `0`, os proximos passam a consumir
+      creditos.
+    </ResponseField>
+    <ResponseField name="reprompts_reset_at" type="string">
+      Data/hora em que a cota diaria de reprompts e reiniciada (ISO 8601).
+    </ResponseField>
     <ResponseField name="phone" type="string">
       Telefone do usuario (se cadastrado)
     </ResponseField>
