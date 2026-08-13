@@ -90,17 +90,13 @@ A API possui limites de requisicoes para garantir estabilidade:
 |----------|--------|
 | Login | 60 requisicoes/minuto |
 | Criar Projeto | 10 requisicoes/minuto |
-| Renderizar | Varia por plano (ver abaixo) |
+| Renderizar | 999999 cortes/hora |
 
-### Limites de renderizacao por plano
+### Limite de renderizacao
 
-| Plano | Limite |
-|-------|--------|
-| Sem plano | 15 cortes/hora |
-| Lite | 30 cortes/hora |
-| Criador | 60 cortes/hora |
-| Viral | 100 cortes/hora |
-| Business | 500 cortes/hora |
+Todos os usuarios e planos possuem o mesmo limite de **999999 cortes por hora**.
+
+Pedidos de renderizacao nao sao rejeitados com base no tamanho atual da fila de processamento. As protecoes contra render duplicado ou ja em andamento continuam ativas.
 
 ## Suporte
 

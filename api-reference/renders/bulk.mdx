@@ -24,8 +24,9 @@ Este endpoint requer autenticacao via Bearer Token.
 
 <Warning>
 **Para usar renderizacao em lote:**
-- Usuario deve ter feito pelo menos um deposito real
-- Limite de 30 renderizacoes por hora continua valido
+- Usuario deve ter um plano ativo
+- O limite e de 999999 cortes por hora para todos os planos
+- O pedido nao e rejeitado com base no tamanho atual da fila de processamento
 - Usuarios que nunca fizeram deposito terao **marca d'agua** nos videos
 </Warning>
 
@@ -121,15 +122,15 @@ $data = json_decode($response, true);
 }
 ```
 
-```json 400 - Rate Limit
+```json 400 - Limite Horario Atingido
 {
-  "error": "Limite de renderizações por hora atingido."
+  "error": "Você já gerou 999999 cortes na última hora. Seu plano permite 999999 cortes por hora. Aguarde alguns minutos e tente novamente."
 }
 ```
 
-```json 403 - Sem Deposito
+```json 400 - Plano Ativo Necessario
 {
-  "error": "Para renderizar em lote, é necessário ter feito pelo menos um depósito."
+  "error": "Para gerar vídeos em massa, é necessário um plano ativo."
 }
 ```
 </ResponseExample>
