@@ -20,6 +20,27 @@ Todas as requisicoes devem incluir os seguintes headers:
 | `Authorization` | `Bearer {token}` | Sim (exceto login) |
 | `Content-Type` | `application/json` | Sim para POST/PUT |
 | `Accept` | `application/json` | Sim |
+| `X-Workspace-Id` | ULID do workspace | Somente para operar em um workspace de equipe |
+
+## Contexto de Workspace
+
+Toda requisicao autenticada opera em exatamente um workspace:
+
+- sem `X-Workspace-Id`, ou com o header vazio, usa o espaco pessoal;
+- com `X-Workspace-Id: {ulid}`, usa o workspace de equipe indicado;
+- o usuario autenticado precisa ser o dono ou um membro ativo desse workspace;
+- recursos de outro workspace nao sao procurados automaticamente.
+
+```bash
+curl "https://api.realoficial.com.br/api/v1/projects" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "X-Workspace-Id: 01KZWORKSPACE000000000001" \
+  -H "Accept: application/json"
+```
+
+Use `GET /workspaces` para listar os espacos acessiveis e obter o ID correto. Consulte
+[Workspaces](/api-reference/workspaces) para isolamento de recursos, papeis, saldo e
+endpoints de gestao.
 
 ## Formato de Resposta
 
@@ -103,6 +124,11 @@ maximo e o valor padrao variam por recurso; confira a pagina do endpoint.
     - POST /login
     - POST /social/callback/email
     - GET /user
+  </Card>
+  <Card title="Workspaces" icon="users" href="/api-reference/workspaces">
+    - GET /workspaces
+    - GET /workspace
+    - POST /workspace
   </Card>
   <Card title="Projetos" icon="folder" href="/api-reference/projects/list">
     - POST /projects

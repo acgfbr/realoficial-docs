@@ -20,7 +20,12 @@
     "groups": [
       {
         "group": "Comece Aqui",
-        "pages": ["introduction", "authentication", "api-reference/overview"]
+        "pages": [
+          "introduction",
+          "authentication",
+          "api-reference/overview",
+          "api-reference/workspaces"
+        ]
       },
       {
         "group": "Autenticacao",

@@ -1,0 +1,190 @@
+---
+title: 'Workspaces'
+description: 'Selecione o espaco ativo, entenda o isolamento de recursos e as permissoes'
+---
+
+Workspaces separam recursos por equipe, marca ou cliente. O Bearer token identifica quem
+esta fazendo a requisicao; o header `X-Workspace-Id` define em qual espaco ela sera
+executada.
+
+## Selecionar o workspace
+
+| Header | Contexto usado |
+|---|---|
+| Omitido | Espaco pessoal do usuario autenticado |
+| `X-Workspace-Id:` vazio | Espaco pessoal do usuario autenticado |
+| `X-Workspace-Id: {ulid}` | Workspace nomeado indicado pelo ULID |
+
+Para operar no espaco pessoal:
+
+```bash
+curl "https://api.realoficial.com.br/api/v1/projects" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+
+Para operar em um workspace de equipe:
+
+```bash
+curl "https://api.realoficial.com.br/api/v1/projects" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "X-Workspace-Id: 01KZWORKSPACE000000000001" \
+  -H "Accept: application/json"
+```
+
+<Warning>
+Mantenha o mesmo `X-Workspace-Id` durante todo o fluxo. Criar um projeto em um workspace
+e tentar listar seus shorts ou renders sem o header consulta o espaco pessoal e pode
+resultar em 404 ou listas vazias.
+</Warning>
+
+Um workspace inexistente retorna 404. Um workspace existente do qual o usuario nao e
+dono nem membro ativo retorna 403.
+
+## Listar espacos acessiveis
+
+```text
+GET /workspaces
+```
+
+A lista inclui sempre o espaco pessoal, os workspaces nomeados dos quais o usuario e dono
+e aqueles em que possui uma associacao ativa.
+
+```bash
+curl "https://api.realoficial.com.br/api/v1/workspaces" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+
+```json
+{
+  "workspaces": [
+    {
+      "id": null,
+      "name": null,
+      "personal": true,
+      "role": "owner",
+      "is_owner": true,
+      "owner": {
+        "id": "01KZUSER000000000000000001",
+        "name": "Minha conta",
+        "email": "contato@example.com"
+      }
+    },
+    {
+      "id": "01KZWORKSPACE000000000001",
+      "name": "Time Conteudo",
+      "personal": false,
+      "role": "editor",
+      "is_owner": false,
+      "owner": {
+        "id": "01KZOWNER00000000000000001",
+        "name": "Dono do workspace",
+        "email": "owner@example.com"
+      }
+    }
+  ]
+}
+```
+
+Use o valor de `id` diretamente no header. IDs sao ULIDs opacos e devem permanecer como
+strings. O item pessoal possui `id: null`, portanto nao exige header.
+
+## Consultar o workspace ativo
+
+```text
+GET /workspace
+```
+
+A resposta respeita o `X-Workspace-Id` e informa o papel do usuario:
+
+```bash
+curl "https://api.realoficial.com.br/api/v1/workspace" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "X-Workspace-Id: 01KZWORKSPACE000000000001" \
+  -H "Accept: application/json"
+```
+
+```json
+{
+  "workspace": {
+    "id": "01KZWORKSPACE000000000001",
+    "name": "Time Conteudo",
+    "personal": false,
+    "owner_user_id": "01KZOWNER00000000000000001",
+    "spend_limit": null,
+    "spend": 320,
+    "discoverable": false,
+    "pending_join_requests": 0
+  },
+  "role": "admin",
+  "members": []
+}
+```
+
+`spend_limit`, `spend` e a lista de membros so ficam disponiveis para quem pode gerenciar
+o workspace. No espaco pessoal, `workspace.id` e `workspace.name` sao `null`,
+`personal` e `true`, o papel e `owner` e `members` e vazio.
+
+## Isolamento de recursos e saldo
+
+O contexto selecionado e aplicado a projetos, shorts, renders, contas sociais,
+publicacoes, Launchers, monitores de live, Biblioteca, Brand Kits, templates e outros
+recursos do produto.
+
+- o espaco pessoal nao enxerga recursos de workspaces nomeados;
+- um workspace nomeado nao enxerga o espaco pessoal nem outro workspace;
+- recursos criados por um membro pertencem ao workspace ativo;
+- o workspace usa o plano e o saldo de creditos do dono;
+- o backend registra o membro que executou a operacao para autoria e limites de gasto.
+
+## Papeis e permissoes
+
+| Papel | Projetos | Publicacao, contas sociais e lives | Billing | Membros | Assinatura |
+|---|---|---|---|---|---|
+| `owner` | Ver e gerenciar | Gerenciar | Ver | Gerenciar | Gerenciar |
+| `admin` | Ver e gerenciar | Gerenciar | Ver | Gerenciar | Nao |
+| `publisher` | Ver e gerenciar | Gerenciar | Nao | Nao | Nao |
+| `editor` | Ver e gerenciar | Nao | Nao | Nao | Nao |
+| `viewer` | Somente leitura | Nao | Nao | Nao | Nao |
+
+Operacoes sem permissao retornam HTTP 403. O papel `owner` e implicito e nao pode ser
+atribuido a outro membro.
+
+## Endpoints de gestao
+
+| Metodo | Endpoint | Regra principal |
+|---|---|---|
+| `GET` | `/workspaces` | Lista o pessoal e todos os workspaces acessiveis |
+| `GET` | `/workspace` | Detalha o workspace selecionado pelo header |
+| `POST` | `/workspace` | Cria workspace; exige assinatura ativa |
+| `PATCH` | `/workspace` | Atualiza o workspace ativo; `owner` ou `admin` |
+| `DELETE` | `/workspace` | Exclui o ativo; somente `owner` |
+| `POST` | `/workspace/invites` | Convida membro para o ativo |
+| `POST` | `/workspace/invites/{token}/accept` | Aceita convite do proprio email |
+| `POST` | `/workspace/invites/{token}/decline` | Recusa convite |
+| `POST` | `/workspace/leave` | Membro sai do workspace ativo |
+| `PATCH` | `/workspace/members/{memberId}` | Altera papel ou limite de gasto |
+| `DELETE` | `/workspace/members/{memberId}` | Remove membro |
+| `GET` | `/workspaces/discover` | Lista workspaces publicamente descobriveis |
+| `POST` | `/workspaces/{workspaceId}/join-request` | Solicita entrada |
+
+Ao gerenciar o workspace ativo, envie explicitamente seu ID:
+
+```bash
+curl -X PATCH "https://api.realoficial.com.br/api/v1/workspace" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "X-Workspace-Id: 01KZWORKSPACE000000000001" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"name":"Time Conteudo","spend_limit":5000}'
+```
+
+`spend_limit` e medido em creditos. Quando o limite global esta preenchido, ele limita a
+soma do workspace e prevalece sobre limites individuais dos membros. Envie `null` para
+remover o limite global.
+
+<Note>
+Ao excluir um workspace nomeado, seus recursos retornam ao espaco pessoal do dono. O
+workspace pessoal nao pode ser renomeado, receber membros nem ser excluido.
+</Note>
