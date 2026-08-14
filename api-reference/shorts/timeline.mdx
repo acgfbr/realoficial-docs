@@ -1,0 +1,138 @@
+---
+title: 'Atualizar Timeline'
+api: 'POST /shorts/{projectId}/{shortId}/updateTimeline'
+description: 'Salve programaticamente a timeline completa de um short'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/shorts/{projectId}/{shortId}/updateTimeline
+```
+
+O endpoint recebe a timeline completa usada pelo editor e a salva no short. Ele pode ser
+usado para reposicionar elementos, alterar legendas, adicionar imagens e preparar o corte
+antes de iniciar uma renderizacao.
+
+<Warning>
+O body substitui a timeline inteira. Primeiro obtenha a versao atual em
+`GET /shorts/{projectId}/{shortId}`, altere apenas os elementos necessarios e envie o
+objeto completo de volta.
+</Warning>
+
+## Autenticacao
+
+O endpoint principal aceita o Bearer token normal da API. Por compatibilidade com
+integracoes de edicao compartilhada, existe tambem esta rota:
+
+```text
+POST https://api.realoficial.com.br/api/v1/readonly/shorts/{projectId}/{shortId}/updateTimeline
+```
+
+Nessa segunda rota, envie o `read_only_token` como Bearer token. Apesar do nome historico
+da credencial, a atualizacao de timeline e uma excecao de escrita suportada por esse fluxo.
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short (ULID).
+</ParamField>
+
+## Body
+
+<ParamField body="timeline" type="object" required>
+  Timeline completa do editor, incluindo `fps`, `compositionWidth`,
+  `compositionHeight`, `tracks`, `items` e `assets`.
+</ParamField>
+
+O backend normaliza a timeline antes de salvar. Calculos de duracao respeitam o `fps`
+informado na propria timeline.
+
+| Regra | Limite |
+|---|---:|
+| Duracao em plano pago | 900 segundos |
+| Duracao no free tier | 180 segundos |
+| Quantidade de assets | 100 |
+
+<RequestExample>
+```bash cURL
+curl -X POST \
+  "https://api.realoficial.com.br/api/v1/shorts/PROJECT_ID/SHORT_ID/updateTimeline" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  --data @timeline.json
+```
+
+```javascript JavaScript
+const short = await fetch(
+  `https://api.realoficial.com.br/api/v1/shorts/${projectId}/${shortId}`,
+  { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } }
+).then((response) => response.json());
+
+short.timeline.items['logo-campanha'] = logoItem;
+short.timeline.assets['logo-campanha'] = logoAsset;
+
+const response = await fetch(
+  `https://api.realoficial.com.br/api/v1/shorts/${projectId}/${shortId}/updateTimeline`,
+  {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json'
+    },
+    body: JSON.stringify({ timeline: short.timeline })
+  }
+);
+```
+</RequestExample>
+
+## Resposta
+
+O backend devolve a versao canonica da timeline depois da normalizacao.
+
+<ResponseExample>
+```json 200 - Timeline atualizada
+{
+  "message": "Timeline atualizada com sucesso.",
+  "short_id": "01k4ef56yqtsyrzjb0gveqy7cd",
+  "project_id": "01k3ab12yqtsyrzjb0fveqy5zx",
+  "source_short_id": null,
+  "materialized": false,
+  "timeline": {
+    "fps": 30,
+    "compositionWidth": 1080,
+    "compositionHeight": 1920,
+    "tracks": [],
+    "items": {},
+    "assets": {}
+  }
+}
+```
+
+```json 400 - Timeline vazia
+{
+  "error": "A timeline não pode estar vazia."
+}
+```
+
+```json 400 - Duracao excedida
+{
+  "error": "A timeline excede o limite máximo permitido.",
+  "duration": 901.2,
+  "maxDuration": 900
+}
+```
+</ResponseExample>
+
+## Shorts publicos de lives
+
+Ao editar um short publico de live, o backend pode criar uma copia privada no workspace.
+Nesse caso, `materialized` sera `true`. Passe a usar os valores retornados em `short_id` e
+`project_id` nas proximas leituras e renderizacoes.
+

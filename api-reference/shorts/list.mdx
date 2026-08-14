@@ -71,7 +71,7 @@ Este endpoint requer autenticacao via Bearer Token.
       Tempo de fim no video original (segundos)
     </ResponseField>
     <ResponseField name="score" type="number">
-      Pontuacao de relevancia (0-100)
+      Pontuacao de relevancia (0-10, normalmente com uma casa decimal)
     </ResponseField>
     <ResponseField name="status" type="string">
       Status do processamento
@@ -120,7 +120,8 @@ Este endpoint requer autenticacao via Bearer Token.
 ```bash cURL
 curl -X GET "https://api.realoficial.com.br/api/v1/shorts/01k3ab12yqtsyrzjb0fveqy5zx?limit=10&sort=score" \
   -H "Authorization: Bearer seu_token_aqui" \
-  -H "Content-Type: application/json"
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json"
 ```
 
 ```javascript JavaScript
@@ -132,7 +133,8 @@ const response = await fetch(
     method: 'GET',
     headers: {
       'Authorization': 'Bearer seu_token_aqui',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
     }
   }
 );
@@ -149,7 +151,8 @@ project_id = '01k3ab12yqtsyrzjb0fveqy5zx'
 
 headers = {
     'Authorization': 'Bearer seu_token_aqui',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
 }
 
 params = {
@@ -177,7 +180,8 @@ curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_HTTPHEADER => [
         'Authorization: Bearer seu_token_aqui',
-        'Content-Type: application/json'
+        'Content-Type: application/json',
+        'Accept: application/json'
     ]
 ]);
 
@@ -205,9 +209,11 @@ $shorts = $data['data']['data'];
         "title": "Momento viral #1",
         "start_time": 245.5,
         "end_time": 305.2,
-        "score": 92,
+        "score": 9.2,
         "status": "face_analysis_done",
         "has_render": true,
+        "thumbnail_url": "https://cdn.realoficial.com.br/shorts/01k3ab12yqtsyrzjb0fveqy5zx/01k4ef56yqtsyrzjb0gveqy7cd_thumbnail.jpg",
+        "preview_thumbnail_url": "https://cdn.realoficial.com.br/shorts/01k3ab12yqtsyrzjb0fveqy5zx/01k4ef56yqtsyrzjb0gveqy7cd_thumbnail.jpg",
         "feedback": "like",
         "created_at": "2025-01-24T10:35:00.000000Z",
         "renders": [
@@ -230,9 +236,11 @@ $shorts = $data['data']['data'];
         "title": "Momento viral #2",
         "start_time": 512.0,
         "end_time": 571.5,
-        "score": 87,
+        "score": 8.7,
         "status": "face_analysis_done",
         "has_render": false,
+        "thumbnail_url": "https://cdn.realoficial.com.br/shorts/01k3ab12yqtsyrzjb0fveqy5zx/01k4ef57yqtsyrzjb0gveqy8de_thumbnail.jpg",
+        "preview_thumbnail_url": "https://cdn.realoficial.com.br/shorts/01k3ab12yqtsyrzjb0fveqy5zx/01k4ef57yqtsyrzjb0gveqy8de_thumbnail.jpg",
         "feedback": null,
         "created_at": "2025-01-24T10:35:00.000000Z",
         "renders": [],
@@ -247,7 +255,7 @@ $shorts = $data['data']['data'];
     "total": 24
   },
   "meta": {
-    "average_score": 75.50,
+    "average_score": 7.55,
     "average_duration": 58.30
   }
 }
@@ -272,10 +280,10 @@ A pontuacao indica a relevancia do corte identificado pela IA:
 
 | Faixa | Classificacao | Descricao |
 |-------|---------------|-----------|
-| 80-100 | Excelente | Momentos de alto engajamento potencial |
-| 60-79 | Bom | Bons trechos para conteudo |
-| 40-59 | Medio | Pode funcionar com edicao |
-| 0-39 | Baixo | Menos recomendado |
+| 8.0-10.0 | Excelente | Momentos de alto engajamento potencial |
+| 6.0-7.9 | Bom | Bons trechos para conteudo |
+| 4.0-5.9 | Medio | Pode funcionar com edicao |
+| 0.0-3.9 | Baixo | Menos recomendado |
 
 <Info>
 **Dica**: Comece renderizando os cortes com maior pontuacao para maximizar o engajamento.
@@ -292,7 +300,8 @@ GET /shorts/{projectId}/{shortId}
 <RequestExample>
 ```bash cURL
 curl -X GET "https://api.realoficial.com.br/api/v1/shorts/PROJECT_ID/SHORT_ID" \
-  -H "Authorization: Bearer seu_token_aqui"
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
 ```
 </RequestExample>
 

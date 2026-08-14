@@ -1,0 +1,269 @@
+---
+title: 'Templates de Composicao'
+description: 'Crie, liste, copie e publique templates completos do editor'
+---
+
+Templates de composicao sao documentos JSON portaveis do editor. Eles podem definir a
+geometria do video, textos, imagens, videos auxiliares, formas, thumbnails, barra de
+progresso, animacoes, legendas, fundo, filtro de cor e um snapshot de Brand Kit.
+
+Eles sao diferentes dos [Caption Templates](/api-reference/caption-templates), que
+alteram apenas o estilo das legendas enviado em `captionTemplate`.
+
+Todas as rotas abaixo exigem Bearer token. Em workspaces de equipe, envie tambem
+`X-Workspace-Id`; os templates privados pertencem ao workspace ativo.
+
+## Endpoints
+
+| Metodo | Endpoint | Resultado |
+|---|---|---|
+| `GET` | `/templates/mine` | Lista os templates do workspace ativo |
+| `GET` | `/templates/public` | Lista a galeria publica aprovada |
+| `GET` | `/templates/{id}` | Retorna um template proprio ou publico aprovado |
+| `POST` | `/templates` | Cria um template privado |
+| `POST` | `/templates/{id}/copy` | Copia um template visivel para o workspace |
+| `PATCH` | `/templates/{id}` | Atualiza um template do workspace |
+| `DELETE` | `/templates/{id}` | Exclui um template do workspace |
+| `POST` | `/templates/{id}/publish` | Publica na galeria |
+| `POST` | `/templates/{id}/unpublish` | Remove da galeria publica |
+| `POST` | `/templates/{id}/use` | Registra uso de forma deduplicada |
+
+<Warning>
+A API de templates gerencia e distribui os documentos do editor. O contrato atual de
+`POST /createShorts` nao aceita apenas um ID de template de composicao. Nao confunda esse
+recurso com o campo `captionTemplate`.
+</Warning>
+
+## Listar meus templates
+
+```bash
+curl "https://api.realoficial.com.br/api/v1/templates/mine" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+
+A resposta nao e paginada:
+
+```json
+{
+  "items": [
+    {
+      "id": "01KZTEMPLATE00000000000001",
+      "user_id": "01KZUSER000000000000000001",
+      "source_template_id": null,
+      "forked_from_seed_id": null,
+      "name": "Podcast Vertical",
+      "description": "Video central e titulo no topo",
+      "data": {
+        "schemaVersion": 1,
+        "format": "vertical",
+        "composition": { "width": 1080, "height": 1920 },
+        "elements": [],
+        "meta": { "name": "Podcast Vertical" }
+      },
+      "cover_url": null,
+      "format": "vertical",
+      "is_public": false,
+      "published_at": null,
+      "moderation_status": "approved",
+      "use_count": 0,
+      "schema_version": 1,
+      "created_at": "2026-08-13T12:00:00+00:00",
+      "updated_at": "2026-08-13T12:00:00+00:00",
+      "author": {
+        "id": "01KZUSER000000000000000001",
+        "name": "Minha marca"
+      },
+      "forked_from": null
+    }
+  ]
+}
+```
+
+IDs sao ULIDs opacos; trate-os sempre como strings.
+
+## Galeria publica
+
+```bash
+curl "https://api.realoficial.com.br/api/v1/templates/public?sort=popular&page=1&pageSize=24&q=podcast" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+
+| Query | Tipo | Padrao | Regra |
+|---|---|---|---|
+| `format` | string | omitido | Atualmente somente `vertical` retorna resultados |
+| `sort` | string | `popular` | `popular` ou `recent` |
+| `q` | string | vazio | Busca por nome |
+| `page` | integer | `1` | Minimo 1 |
+| `pageSize` | integer | `24` | Entre 1 e 60 |
+
+```json
+{
+  "items": [],
+  "page": 1,
+  "pageSize": 24,
+  "total": 0,
+  "hasMore": false
+}
+```
+
+Somente templates com `is_public: true`, `moderation_status: "approved"` e formato
+vertical aparecem na galeria.
+
+## Criar template
+
+```bash
+curl -X POST "https://api.realoficial.com.br/api/v1/templates" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "name": "Podcast Vertical",
+    "description": "Video principal ocupando a composicao",
+    "format": "vertical",
+    "data": {
+      "schemaVersion": 1,
+      "format": "vertical",
+      "composition": { "width": 1080, "height": 1920 },
+      "elements": [
+        {
+          "id": "main-video",
+          "kind": "video-slot",
+          "rect": { "x": 0, "y": 0, "width": 100, "height": 100 },
+          "zIndex": 0,
+          "crop": "face-track",
+          "mask": "none"
+        }
+      ],
+      "meta": {
+        "name": "Podcast Vertical",
+        "description": "Video principal ocupando a composicao"
+      }
+    }
+  }'
+```
+
+A criacao retorna o record completo com HTTP 201. O template nasce privado,
+`moderation_status: "approved"` e `use_count: 0`.
+
+<ParamField body="name" type="string" required>
+  Entre 1 e 120 caracteres. URLs nao sao aceitas no nome.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Ate 2000 caracteres.
+</ParamField>
+
+<ParamField body="format" type="string" required>
+  Atualmente deve ser `vertical`.
+</ParamField>
+
+<ParamField body="data" type="object" required>
+  Documento completo no schema v1, limitado a 256 KB e 200 elementos.
+</ParamField>
+
+<ParamField body="cover_url" type="string">
+  URL HTTPS opcional em um host de midia permitido.
+</ParamField>
+
+<ParamField body="forked_from_seed_id" type="string">
+  ID de um template-base do frontend quando a criacao deriva desse modelo.
+</ParamField>
+
+## Schema do documento v1
+
+```json
+{
+  "schemaVersion": 1,
+  "format": "vertical",
+  "composition": { "width": 1080, "height": 1920 },
+  "elements": [],
+  "animations": [],
+  "captionsEnabled": true,
+  "captionsZone": {
+    "rect": { "x": 5, "y": 72, "width": 90, "height": 15 }
+  },
+  "captionsStyle": {},
+  "background": { "kind": "none" },
+  "colorFilter": { "filterId": "none", "intensity": 0 },
+  "meta": {
+    "name": "Nome do template",
+    "description": "Descricao opcional",
+    "coverUrl": "https://cdn.realoficial.com.br/capa.png"
+  }
+}
+```
+
+As coordenadas de `rect` sao percentuais da composicao.
+
+| `kind` | Funcao |
+|---|---|
+| `text` | Texto livre ou ligado ao titulo do corte com `bindToCutTitle` |
+| `shape` | Retangulo ou circulo |
+| `image` | Imagem, logo ou avatar |
+| `video` | Video auxiliar enviado pelo usuario |
+| `video-slot` | Posicao e recorte do video principal |
+| `thumbnail-slot` | Thumbnail do corte ou imagem estatica |
+| `progress` | Barra de progresso sincronizada |
+| `animation` | Preset de animacao nativo do editor |
+
+O `video-slot.crop` aceita `face-track`, `center`, `cover`, `square`, `contain` e
+`stretch`. O documento pode ter no maximo um `video-slot`.
+
+Fundos aceitos:
+
+```json
+{ "kind": "none" }
+{ "kind": "solid", "color": "#111111" }
+{ "kind": "gradient", "css": "linear-gradient(180deg, #111111, #333333)" }
+{ "kind": "image", "src": "https://cdn.realoficial.com.br/fundo.png", "fit": "cover", "blur": 4 }
+{ "kind": "blur-video", "blur": 10 }
+```
+
+URLs de midia devem usar HTTPS e um destes hosts exatos:
+
+- `brandkit.realoficial.com.br`
+- `cdn.realoficial.com.br`
+- `editor-uploads.realoficial.com.br`
+
+## Copiar e editar
+
+Para copiar um template proprio ou um template publico aprovado:
+
+```bash
+curl -X POST "https://api.realoficial.com.br/api/v1/templates/TEMPLATE_ID/copy" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Podcast Vertical - copia"}'
+```
+
+`name` e `description` sao opcionais. A copia recebe um novo ULID, nasce privada,
+zera `use_count` e referencia a origem em `source_template_id`.
+
+`PATCH /templates/{id}` aceita qualquer subconjunto de `name`, `description`, `data`,
+`cover_url` e `format`. Se `data` for enviado, o documento completo e revalidado.
+
+## Publicar e despublicar
+
+```bash
+curl -X POST "https://api.realoficial.com.br/api/v1/templates/TEMPLATE_ID/publish" \
+  -H "Authorization: Bearer seu_token_aqui"
+```
+
+Publicar exige uma assinatura ativa e revalida todo o documento. Para remover o
+template da galeria sem exclui-lo, use `POST /templates/{id}/unpublish`.
+
+## Registrar uso
+
+`POST /templates/{id}/use` retorna HTTP 204. O contador ignora usos do proprio
+workspace e contabiliza no maximo um uso por usuario/template a cada hora. Rajadas acima
+de cinco chamadas por minuto tambem retornam 204 sem incrementar.
+
+## Erros importantes
+
+| Status | Situacao |
+|---|---|
+| `403` | Sem permissao para gerenciar projetos ou sem assinatura para publicar |
+| `404` | Template inexistente, privado de outro workspace ou indisponivel |
+| `422` | Payload, documento, nome ou URL de midia invalida |

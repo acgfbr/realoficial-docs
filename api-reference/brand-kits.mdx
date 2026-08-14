@@ -1,0 +1,110 @@
+---
+title: 'Brand Kits'
+description: 'Crie e gerencie configuracoes reutilizaveis de marca'
+---
+
+Brand Kits armazenam logos, marcas d'agua e estilos de legenda no workspace.
+
+## Endpoints
+
+| Metodo | Endpoint | Descricao |
+|---|---|---|
+| `GET` | `/brand-kits` | Lista Brand Kits |
+| `POST` | `/brand-kits` | Cria Brand Kit |
+| `GET` | `/brand-kits/{id}` | Detalha Brand Kit |
+| `PUT` | `/brand-kits/{id}` | Atualiza Brand Kit |
+| `POST` | `/brand-kits/{id}/duplicate` | Duplica Brand Kit |
+| `DELETE` | `/brand-kits/{id}` | Remove Brand Kit |
+
+Criacao e duplicacao exigem assinatura ativa. Operacoes de escrita exigem permissao para
+gerenciar projetos no workspace.
+
+## Criar
+
+<ParamField body="name" type="string" required>
+  Nome com ate 255 caracteres.
+</ParamField>
+
+<ParamField body="format" type="string" required>
+  `vertical` ou `horizontal`.
+</ParamField>
+
+<ParamField body="data" type="object" required>
+  Conteudo do Brand Kit. Aceita `version`, `logos`, `watermarks` e `caption`.
+</ParamField>
+
+Cada item de `logos` e `watermarks` aceita:
+
+- `id`;
+- `url` obrigatoria;
+- `fileKey`;
+- `position`;
+- `size`;
+- `opacity` entre 0 e 1.
+
+O objeto `caption` aceita `position`, `size` e `styles`.
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/brand-kits" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "name": "Campanha XPTO",
+    "format": "vertical",
+    "data": {
+      "version": "2.0",
+      "logos": [
+        {
+          "id": "logo-principal",
+          "url": "https://cdn.exemplo.com/logo.png",
+          "position": {"top": 60, "left": 60},
+          "size": {"width": 200, "height": 200},
+          "opacity": 1
+        }
+      ],
+      "watermarks": [],
+      "caption": {
+        "position": {"top": 1200, "left": 90},
+        "size": {"width": 900, "height": 400},
+        "styles": {"fontFamily": "Montserrat", "color": "white"}
+      }
+    }
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 201 - Criado
+{
+  "success": true,
+  "data": {
+    "id": "01kbrandkit000000000000001",
+    "name": "Campanha XPTO",
+    "format": "vertical",
+    "data": {}
+  },
+  "message": "Brand Kit criado com sucesso."
+}
+```
+</ResponseExample>
+
+## Atualizar e duplicar
+
+`PUT /brand-kits/{id}` aceita `name`, `format` e `data`. Todos sao opcionais, mas um
+campo enviado precisa respeitar o mesmo schema da criacao.
+
+`POST /brand-kits/{id}/duplicate` nao exige body. A copia recebe o sufixo `(cópia)`.
+
+## Aplicacao em shorts
+
+<Warning>
+O contrato atual nao possui endpoint para vincular um `brand_kit_id` a um projeto, short
+ou render. Enviar `brand_kit_id` em `/createShorts` ou `/render` nao aplica o kit.
+</Warning>
+
+Para automacao avancada, leia `data` do Brand Kit, altere a timeline completa do short e
+salve com [Atualizar Timeline](/api-reference/shorts/timeline). Essa operacao e de baixo
+nivel: a integracao e responsavel por criar os assets, items e tracks correspondentes.
+

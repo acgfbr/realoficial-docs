@@ -1,0 +1,108 @@
+---
+title: 'Biblioteca'
+description: 'Organize arquivos e prompts em pastas privadas ou publicas'
+---
+
+A Biblioteca armazena metadados de arquivos e prompts no workspace ativo. Operacoes de
+escrita exigem assinatura ativa e permissao para gerenciar projetos.
+
+## Endpoints do workspace
+
+| Metodo | Endpoint | Descricao |
+|---|---|---|
+| `GET` | `/library/folders` | Lista pastas |
+| `POST` | `/library/folders` | Cria pasta |
+| `GET` | `/library/folders/{id}` | Detalha pasta |
+| `PUT` | `/library/folders/{id}` | Atualiza pasta |
+| `DELETE` | `/library/folders/{id}` | Remove pasta |
+| `GET` | `/library/folders/{id}/items` | Lista itens da pasta |
+| `GET` | `/library/items` | Lista itens do workspace |
+| `POST` | `/library/items` | Cria item |
+| `GET` | `/library/items/{id}` | Detalha item |
+| `PUT` | `/library/items/{id}` | Atualiza ou move item |
+| `DELETE` | `/library/items/{id}` | Remove item |
+
+## Pastas
+
+Pastas aceitam `name` e `visibility`, que pode ser `private` ou `public`. O padrao e
+`private`.
+
+```bash
+curl -X POST "https://api.realoficial.com.br/api/v1/library/folders" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"name":"Prompts de campanha","visibility":"private"}'
+```
+
+Ao excluir uma pasta, seus itens nao sao excluidos: eles sao movidos para a raiz da
+Biblioteca (`folder_id: null`).
+
+## Itens
+
+Os tipos aceitos sao `file` e `prompt`.
+
+Campos comuns:
+
+| Campo | Tipo | Regra |
+|---|---|---|
+| `folder_id` | string ou null | Pasta do mesmo workspace |
+| `type` | string | `file` ou `prompt` |
+| `name` | string | Obrigatorio, maximo 255 caracteres |
+| `description` | string | Opcional, maximo 5000 caracteres |
+| `visibility` | string | `private` ou `public`; padrao `private` |
+| `data` | object | Dados especificos do tipo |
+
+### Item do tipo prompt
+
+`data.content` e obrigatorio. `data.tags` e opcional.
+
+```bash
+curl -X POST "https://api.realoficial.com.br/api/v1/library/items" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "folder_id": "FOLDER_ID",
+    "type": "prompt",
+    "name": "Cortes sobre saude",
+    "data": {
+      "content": "Priorize falas completas sobre saude publica.",
+      "tags": ["saude", "campanha"]
+    }
+  }'
+```
+
+### Item do tipo file
+
+O objeto `data` exige `filename`, `mime_type` e `size`. Tambem aceita
+`storage_provider` e `url`; quando o provider for omitido, o backend grava `r2`.
+
+<Warning>
+`POST /library/items` registra os metadados do arquivo, mas nao recebe upload binario.
+Informe uma URL de arquivo que ja tenha sido enviado pelo fluxo de upload da aplicacao.
+Existe um limite de 100 novos itens `file` por dia e por workspace.
+</Warning>
+
+## Filtros
+
+`GET /library/items` aceita `folder_id` e `type`. Para listar itens na raiz, envie
+`folder_id=null` ou `folder_id=`.
+
+`GET /library/folders/{id}/items` aceita o filtro opcional `type`.
+
+## Catalogo publico
+
+| Metodo | Endpoint | Descricao |
+|---|---|---|
+| `GET` | `/library/public/folders` | Pastas publicas aprovadas |
+| `GET` | `/library/public/folders/{id}/items` | Itens publicos de uma pasta |
+| `GET` | `/library/public/items` | Itens publicos aprovados |
+
+Esses endpoints continuam exigindo Bearer token. `public` significa visivel a outros
+usuarios autenticados. Apenas registros com `visibility: public` e `is_approved: true`
+entram no catalogo.
+
+As listagens publicas aceitam `limit` (padrao 30, maximo 100), `page`, `type` e, na
+listagem geral de itens, `folder_id`.
+

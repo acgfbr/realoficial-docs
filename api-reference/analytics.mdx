@@ -1,0 +1,136 @@
+---
+title: 'Analytics'
+description: 'KPIs, desempenho de posts, crescimento e exportacao de dados sociais'
+---
+
+Os endpoints de Analytics combinam metricas sincronizadas das contas sociais com dados de
+projetos e shorts da Real Oficial.
+
+## Filtros comuns
+
+<ParamField query="range" type="integer">
+  Janela em dias: `30`, `60` ou `90`. Valores diferentes usam o padrao 30.
+</ParamField>
+
+<ParamField query="platforms" type="string | array">
+  Plataformas separadas por virgula (`instagram,tiktok`) ou como array de query string.
+  Quando omitido, inclui todas.
+</ParamField>
+
+<ParamField query="social_account_ids" type="string | array">
+  IDs separados por virgula ou como array. Tambem e aceito o singular
+  `social_account_id`. Maximo de 100 IDs.
+</ParamField>
+
+## Endpoints principais
+
+Todos usam o prefixo `/dashboard/analytics`.
+
+| Endpoint | Resultado |
+|---|---|
+| `GET /overview` | KPIs de views, shorts, minutos e origem dos dados |
+| `GET /posts` | Lista paginada de posts e metricas |
+| `GET /timeseries` | Serie temporal do periodo |
+| `GET /top-posts` | Posts de melhor desempenho |
+| `GET /platforms` | Comparacao por plataforma |
+| `GET /accounts` | Comparacao por conta social |
+| `GET /best-time` | Horarios de melhor desempenho |
+| `GET /fatigue` | Sinais de fadiga de conteudo |
+| `GET /follower-growth` | Crescimento de seguidores |
+| `GET /youtube/post/{socialPostId}/daily` | Views diarias no YouTube |
+| `GET /instagram/demographics` | Demografia do Instagram |
+| `GET /content-decay` | Decaimento de desempenho |
+| `GET /repurpose-suggestions` | Sugestoes de conteudo para reaproveitar |
+| `GET /hashtag-trends` | Tendencias de hashtags |
+| `GET /competitor-benchmark` | Benchmark de concorrentes |
+| `GET /posts/{socialPostId}/sentiment` | Sentimento dos comentarios |
+| `GET /export` | Exportacao CSV |
+
+## Exemplos
+
+```bash
+curl \
+  "https://api.realoficial.com.br/api/v1/dashboard/analytics/overview?range=30&platforms=instagram,tiktok" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+
+```json
+{
+  "views": {
+    "today": 1200,
+    "yesterday": 980,
+    "total": 45200,
+    "delta_pct": 22.45
+  },
+  "shorts": {},
+  "minutes": {},
+  "source_breakdown": {},
+  "range_days": 30,
+  "platforms": ["instagram", "tiktok"],
+  "social_account_ids": [],
+  "last_synced_at": "2026-08-13T12:00:00.000000Z"
+}
+```
+
+### Posts
+
+`GET /posts` aceita:
+
+- `sortBy`: `date`, `views`, `impressions`, `likes`, `comments`, `shares` ou
+  `engagement`;
+- `order`: `asc` ou `desc`;
+- `page`: padrao 1;
+- `limit`: entre 1 e 100, padrao 20.
+
+### Top posts
+
+`GET /top-posts` aceita `metric` (`views`, `impressions`, `likes`, `comments`, `shares`
+ou `engagement_rate`) e `limit` entre 1 e 50.
+
+### Melhor horario
+
+`GET /best-time` aceita `metric` (`views`, `likes` ou `engagement_rate`) e `scope`
+(`user` ou `global`).
+
+### Demografia do Instagram
+
+`GET /instagram/demographics` exige `social_account_id` e aceita `metric` como
+`follower_demographics` ou `engaged_audience_demographics`.
+
+### Sugestoes de reaproveitamento
+
+`GET /repurpose-suggestions` aceita `min_views` (padrao 5000), `age_days_min` (minimo 7,
+padrao 30) e `limit` (maximo 50, padrao 20).
+
+## Exportar CSV
+
+```text
+GET /dashboard/analytics/export?type=posts&range=30
+```
+
+`type` pode ser `posts`, `platforms` ou `accounts`. A resposta usa
+`Content-Type: text/csv` e inicia o download do arquivo.
+
+## Metas
+
+| Metodo | Endpoint | Descricao |
+|---|---|---|
+| `GET` | `/dashboard/analytics/goals` | Lista metas |
+| `POST` | `/dashboard/analytics/goals` | Cria meta |
+| `PUT` | `/dashboard/analytics/goals/{id}` | Atualiza meta |
+| `DELETE` | `/dashboard/analytics/goals/{id}` | Arquiva meta |
+
+Ao criar uma meta:
+
+- `metric`: `views`, `followers`, `posts` ou `engagement_rate`;
+- `scope`: `total`, `platform` ou `account`;
+- `period`: `weekly`, `monthly`, `quarterly` ou `custom`;
+- `target_value`, `starts_at` e `ends_at` sao obrigatorios.
+
+<Note>
+As metricas sociais dependem da sincronizacao com os provedores. Consulte
+`last_synced_at`; uma resposta vazia pode significar que a conta ainda nao possui
+snapshots no periodo solicitado.
+</Note>
+

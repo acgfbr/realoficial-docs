@@ -41,7 +41,11 @@
       },
       {
         "group": "Shorts",
-        "pages": ["api-reference/shorts/list", "api-reference/shorts/preview"]
+        "pages": [
+          "api-reference/shorts/list",
+          "api-reference/shorts/preview",
+          "api-reference/shorts/timeline"
+        ]
       },
       {
         "group": "Renders",
@@ -78,6 +82,31 @@
           "api-reference/lives/favorite",
           "api-reference/lives/clips"
         ]
+      },
+      {
+        "group": "Publicacao e Redes Sociais",
+        "pages": [
+          "api-reference/social-accounts",
+          "api-reference/social-posts",
+          "api-reference/launchers"
+        ]
+      },
+      {
+        "group": "Conteudo e Marca",
+        "pages": [
+          "api-reference/brand-kits",
+          "api-reference/templates",
+          "api-reference/caption-templates",
+          "api-reference/library"
+        ]
+      },
+      {
+        "group": "Analytics",
+        "pages": ["api-reference/analytics"]
+      },
+      {
+        "group": "Contrato da API",
+        "pages": ["api-reference/limitations"]
       }
     ]
   },

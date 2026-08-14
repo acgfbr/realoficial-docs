@@ -76,7 +76,9 @@ Este endpoint requer autenticacao e consome creditos do usuario.
 </ParamField>
 
 <ParamField body="captionTemplate" type="json">
-  Template de estilo de legendas. Você pode obter o JSON do template em [app.realoficial.com.br/docs/caption-templates](https://app.realoficial.com.br/docs/caption-templates)
+  Objeto completo do estilo de legendas, com `id`, `style` e `config`. Consulte o
+  [catálogo de Caption Templates](/api-reference/caption-templates) ou copie o JSON
+  pela [galeria interativa](https://app.realoficial.com.br/docs/caption-templates).
 </ParamField>
 
 <ParamField body="ignoreCaptions" type="boolean" default="false">
@@ -151,6 +153,7 @@ Durante campanhas sazonais podem valer limites adicionais mais restritivos para 
 curl -X POST "https://api.realoficial.com.br/api/v1/createShorts" \
   -H "Authorization: Bearer seu_token_aqui" \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
   -d '{
     "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "clipDuration": "60",
@@ -166,7 +169,8 @@ const response = await fetch('https://api.realoficial.com.br/api/v1/createShorts
   method: 'POST',
   headers: {
     'Authorization': 'Bearer seu_token_aqui',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
   },
   body: JSON.stringify({
     url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
@@ -187,7 +191,8 @@ import requests
 
 headers = {
     'Authorization': 'Bearer seu_token_aqui',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
 }
 
 data = {
@@ -217,7 +222,8 @@ curl_setopt_array($ch, [
     CURLOPT_POST => true,
     CURLOPT_HTTPHEADER => [
         'Authorization: Bearer seu_token_aqui',
-        'Content-Type: application/json'
+        'Content-Type: application/json',
+        'Accept: application/json'
     ],
     CURLOPT_POSTFIELDS => json_encode([
         'url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',

@@ -48,6 +48,10 @@ Usuarios que nunca fizeram deposito terao **marca d'agua** nos videos.
     <ResponseField name="render_id" type="string">
       ID unico da renderizacao (ULID)
     </ResponseField>
+    <ResponseField name="id" type="string">
+      Alias de compatibilidade para `render_id`. Novas integracoes devem preferir
+      `render_id` como nome canonico.
+    </ResponseField>
     <ResponseField name="status" type="string">
       Status inicial: `pending`
     </ResponseField>
@@ -58,7 +62,8 @@ Usuarios que nunca fizeram deposito terao **marca d'agua** nos videos.
 ```bash cURL
 curl -X POST "https://api.realoficial.com.br/api/v1/shorts/PROJECT_ID/SHORT_ID/render" \
   -H "Authorization: Bearer seu_token_aqui" \
-  -H "Content-Type: application/json"
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json"
 ```
 
 ```javascript JavaScript
@@ -71,7 +76,8 @@ const response = await fetch(
     method: 'POST',
     headers: {
       'Authorization': 'Bearer seu_token_aqui',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
     }
   }
 );
@@ -88,7 +94,8 @@ short_id = '01k4ef56yqtsyrzjb0gveqy7cd'
 
 headers = {
     'Authorization': 'Bearer seu_token_aqui',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
 }
 
 response = requests.post(
@@ -112,7 +119,8 @@ curl_setopt_array($ch, [
     CURLOPT_POST => true,
     CURLOPT_HTTPHEADER => [
         'Authorization: Bearer seu_token_aqui',
-        'Content-Type: application/json'
+        'Content-Type: application/json',
+        'Accept: application/json'
     ]
 ]);
 
@@ -126,6 +134,7 @@ $data = json_decode($response, true);
 {
   "message": "Renderização iniciada com sucesso, você pode acompanhar o progresso no menu \"Meus Vídeos\".",
   "data": {
+    "id": "01k6ij90yqtsyrzjb0hveqy9ef",
     "render_id": "01k6ij90yqtsyrzjb0hveqy9ef",
     "status": "pending"
   }
@@ -136,6 +145,7 @@ $data = json_decode($response, true);
 {
   "message": "Renderização já feita para este corte.",
   "data": {
+    "id": "01k6ij90yqtsyrzjb0hveqy9ef",
     "render_id": "01k6ij90yqtsyrzjb0hveqy9ef",
     "url": "https://cdn-wasabi.realoficial.com.br/renders/01k6ij90yqtsyrzjb0hveqy9ef.mp4"
   }

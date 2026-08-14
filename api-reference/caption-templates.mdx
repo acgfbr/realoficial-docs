@@ -1,0 +1,108 @@
+---
+title: 'Caption Templates'
+description: 'Catalogo de estilos de legenda aceitos pelo createShorts'
+---
+
+Caption Templates controlam somente a aparencia e a animacao das legendas. Eles sao
+diferentes dos [Templates de Composicao](/api-reference/templates), que podem incluir
+video, imagens, textos, formas, Brand Kit e outras camadas.
+
+O campo `captionTemplate` de `POST /createShorts` recebe o objeto completo do template.
+Enviar apenas o `id` nao aplica os valores padrao de `style` e `config`.
+
+<Note>
+Nao existe atualmente um endpoint `GET /caption-templates`. Esta pagina documenta o
+catalogo oficial usado pelo frontend. Para visualizar as animacoes e copiar o JSON exato,
+use a [galeria interativa](https://app.realoficial.com.br/docs/caption-templates).
+</Note>
+
+## Formato do campo
+
+```json
+{
+  "captionTemplate": {
+    "id": "simple-white",
+    "style": "colored-words",
+    "config": {
+      "fontFamily": "Inter",
+      "fontSize": 75,
+      "fontWeight": "bold",
+      "textTransform": "none",
+      "primaryColor": "#ffffff",
+      "secondaryColor": "#ffffff",
+      "strokeColor": "#000000",
+      "strokeWidth": 6,
+      "maxWidth": 900
+    }
+  }
+}
+```
+
+| Campo | Tipo | Descricao |
+|---|---|---|
+| `id` | string | Identificador do modelo no catalogo |
+| `style` | string | Motor de animacao usado pelo renderer |
+| `config` | object | Fonte, cores, contorno, dimensoes e parametros do estilo |
+
+Os campos comuns de `config` sao `fontFamily`, `fontSize`, `fontWeight`,
+`textTransform`, `primaryColor`, `secondaryColor`, `backgroundColor`, `strokeColor`,
+`strokeWidth`, `maxWidth`, `padding`, `borderRadius`, `animationDuration`,
+`animationDelay`, `scaleAmount`, `highlightColor`, `enableEmojis`, `keywordsEnabled`,
+`keywordColor` e `entryAnimation`. Alguns estilos usam apenas um subconjunto deles.
+
+## Catalogo atual
+
+| ID | Nome | `style` | Categoria |
+|---|---|---|---|
+| `simple-white` | Simples Branco | `colored-words` | `basico` |
+| `simple-yellow` | Simples Amarelo | `colored-words` | `basico` |
+| `classic` | Classico | `colored-words` | `basico` |
+| `green-fresh` | Verde Fresco | `scaling-words` | `animado` |
+| `explosive-boom` | Explosive | `explosive` | `animado` |
+| `yellow-energy` | Amarelo Energia | `scaling-words` | `animado` |
+| `blue-box` | Caixa Azul | `animated-background` | `destaque` |
+| `gold-italic` | Dourado Italico | `scaling-words` | `animado` |
+| `bounce-viral` | Bounce | `bounce` | `animado` |
+| `shake-energy` | Shake | `shake` | `animado` |
+| `zoom-impact` | Zoom | `zoom` | `animado` |
+| `fade-smooth` | Fade | `fade` | `animado` |
+| `glitch-tech` | Glitch | `glitch` | `criativo` |
+| `rotate-spin` | Rotate | `rotating` | `criativo` |
+| `glow-magic` | Glow | `glowing` | `criativo` |
+| `karaoke-fill` | Karaoke | `karaoke` | `basico` |
+| `typewriter-code` | Typewriter | `typewriter-reveal` | `criativo` |
+| `typewriter-erase-clean` | Digita e Apaga | `typewriter-erase` | `criativo` |
+| `wave-rhythm` | Onda | `wave` | `animado` |
+| `pill-modern` | Pilula | `pill` | `destaque` |
+| `flicker-neon` | Flicker | `flicker` | `animado` |
+| `highlighter-study` | Marca-texto | `highlighter` | `destaque` |
+| `blur-focus` | Foco | `blur` | `basico` |
+| `rainbow-fun` | Arco-iris | `rainbow` | `criativo` |
+| `spotlight-cinema` | Spotlight | `spotlight` | `destaque` |
+| `gradient-sunset` | Gradiente | `gradient-text` | `criativo` |
+| `underline-clean` | Sublinhado | `underline-bar` | `destaque` |
+| `shadow-neon` | Sombra Neon | `colored-shadow` | `destaque` |
+| `pop-word-viral` | Pop Word | `pop-word` | `criativo` |
+| `big-impact-viral` | Big Impact | `big-impact` | `animado` |
+| `cap-crazy` | capCrazy | `cap-crazy` | `criativo` |
+| `elegant-reels` | Reels Editorial | `elegant-reels` | `criativo` |
+| `elegant-reels-lower` | Reels Minimal | `elegant-reels-lower` | `criativo` |
+
+## Template surpresa
+
+O identificador especial `surprise` seleciona um estilo aleatorio para cada video:
+
+```json
+{
+  "captionTemplate": {
+    "id": "surprise",
+    "style": "random",
+    "config": {
+      "fontFamily": "Montserrat"
+    }
+  }
+}
+```
+
+Para desativar as legendas por completo, envie `ignoreCaptions: true` no
+`POST /createShorts`; nesse caso `captionTemplate` e ignorado.

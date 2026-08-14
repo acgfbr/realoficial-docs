@@ -1,0 +1,132 @@
+---
+title: 'Publicacoes e Agendamento'
+description: 'Publique imediatamente ou agende um short em uma ou mais redes sociais'
+---
+
+## Endpoints
+
+| Metodo | Endpoint | Descricao |
+|---|---|---|
+| `GET` | `/social/posts` | Lista publicacoes |
+| `POST` | `/social/posts` | Publica ou agenda um short |
+| `GET` | `/social/posts/{id}` | Retorna uma publicacao |
+| `PATCH` | `/social/posts/{id}` | Atualiza a publicacao e seus destinos |
+| `DELETE` | `/social/posts/{id}` | Remove o registro local |
+| `POST` | `/social/posts/{id}/retry` | Tenta novamente todos os destinos com falha |
+| `POST` | `/social/posts/{id}/retry/{socialPostId}` | Tenta novamente um destino |
+
+## Listar publicacoes
+
+<ParamField query="limit" type="integer">
+  Itens por pagina, entre 1 e 1000. Padrao: 20.
+</ParamField>
+
+<ParamField query="status" type="string | array">
+  Um status ou uma lista separada por virgulas: `draft`, `scheduled`, `processing`,
+  `published` ou `failed`.
+</ParamField>
+
+```bash
+curl "https://api.realoficial.com.br/api/v1/social/posts?status=scheduled,failed&limit=50" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+
+## Criar publicacao
+
+```text
+POST /social/posts
+```
+
+<ParamField body="short_id" type="string" required>
+  ID de um short do workspace com timeline renderizavel.
+</ParamField>
+
+<ParamField body="social_accounts" type="array" required>
+  Lista de destinos. Cada item exige `id` e pode sobrescrever `title` e `description`.
+</ParamField>
+
+<ParamField body="title" type="string" required>
+  Titulo padrao, com ate 255 caracteres.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Descricao padrao, com ate 5000 caracteres.
+</ParamField>
+
+<ParamField body="scheduled_at" type="string">
+  Horario futuro no formato `YYYY-MM-DD HH:mm:ss`, interpretado no fuso
+  `America/Sao_Paulo`. O agendamento pode ficar no maximo 60 dias no futuro.
+</ParamField>
+
+<ParamField body="tiktok_guidelines_filter_enabled" type="boolean">
+  Ativa o filtro de diretrizes do TikTok. Padrao: `true`.
+</ParamField>
+
+<ParamField body="tags" type="array">
+  Ate 10 tags, com no maximo 50 caracteres cada.
+</ParamField>
+
+<ParamField body="auto_reply_config" type="object">
+  Automacao opcional. `name` e `dm_message` sao obrigatorios quando o objeto e enviado;
+  tambem aceita `comment_reply`, `keywords` e `match_mode` (`exact` ou `contains`).
+</ParamField>
+
+Se `scheduled_at` for omitido, a publicacao e iniciada imediatamente. Caso o short ainda
+nao tenha render final, o fluxo cria ou aguarda a renderizacao antes de publicar.
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/social/posts" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "short_id": "01k4ef56yqtsyrzjb0gveqy7cd",
+    "title": "Novo corte",
+    "description": "Confira este trecho",
+    "scheduled_at": "2026-08-20 18:30:00",
+    "social_accounts": [
+      {
+        "id": "01ksocialaccount000000000001",
+        "title": "Titulo especifico para esta conta"
+      }
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 201 - Agendado
+{
+  "message": "Publicação agendada com sucesso.",
+  "post": {
+    "id": "01kpost00000000000000000001",
+    "short_id": "01k4ef56yqtsyrzjb0gveqy7cd",
+    "status": "scheduled",
+    "scheduled_at": "2026-08-20T21:30:00.000000Z",
+    "social_posts": []
+  }
+}
+```
+</ResponseExample>
+
+## Atualizar
+
+`PATCH /social/posts/{id}` aceita `title`, `description`, `scheduled_at`,
+`tiktok_guidelines_filter_enabled`, `auto_reply_config` e exige `social_accounts` com ao
+menos um destino. Titulos e descricoes podem ser personalizados por conta.
+
+Uma atualizacao pode responder `207 Multi-Status` quando o registro local foi salvo, mas
+alguma plataforma nao permite ou recusou a alteracao do post ja publicado.
+
+## Excluir
+
+`DELETE /social/posts/{id}` remove o post e seus destinos do banco da Real Oficial. A
+operacao atual **nao apaga videos que ja foram publicados nas plataformas externas**.
+
+## Retry
+
+Use os endpoints de retry somente para destinos com status `failed`. O retorno informa os
+destinos reenfileirados e os erros que nao puderam ser recuperados.
+

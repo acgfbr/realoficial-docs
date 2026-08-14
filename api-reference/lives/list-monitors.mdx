@@ -14,7 +14,8 @@ GET https://api.realoficial.com.br/api/v1/lives/monitors
 Este endpoint requer autenticacao via Bearer Token.
 </Note>
 
-Retorna os monitors do usuario autenticado, paginados (20 por pagina).
+Retorna os monitors do usuario autenticado em um paginator Laravel configurado atualmente
+com `per_page: 1000`.
 
 ## Query Parameters
 
@@ -26,10 +27,15 @@ Retorna os monitors do usuario autenticado, paginados (20 por pagina).
   Numero da pagina (padrao: 1)
 </ParamField>
 
+<Warning>
+O endpoint nao aceita `per_page` no contrato atual. O backend usa o valor fixo `1000`.
+</Warning>
+
 <RequestExample>
 ```bash cURL
 curl -X GET "https://api.realoficial.com.br/api/v1/lives/monitors?visibility=public" \
-  -H "Authorization: Bearer seu_token_aqui"
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
 ```
 </RequestExample>
 

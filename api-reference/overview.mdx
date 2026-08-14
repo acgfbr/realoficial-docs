@@ -19,11 +19,17 @@ Todas as requisicoes devem incluir os seguintes headers:
 |--------|-------|-------------|
 | `Authorization` | `Bearer {token}` | Sim (exceto login) |
 | `Content-Type` | `application/json` | Sim para POST/PUT |
-| `Accept` | `application/json` | Recomendado |
+| `Accept` | `application/json` | Sim |
 
 ## Formato de Resposta
 
-Todas as respostas sao retornadas em JSON.
+Envie `Accept: application/json` em todas as requisicoes. Sem esse header, erros de
+validacao ou autenticacao podem seguir o comportamento padrao do Laravel e retornar um
+redirect HTTP em vez do JSON esperado.
+
+Os endpoints historicos da API possuem envelopes diferentes. Use o contrato descrito na
+pagina de cada endpoint; nao presuma que toda resposta usa obrigatoriamente `message` e
+`data`.
 
 ### Resposta de Sucesso
 
@@ -49,16 +55,19 @@ Todas as respostas sao retornadas em JSON.
 | `200` | Sucesso |
 | `201` | Criado com sucesso |
 | `202` | Aceito (processamento assincrono) |
+| `208` | Recurso ja existente e reutilizado |
 | `400` | Requisicao invalida |
 | `401` | Nao autenticado |
 | `403` | Sem permissao |
 | `404` | Nao encontrado |
+| `422` | Erro de validacao ou regra de negocio |
 | `429` | Muitas requisicoes (rate limit) |
 | `500` | Erro interno do servidor |
 
 ## Paginacao
 
-Endpoints que retornam listas utilizam paginacao:
+Endpoints que retornam listas podem utilizar paginacao. Os nomes dos campos, o limite
+maximo e o valor padrao variam por recurso; confira a pagina do endpoint.
 
 ```json
 {
@@ -85,7 +94,7 @@ Endpoints que retornam listas utilizam paginacao:
 | Parametro | Tipo | Descricao | Padrao |
 |-----------|------|-----------|--------|
 | `page` | integer | Numero da pagina | 1 |
-| `per_page` | integer | Itens por pagina (max: 100) | 20 |
+| `per_page` ou `limit` | integer | Itens por pagina; limite depende do endpoint | Consulte o endpoint |
 
 ## Endpoints Disponiveis
 
@@ -103,6 +112,7 @@ Endpoints que retornam listas utilizam paginacao:
   <Card title="Shorts" icon="scissors" href="/api-reference/shorts/list">
     - GET /shorts/{projectId}
     - GET /shorts/{projectId}/{shortId}
+    - POST /shorts/{projectId}/{shortId}/updateTimeline
   </Card>
   <Card title="Renders" icon="video" href="/api-reference/renders/list">
     - POST /shorts/{projectId}/{shortId}/render
@@ -114,5 +124,17 @@ Endpoints que retornam listas utilizam paginacao:
     - GET /lives/monitors
     - GET /lives/public
     - POST /lives/shorts/{id}/copy
+  </Card>
+  <Card title="Publicacao" icon="share-nodes" href="/api-reference/social-posts">
+    - POST /social/connect
+    - GET /social/accounts
+    - POST /social/posts
+    - GET /launchers
+  </Card>
+  <Card title="Conteudo e Analytics" icon="chart-line" href="/api-reference/analytics">
+    - GET /library/items
+    - GET /dashboard/analytics/overview
+    - GET /brand-kits
+    - GET /templates/public
   </Card>
 </CardGroup>

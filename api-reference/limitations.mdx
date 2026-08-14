@@ -1,0 +1,64 @@
+---
+title: 'Limitacoes Atuais'
+description: 'Funcionalidades que ainda nao possuem um endpoint dedicado na API'
+---
+
+Esta pagina torna explicitas limitacoes do contrato atual para que integracoes nao
+dependam de probes, parametros ignorados ou rotas inexistentes.
+
+## Aplicar Brand Kit automaticamente
+
+O CRUD de Brand Kits esta disponivel, mas nao existe uma operacao dedicada para aplicar um
+kit a todos os shorts de um projeto ou durante a renderizacao.
+
+- `brand_kit_id` nao e aceito por `/createShorts`;
+- `brand_kit_id` nao e aceito por `/shorts/{projectId}/{shortId}/render`;
+- nao existe `/projects/{projectId}/apply-brand-kit`.
+
+Veja [Brand Kits](/api-reference/brand-kits) para o workaround por edicao de timeline.
+
+## Cancelar projeto em processamento
+
+`DELETE /projects/{projectId}` so e aceito quando o projeto esta em um destes status:
+
+- `face_analysis_done`;
+- `refunded_by_user`;
+- `expired`;
+- `refunded`;
+- `try_again`.
+
+Projetos em `pending`, `downloading`, `transcribing`, `transcribed` ou `shorts_created`
+nao podem ser cancelados. O endpoint retorna HTTP 400 pedindo para aguardar o
+processamento.
+
+```bash
+curl -X DELETE \
+  "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+
+## Consultar um projeto singular
+
+Nao existe `GET /projects/{projectId}`. Use `GET /projects` e sua paginacao. Quando a
+integracao tambem precisa dos cortes, `GET /shorts/{projectId}` inclui os dados do projeto
+no campo `project`.
+
+## Galeria de caption templates
+
+Nao existe `GET /caption-templates`. O campo `captionTemplate` de `/createShorts` recebe o
+JSON completo do template, nao apenas um identificador.
+
+Os 33 modelos atualmente disponiveis, seus identificadores e estilos estao documentados no
+[catalogo de Caption Templates](/api-reference/caption-templates). A
+[galeria interativa](https://app.realoficial.com.br/docs/caption-templates) permite visualizar
+cada animacao e copiar o JSON completo.
+
+Os endpoints `/user/caption-styles` armazenam estilos personalizados do proprio usuario;
+eles nao representam a galeria oficial de templates.
+
+## Respostas e erros
+
+A API v1 preserva envelopes historicos diferentes entre recursos. Consulte sempre a
+pagina do endpoint e nao dependa de um envelope global unico. Da mesma forma, regras de
+negocio antigas podem responder 400 enquanto validacoes estruturadas respondem 422.

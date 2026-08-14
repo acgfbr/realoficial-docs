@@ -78,7 +78,12 @@ Este endpoint requer autenticacao via Bearer Token.
           Tempo de fim
         </ResponseField>
         <ResponseField name="thumbnail_url" type="string">
-          URL da thumbnail
+          Capa do video original. Este valor pode ser igual entre todos os cortes do
+          projeto.
+        </ResponseField>
+        <ResponseField name="preview_thumbnail_url" type="string">
+          JPG do frame real do corte. Use este campo quando precisar de uma imagem
+          diferente para cada short.
         </ResponseField>
         <ResponseField name="project" type="object">
           Dados basicos do projeto
@@ -95,7 +100,8 @@ Este endpoint requer autenticacao via Bearer Token.
 ```bash cURL
 curl -X GET "https://api.realoficial.com.br/api/v1/renders?limit=20&page=1" \
   -H "Authorization: Bearer seu_token_aqui" \
-  -H "Content-Type: application/json"
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json"
 ```
 
 ```javascript JavaScript
@@ -105,7 +111,8 @@ const response = await fetch(
     method: 'GET',
     headers: {
       'Authorization': 'Bearer seu_token_aqui',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
     }
   }
 );
@@ -127,7 +134,8 @@ import requests
 
 headers = {
     'Authorization': 'Bearer seu_token_aqui',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
 }
 
 params = {
@@ -156,7 +164,8 @@ curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_HTTPHEADER => [
         'Authorization: Bearer seu_token_aqui',
-        'Content-Type: application/json'
+        'Content-Type: application/json',
+        'Accept: application/json'
     ]
 ]);
 
@@ -295,7 +304,8 @@ async function processVideo(youtubeUrl) {
   const token = 'seu_token_aqui';
   const headers = {
     'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
   };
 
   // 1. Criar projeto

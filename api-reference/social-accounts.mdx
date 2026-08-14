@@ -1,0 +1,118 @@
+---
+title: 'Contas Sociais'
+description: 'Conecte, liste e desconecte contas de redes sociais'
+---
+
+As contas sociais pertencem ao workspace ativo e sao usadas pelas APIs de publicacao e
+Launchers.
+
+## Plataformas suportadas
+
+`youtube`, `tiktok`, `instagram`, `facebook`, `twitter`, `linkedin`, `threads`,
+`reddit`, `pinterest` e `bluesky`.
+
+## Iniciar conexao OAuth
+
+```text
+POST /social/connect
+```
+
+<ParamField body="platform" type="string" required>
+  Uma das plataformas suportadas.
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/social/connect" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"platform":"instagram"}'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - URL OAuth criada
+{
+  "oauth_url": "https://api.realoficial.com.br/connect/...",
+  "platform": "instagram"
+}
+```
+
+```json 422 - Plataforma invalida
+{
+  "error": "Plataforma inválida.",
+  "message": "The selected platform is invalid.",
+  "supported_platforms": [
+    "youtube", "tiktok", "instagram", "facebook", "twitter",
+    "linkedin", "threads", "reddit", "pinterest", "bluesky"
+  ]
+}
+```
+</ResponseExample>
+
+Abra `oauth_url` no navegador e conclua a autorizacao na plataforma. O callback OAuth e
+processado pelo backend; o cliente nao deve chamar o callback manualmente.
+
+## Listar contas
+
+```text
+GET /social/accounts
+```
+
+Retorna um paginator com ate 100 contas por pagina. Tokens de acesso, refresh tokens e o
+identificador interno do provedor nao sao expostos.
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/social/accounts?page=1" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Contas conectadas
+{
+  "current_page": 1,
+  "data": [
+    {
+      "id": "01ksocialaccount000000000001",
+      "platform": "instagram",
+      "account_name": "Minha marca",
+      "account_id": "17841400000000000",
+      "is_active": true
+    }
+  ],
+  "per_page": 100
+}
+```
+</ResponseExample>
+
+## Desconectar conta
+
+```text
+DELETE /social/accounts/{id}
+```
+
+<RequestExample>
+```bash cURL
+curl -X DELETE \
+  "https://api.realoficial.com.br/api/v1/social/accounts/SOCIAL_ACCOUNT_ID" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<Warning>
+Ao desconectar uma conta, publicacoes locais ainda em `scheduled` ou `processing`
+associadas a ela sao removidas e o status do post pai e recalculado.
+</Warning>
+
+<ResponseExample>
+```json 200 - Conta desconectada
+{
+  "message": "Conta desconectada com sucesso."
+}
+```
+</ResponseExample>
