@@ -1,29 +1,29 @@
 ---
 title: 'Preview do Short'
-description: 'Video de preview (MP4) de cada corte, servido pelo CDN publico'
+description: 'Vídeo de preview (MP4) de cada corte, servido pelo CDN público'
 ---
 
-## Visao geral
+## Visão geral
 
-Cada corte gerado tem um **video de preview em MP4** publicado no CDN. Ele e uma versao
-comprimida e de baixa resolucao do corte, usada para pre-visualizacao — nao e o arquivo
+Cada corte gerado tem um **vídeo de preview em MP4** publicado no CDN. Ele é uma versão
+comprimida e de baixa resolução do corte, usada para pré-visualização — não é o arquivo
 final de render.
 
-E o mesmo arquivo que o painel da Real Oficial usa para exibir os cards de cada corte na
+É o mesmo arquivo que o painel da Real Oficial usa para exibir os cards de cada corte na
 tela de projeto.
 
-## Padrao da URL
+## Padrão da URL
 
 ```
 https://cdn.realoficial.com.br/shorts/{projectId}/{shortId}_preview.mp4
 ```
 
-Onde `projectId` e `shortId` sao os mesmos ULIDs retornados por
+Onde `projectId` e `shortId` são os mesmos ULIDs retornados por
 [Listar Shorts](/api-reference/shorts/list).
 
 <Note>
-O CDN e **publico**: a URL nao exige `Authorization`, token ou assinatura. Nao use estas
-URLs para conteudo que precise ser privado.
+O CDN é **público**: a URL não exige `Authorization`, token ou assinatura. Não use estas
+URLs para conteúdo que precise ser privado.
 </Note>
 
 ## Verificando a disponibilidade
@@ -58,35 +58,35 @@ o trecho inicial do arquivo em vez do MP4 inteiro.
 
 <Tip>
 `preload="metadata"` faz o navegador buscar apenas os metadados e o primeiro frame, sem
-baixar o video completo. E o que permite usar o preview como thumbnail sem custo de banda
+baixar o vídeo completo. É o que permite usar o preview como thumbnail sem custo de banda
 relevante.
 </Tip>
 
 ## Thumbnail por corte
 
-Cada short tambem expoe um **JPG de thumbnail** proprio, no campo `preview_thumbnail_url`
+Cada short também expõe um **JPG de thumbnail** próprio, no campo `preview_thumbnail_url`
 retornado pelos endpoints de short:
 
 ```
 https://cdn.realoficial.com.br/shorts/{projectId}/{shortId}_thumbnail.jpg
 ```
 
-Se voce so precisa de uma imagem estatica por corte, prefira esse campo — e mais leve que
+Se você só precisa de uma imagem estática por corte, prefira esse campo — é mais leve que
 carregar metadados de um MP4.
 
 <Warning>
-Nao confunda com `thumbnail_url` no nivel do `project`: aquele e a capa do **video
-original**, igual para todos os cortes do mesmo projeto. O preview e o
-`preview_thumbnail_url` sao por corte, mostrando o frame real do trecho.
+Não confunda com `thumbnail_url` no nível do `project`: aquele é a capa do **vídeo
+original**, igual para todos os cortes do mesmo projeto. O preview é o
+`preview_thumbnail_url` são por corte, mostrando o frame real do trecho.
 </Warning>
 
 ## Disponibilidade
 
-O preview e gerado durante o processamento do corte, junto com o proprio short. Ele fica
-disponivel a partir do momento em que o corte aparece na listagem.
+O preview é gerado durante o processamento do corte, junto com o próprio short. Ele fica
+disponível a partir do momento em que o corte aparece na listagem.
 
 <Warning>
-Assim como os demais arquivos de um projeto, os previews seguem a politica de **retencao
+Assim como os demais arquivos de um projeto, os previews seguem a política de **retenção
 de 30 dias**. Depois disso a URL passa a responder `404`. Trate o erro no cliente em vez
 de assumir que o arquivo existe para sempre.
 </Warning>

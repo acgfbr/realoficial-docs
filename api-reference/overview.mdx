@@ -1,21 +1,21 @@
 ---
-title: 'Visao Geral'
-description: 'Referencia completa da API Real Oficial'
+title: 'Visão Geral'
+description: 'Referência completa da API Real Oficial'
 ---
 
 ## Base URL
 
-Todas as requisicoes devem ser feitas para:
+Todas as requisições devem ser feitas para:
 
 ```
 https://api.realoficial.com.br/api/v1
 ```
 
-## Headers Padrao
+## Headers Padrão
 
-Todas as requisicoes devem incluir os seguintes headers:
+Todas as requisições devem incluir os seguintes headers:
 
-| Header | Valor | Obrigatorio |
+| Header | Valor | Obrigatório |
 |--------|-------|-------------|
 | `Authorization` | `Bearer {token}` | Sim (exceto login) |
 | `Content-Type` | `application/json` | Sim para POST/PUT |
@@ -24,12 +24,12 @@ Todas as requisicoes devem incluir os seguintes headers:
 
 ## Contexto de Workspace
 
-Toda requisicao autenticada opera em exatamente um workspace:
+Toda requisição autenticada opera em exatamente um workspace:
 
-- sem `X-Workspace-Id`, ou com o header vazio, usa o espaco pessoal;
+- sem `X-Workspace-Id`, ou com o header vazio, usa o espaço pessoal;
 - com `X-Workspace-Id: {ulid}`, usa o workspace de equipe indicado;
-- o usuario autenticado precisa ser o dono ou um membro ativo desse workspace;
-- recursos de outro workspace nao sao procurados automaticamente.
+- o usuário autenticado precisa ser o dono ou um membro ativo desse workspace;
+- recursos de outro workspace não são procurados automaticamente.
 
 ```bash
 curl "https://api.realoficial.com.br/api/v1/projects" \
@@ -38,25 +38,25 @@ curl "https://api.realoficial.com.br/api/v1/projects" \
   -H "Accept: application/json"
 ```
 
-Use `GET /workspaces` para listar os espacos acessiveis e obter o ID correto. Consulte
-[Workspaces](/api-reference/workspaces) para isolamento de recursos, papeis, saldo e
-endpoints de gestao.
+Use `GET /workspaces` para listar os espaços acessíveis e obter o ID correto. Consulte
+[Workspaces](/api-reference/workspaces) para isolamento de recursos, papéis, saldo e
+endpoints de gestão.
 
 ## Formato de Resposta
 
-Envie `Accept: application/json` em todas as requisicoes. Sem esse header, erros de
-validacao ou autenticacao podem seguir o comportamento padrao do Laravel e retornar um
+Envie `Accept: application/json` em todas as requisições. Sem esse header, erros de
+validação ou autenticação podem seguir o comportamento padrão do Laravel e retornar um
 redirect HTTP em vez do JSON esperado.
 
-Os endpoints historicos da API possuem envelopes diferentes. Use o contrato descrito na
-pagina de cada endpoint; nao presuma que toda resposta usa obrigatoriamente `message` e
+Os endpoints históricos da API possuem envelopes diferentes. Use o contrato descrito na
+página de cada endpoint; não presuma que toda resposta usa obrigatoriamente `message` e
 `data`.
 
 ### Resposta de Sucesso
 
 ```json
 {
-  "message": "Operacao realizada com sucesso",
+  "message": "Operação realizada com sucesso",
   "data": { ... }
 }
 ```
@@ -65,30 +65,30 @@ pagina de cada endpoint; nao presuma que toda resposta usa obrigatoriamente `mes
 
 ```json
 {
-  "error": "Descricao do erro"
+  "error": "Descrição do erro"
 }
 ```
 
-## Codigos HTTP
+## Códigos HTTP
 
-| Codigo | Descricao |
+| Código | Descrição |
 |--------|-----------|
 | `200` | Sucesso |
 | `201` | Criado com sucesso |
-| `202` | Aceito (processamento assincrono) |
-| `208` | Recurso ja existente e reutilizado |
-| `400` | Requisicao invalida |
-| `401` | Nao autenticado |
-| `403` | Sem permissao |
-| `404` | Nao encontrado |
-| `422` | Erro de validacao ou regra de negocio |
-| `429` | Muitas requisicoes (rate limit) |
+| `202` | Aceito (processamento assíncrono) |
+| `208` | Recurso já existente e reutilizado |
+| `400` | Requisição inválida |
+| `401` | Não autenticado |
+| `403` | Sem permissão |
+| `404` | Não encontrado |
+| `422` | Erro de validação ou regra de negócio |
+| `429` | Muitas requisições (rate limit) |
 | `500` | Erro interno do servidor |
 
-## Paginacao
+## Paginação
 
-Endpoints que retornam listas podem utilizar paginacao. Os nomes dos campos, o limite
-maximo e o valor padrao variam por recurso; confira a pagina do endpoint.
+Endpoints que retornam listas podem utilizar paginação. Os nomes dos campos, o limite
+máximo e o valor padrão variam por recurso; confira a página do endpoint.
 
 ```json
 {
@@ -110,17 +110,17 @@ maximo e o valor padrao variam por recurso; confira a pagina do endpoint.
 }
 ```
 
-### Parametros de Paginacao
+### Parâmetros de Paginação
 
-| Parametro | Tipo | Descricao | Padrao |
+| Parâmetro | Tipo | Descrição | Padrão |
 |-----------|------|-----------|--------|
-| `page` | integer | Numero da pagina | 1 |
-| `per_page` ou `limit` | integer | Itens por pagina; limite depende do endpoint | Consulte o endpoint |
+| `page` | integer | Número da página | 1 |
+| `per_page` ou `limit` | integer | Itens por página; limite depende do endpoint | Consulte o endpoint |
 
-## Endpoints Disponiveis
+## Endpoints Disponíveis
 
 <CardGroup cols={2}>
-  <Card title="Autenticacao" icon="key" href="/api-reference/auth/login">
+  <Card title="Autenticação" icon="key" href="/api-reference/auth/login">
     - POST /login
     - POST /social/callback/email
     - GET /user
@@ -151,13 +151,13 @@ maximo e o valor padrao variam por recurso; confira a pagina do endpoint.
     - GET /lives/public
     - POST /lives/shorts/{id}/copy
   </Card>
-  <Card title="Publicacao" icon="share-nodes" href="/api-reference/social-posts">
+  <Card title="Publicação" icon="share-nodes" href="/api-reference/social-posts">
     - POST /social/connect
     - GET /social/accounts
     - POST /social/posts
     - GET /launchers
   </Card>
-  <Card title="Conteudo e Analytics" icon="chart-line" href="/api-reference/analytics">
+  <Card title="Conteúdo e Analytics" icon="chart-line" href="/api-reference/analytics">
     - GET /library/items
     - GET /dashboard/analytics/overview
     - GET /brand-kits

@@ -1,7 +1,7 @@
 ---
 title: 'Renderizar Short'
 api: 'POST /shorts/{projectId}/{shortId}/render'
-description: 'Inicie a renderizacao de um corte para gerar o video final'
+description: 'Inicie a renderização de um corte para gerar o vídeo final'
 ---
 
 ## Endpoint
@@ -11,7 +11,7 @@ POST https://api.realoficial.com.br/api/v1/shorts/{projectId}/{shortId}/render
 ```
 
 <Note>
-Este endpoint requer autenticacao via Bearer Token.
+Este endpoint requer autenticação via Bearer Token.
 </Note>
 
 ## Path Parameters
@@ -27,30 +27,30 @@ Este endpoint requer autenticacao via Bearer Token.
 ## Rate Limits
 
 <Warning>
-**Limite de renderizacao por hora:**
+**Limite de renderização por hora:**
 
-Todos os usuarios e planos podem solicitar ate **999999 cortes por hora**.
+Todos os usuários e planos podem solicitar até **999999 cortes por hora**.
 
-O endpoint nao rejeita novos pedidos com base no tamanho atual da fila de processamento. As protecoes contra render duplicado ou ja em andamento continuam ativas.
+O endpoint não rejeita novos pedidos com base no tamanho atual da fila de processamento. As proteções contra render duplicado ou já em andamento continuam ativas.
 
-Usuarios que nunca fizeram deposito terao **marca d'agua** nos videos.
+Usuários que nunca fizeram depósito terão **marca d'água** nos vídeos.
 </Warning>
 
 ## Resposta de Sucesso
 
 <ResponseField name="message" type="string">
-  Mensagem de confirmacao
+  Mensagem de confirmação
 </ResponseField>
 
 <ResponseField name="data" type="object">
-  Dados da renderizacao iniciada
+  Dados da renderização iniciada
   <Expandable title="Propriedades">
     <ResponseField name="render_id" type="string">
-      ID unico da renderizacao (ULID)
+      ID único da renderização (ULID)
     </ResponseField>
     <ResponseField name="id" type="string">
-      Alias de compatibilidade para `render_id`. Novas integracoes devem preferir
-      `render_id` como nome canonico.
+      Alias de compatibilidade para `render_id`. Novas integrações devem preferir
+      `render_id` como nome canônico.
     </ResponseField>
     <ResponseField name="status" type="string">
       Status inicial: `pending`
@@ -83,7 +83,7 @@ const response = await fetch(
 );
 
 const data = await response.json();
-console.log(data.data.render_id); // ID da renderizacao
+console.log(data.data.render_id); // ID da renderização
 ```
 
 ```python Python
@@ -130,7 +130,7 @@ $data = json_decode($response, true);
 </RequestExample>
 
 <ResponseExample>
-```json 200 - Renderizacao Iniciada
+```json 200 - Renderização Iniciada
 {
   "message": "Renderização iniciada com sucesso, você pode acompanhar o progresso no menu \"Meus Vídeos\".",
   "data": {
@@ -141,7 +141,7 @@ $data = json_decode($response, true);
 }
 ```
 
-```json 208 - Renderizacao Ja Existente
+```json 208 - Renderização Já Existente
 {
   "message": "Renderização já feita para este corte.",
   "data": {
@@ -158,22 +158,22 @@ $data = json_decode($response, true);
 }
 ```
 
-```json 400 - Renderizacao em Progresso
+```json 400 - Renderização em Progresso
 {
   "error": "Renderização já está em progresso para este corte. Acompanhe o progresso no menu \"Meus Vídeos\"."
 }
 ```
 
-```json 404 - Short Nao Encontrado
+```json 404 - Short Não Encontrado
 {
   "error": "Short não encontrado."
 }
 ```
 </ResponseExample>
 
-## Renderizacao em Lote
+## Renderização em Lote
 
-Para renderizar multiplos shorts de uma vez:
+Para renderizar múltiplos shorts de uma vez:
 
 ```
 POST https://api.realoficial.com.br/api/v1/renders/bulk
@@ -209,30 +209,30 @@ curl -X POST "https://api.realoficial.com.br/api/v1/renders/bulk" \
 </ResponseExample>
 
 <Warning>
-**Requisitos para renderizacao em lote:**
-- Usuario deve ter um plano ativo
-- O limite de 999999 cortes por hora e o mesmo para todos os planos
-- O pedido nao e rejeitado com base no tamanho atual da fila de processamento
+**Requisitos para renderização em lote:**
+- Usuário deve ter um plano ativo
+- O limite de 999999 cortes por hora é o mesmo para todos os planos
+- O pedido não é rejeitado com base no tamanho atual da fila de processamento
 </Warning>
 
-## Status da Renderizacao
+## Status da Renderização
 
-| Status | Descricao |
+| Status | Descrição |
 |--------|-----------|
 | `pending` | Na fila de processamento |
 | `processing` | Sendo renderizado |
-| `done` | Concluido - video disponivel |
-| `error` | Erro durante renderizacao |
+| `done` | Concluído - vídeo disponível |
+| `error` | Erro durante renderização |
 
 ## Tempo de Processamento
 
 <Info>
-O tempo medio de renderizacao e de **30 segundos a 2 minutos** por corte, dependendo da duracao e complexidade.
+O tempo médio de renderização é de **30 segundos a 2 minutos** por corte, dependendo da duração e complexidade.
 </Info>
 
 ## Polling de Status
 
-Apos iniciar a renderizacao, consulte o endpoint `GET /renders` para verificar quando o video esta pronto:
+Após iniciar a renderização, consulte o endpoint `GET /renders` para verificar quando o vídeo está pronto:
 
 ```javascript
 async function waitForRender(renderId, maxAttempts = 30) {
@@ -251,6 +251,6 @@ async function waitForRender(renderId, maxAttempts = 30) {
     await new Promise(resolve => setTimeout(resolve, 5000)); // 5 segundos
   }
 
-  throw new Error('Timeout aguardando renderizacao');
+  throw new Error('Timeout aguardando renderização');
 }
 ```

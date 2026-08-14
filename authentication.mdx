@@ -1,11 +1,11 @@
 ---
-title: 'Autenticacao'
-description: 'Aprenda como autenticar suas requisicoes na API'
+title: 'Autenticação'
+description: 'Aprenda como autenticar suas requisições na API'
 ---
 
-## Metodo de Autenticacao
+## Método de Autenticação
 
-A API do Real Oficial utiliza **Bearer Token** para autenticacao. Apos fazer login, voce recebera um token que deve ser enviado em todas as requisicoes subsequentes.
+A API do Real Oficial utiliza **Bearer Token** para autenticação. Após fazer login, você receberá um token que deve ser enviado em todas as requisições subsequentes.
 
 ## Obtendo seu Token
 
@@ -14,37 +14,37 @@ A API do Real Oficial utiliza **Bearer Token** para autenticacao. Apos fazer log
     Registre-se em [app.realoficial.com.br](https://app.realoficial.com.br).
   </Step>
   <Step title="Obtenha seu token">
-    Use o endpoint `/login` para obter seu token ou acesse **Configuracoes > Seguranca** no dashboard.
+    Use o endpoint `/login` para obter seu token ou acesse **Configurações > Segurança** no dashboard.
   </Step>
   <Step title="Use o token">
-    Inclua o token no header `Authorization` de todas as requisicoes.
+    Inclua o token no header `Authorization` de todas as requisições.
   </Step>
 </Steps>
 
 ## Formato do Header
 
-Todas as requisicoes autenticadas devem incluir o header `Authorization`:
+Todas as requisições autenticadas devem incluir o header `Authorization`:
 
 ```bash
 Authorization: Bearer SEU_TOKEN_AQUI
 ```
 
-## Header `Accept` (obrigatorio)
+## Header `Accept` (obrigatório)
 
 <Warning>
-Envie sempre `Accept: application/json`. Sem esse header, requisicoes que falham na
-validacao **nao retornam JSON** — elas respondem com um **redirect `302`**, que e o
-comportamento padrao do framework para clientes que nao pedem JSON explicitamente.
+Envie sempre `Accept: application/json`. Sem esse header, requisições que falham na
+validação **não retornam JSON** — elas respondem com um **redirect `302`**, que é o
+comportamento padrão do framework para clientes que não pedem JSON explicitamente.
 </Warning>
 
 ```bash
 Accept: application/json
 ```
 
-O sintoma e enganoso porque nem todo erro se comporta igual: falhas de autenticacao
-(`401`) retornam JSON mesmo sem o header, enquanto erros de validacao viram `302`. Um
-SDK que esqueca o `Accept` funciona ate a primeira requisicao invalida e entao recebe um
-redirect sem corpo util para parsear.
+O sintoma é enganoso porque nem todo erro se comporta igual: falhas de autenticação
+(`401`) retornam JSON mesmo sem o header, enquanto erros de validação viram `302`. Um
+SDK que esqueça o `Accept` funciona até a primeira requisição inválida e então recebe um
+redirect sem corpo útil para parsear.
 
 <CodeGroup>
 ```bash Sem o header (incorreto)
@@ -68,12 +68,12 @@ curl -X POST "https://api.realoficial.com.br/api/v1/createShorts" \
 </CodeGroup>
 
 <Note>
-`Content-Type: application/json` descreve o **corpo que voce envia** e e necessario em
-requisicoes com body (`POST`, `PUT`). `Accept: application/json` descreve a **resposta que
-voce espera** e deve ser enviado em todas as requisicoes, inclusive `GET`.
+`Content-Type: application/json` descreve o **corpo que você envia** e é necessário em
+requisições com body (`POST`, `PUT`). `Accept: application/json` descreve a **resposta que
+você espera** e deve ser enviado em todas as requisições, inclusive `GET`.
 </Note>
 
-## Exemplo de Requisicao
+## Exemplo de Requisição
 
 <CodeGroup>
 ```bash cURL
@@ -131,39 +131,39 @@ $data = json_decode($response, true);
 ```
 </CodeGroup>
 
-## Tokens e Seguranca
+## Tokens e Segurança
 
 <Info>
-  **Seu token e permanente.** Uma vez gerado, seu token nao expira e permanece o mesmo. Guarde-o em um local seguro.
+  **Seu token é permanente.** Uma vez gerado, seu token não expira e permanece o mesmo. Guarde-o em um local seguro.
 </Info>
 
 <Warning>
-  **Mantenha seu token seguro!** Nunca compartilhe ou exponha seu token em codigo publico, repositorios Git ou logs.
+  **Mantenha seu token seguro!** Nunca compartilhe ou exponha seu token em código público, repositórios Git ou logs.
 </Warning>
 
-### Boas praticas
+### Boas práticas
 
 <CardGroup cols={2}>
-  <Card title="Variaveis de ambiente" icon="lock">
-    Armazene tokens em variaveis de ambiente, nunca no codigo
+  <Card title="Variáveis de ambiente" icon="lock">
+    Armazene tokens em variáveis de ambiente, nunca no código
   </Card>
   <Card title="HTTPS apenas" icon="shield">
-    Sempre use HTTPS para todas as requisicoes
+    Sempre use HTTPS para todas as requisições
   </Card>
   <Card title="Token fixo" icon="lock-keyhole">
-    Seu token e permanente e nao expira, guarde-o com seguranca
+    Seu token é permanente e não expira, guarde-o com segurança
   </Card>
   <Card title="Monitoramento" icon="eye">
-    Monitore o uso da sua conta para detectar acessos nao autorizados
+    Monitore o uso da sua conta para detectar acessos não autorizados
   </Card>
 </CardGroup>
 
-## Codigos de Erro de Autenticacao
+## Códigos de Erro de Autenticação
 
-| Codigo | Descricao |
+| Código | Descrição |
 |--------|-----------|
-| `401` | Token invalido ou ausente |
-| `403` | Token valido mas sem permissao para o recurso |
+| `401` | Token inválido ou ausente |
+| `403` | Token válido mas sem permissão para o recurso |
 
 ### Exemplo de resposta de erro
 
@@ -173,7 +173,7 @@ $data = json_decode($response, true);
 }
 ```
 
-## Proximos passos
+## Próximos passos
 
 <CardGroup cols={2}>
   <Card
@@ -181,7 +181,7 @@ $data = json_decode($response, true);
     icon="right-to-bracket"
     href="/api-reference/auth/login"
   >
-    Faca login e obtenha seu token
+    Faça login e obtenha seu token
   </Card>
   <Card
     title="Criar Projeto"

@@ -3,7 +3,7 @@ title: 'Contas Sociais'
 description: 'Conecte, liste e desconecte contas de redes sociais'
 ---
 
-As contas sociais pertencem ao workspace ativo e sao usadas pelas APIs de publicacao e
+As contas sociais pertencem ao workspace ativo e são usadas pelas APIs de publicação e
 Launchers.
 
 ## Plataformas suportadas
@@ -11,7 +11,7 @@ Launchers.
 `youtube`, `tiktok`, `instagram`, `facebook`, `twitter`, `linkedin`, `threads`,
 `reddit`, `pinterest` e `bluesky`.
 
-## Iniciar conexao OAuth
+## Iniciar conexão OAuth
 
 ```text
 POST /social/connect
@@ -39,7 +39,7 @@ curl -X POST "https://api.realoficial.com.br/api/v1/social/connect" \
 }
 ```
 
-```json 422 - Plataforma invalida
+```json 422 - Plataforma inválida
 {
   "error": "Plataforma inválida.",
   "message": "The selected platform is invalid.",
@@ -51,8 +51,8 @@ curl -X POST "https://api.realoficial.com.br/api/v1/social/connect" \
 ```
 </ResponseExample>
 
-Abra `oauth_url` no navegador e conclua a autorizacao na plataforma. O callback OAuth e
-processado pelo backend; o cliente nao deve chamar o callback manualmente.
+Abra `oauth_url` no navegador e conclua a autorização na plataforma. O callback OAuth é
+processado pelo backend; o cliente não deve chamar o callback manualmente.
 
 ## Listar contas
 
@@ -60,8 +60,8 @@ processado pelo backend; o cliente nao deve chamar o callback manualmente.
 GET /social/accounts
 ```
 
-Retorna um paginator com ate 100 contas por pagina. Tokens de acesso, refresh tokens e o
-identificador interno do provedor nao sao expostos.
+Retorna um paginator com até 100 contas por página. Tokens de acesso, refresh tokens e o
+identificador interno do provedor não são expostos.
 
 <RequestExample>
 ```bash cURL
@@ -105,8 +105,8 @@ curl -X DELETE \
 </RequestExample>
 
 <Warning>
-Ao desconectar uma conta, publicacoes locais ainda em `scheduled` ou `processing`
-associadas a ela sao removidas e o status do post pai e recalculado.
+Ao desconectar uma conta, publicações locais ainda em `scheduled` ou `processing`
+associadas a ela são removidas e o status do post pai é recalculado.
 </Warning>
 
 <ResponseExample>

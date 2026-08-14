@@ -28,7 +28,7 @@
         ]
       },
       {
-        "group": "Autenticacao",
+        "group": "Autenticação",
         "pages": [
           "api-reference/auth/login",
           "api-reference/auth/user",
@@ -97,7 +97,7 @@
         ]
       },
       {
-        "group": "Social - Publicacoes",
+        "group": "Social - Publicações",
         "pages": [
           "api-reference/social-posts/list",
           "api-reference/social-posts/create",
@@ -126,7 +126,7 @@
         ]
       },
       {
-        "group": "Conteudo - Brand Kits",
+        "group": "Conteúdo - Brand Kits",
         "pages": [
           "api-reference/brand-kits/list",
           "api-reference/brand-kits/create",
@@ -137,7 +137,7 @@
         ]
       },
       {
-        "group": "Conteudo - Templates",
+        "group": "Conteúdo - Templates",
         "pages": [
           "api-reference/templates/mine",
           "api-reference/templates/public",
@@ -152,7 +152,7 @@
         ]
       },
       {
-        "group": "Conteudo - Biblioteca",
+        "group": "Conteúdo - Biblioteca",
         "pages": [
           "api-reference/library/folders-list",
           "api-reference/library/folders-create",

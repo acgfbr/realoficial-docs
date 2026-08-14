@@ -1,14 +1,14 @@
 ---
 title: 'Biblioteca'
-description: 'Organize arquivos e prompts em pastas privadas ou publicas'
+description: 'Organize arquivos e prompts em pastas privadas ou públicas'
 ---
 
-A Biblioteca armazena metadados de arquivos e prompts no workspace ativo. Operacoes de
-escrita exigem assinatura ativa e permissao para gerenciar projetos.
+A Biblioteca armazena metadados de arquivos e prompts no workspace ativo. Operações de
+escrita exigem assinatura ativa e permissão para gerenciar projetos.
 
 ## Endpoints do workspace
 
-| Metodo | Endpoint | Descricao |
+| Método | Endpoint | Descrição |
 |---|---|---|
 | `GET` | `/library/folders` | Lista pastas |
 | `POST` | `/library/folders` | Cria pasta |
@@ -24,7 +24,7 @@ escrita exigem assinatura ativa e permissao para gerenciar projetos.
 
 ## Pastas
 
-Pastas aceitam `name` e `visibility`, que pode ser `private` ou `public`. O padrao e
+Pastas aceitam `name` e `visibility`, que pode ser `private` ou `public`. O padrão é
 `private`.
 
 ```bash
@@ -35,12 +35,12 @@ curl -X POST "https://api.realoficial.com.br/api/v1/library/folders" \
   -d '{"name":"Prompts de campanha","visibility":"private"}'
 ```
 
-Ao excluir uma pasta, seus itens nao sao excluidos: eles sao movidos para a raiz da
+Ao excluir uma pasta, seus itens não são excluídos: eles são movidos para a raiz da
 Biblioteca (`folder_id: null`).
 
 ## Itens
 
-Os tipos aceitos sao `file` e `prompt`.
+Os tipos aceitos são `file` e `prompt`.
 
 Campos comuns:
 
@@ -48,14 +48,14 @@ Campos comuns:
 |---|---|---|
 | `folder_id` | string ou null | Pasta do mesmo workspace |
 | `type` | string | `file` ou `prompt` |
-| `name` | string | Obrigatorio, maximo 255 caracteres |
-| `description` | string | Opcional, maximo 5000 caracteres |
-| `visibility` | string | `private` ou `public`; padrao `private` |
-| `data` | object | Dados especificos do tipo |
+| `name` | string | Obrigatório, máximo 255 caracteres |
+| `description` | string | Opcional, máximo 5000 caracteres |
+| `visibility` | string | `private` ou `public`; padrão `private` |
+| `data` | object | Dados específicos do tipo |
 
 ### Item do tipo prompt
 
-`data.content` e obrigatorio. `data.tags` e opcional.
+`data.content` é obrigatório. `data.tags` é opcional.
 
 ```bash
 curl -X POST "https://api.realoficial.com.br/api/v1/library/items" \
@@ -65,22 +65,22 @@ curl -X POST "https://api.realoficial.com.br/api/v1/library/items" \
   -d '{
     "folder_id": "FOLDER_ID",
     "type": "prompt",
-    "name": "Cortes sobre saude",
+    "name": "Cortes sobre saúde",
     "data": {
-      "content": "Priorize falas completas sobre saude publica.",
-      "tags": ["saude", "campanha"]
+      "content": "Priorize falas completas sobre saúde pública.",
+      "tags": ["saúde", "campanha"]
     }
   }'
 ```
 
 ### Item do tipo file
 
-O objeto `data` exige `filename`, `mime_type` e `size`. Tambem aceita
+O objeto `data` exige `filename`, `mime_type` e `size`. Também aceita
 `storage_provider` e `url`; quando o provider for omitido, o backend grava `r2`.
 
 <Warning>
-`POST /library/items` registra os metadados do arquivo, mas nao recebe upload binario.
-Informe uma URL de arquivo que ja tenha sido enviado pelo fluxo de upload da aplicacao.
+`POST /library/items` registra os metadados do arquivo, mas não recebe upload binário.
+Informe uma URL de arquivo que já tenha sido enviado pelo fluxo de upload da aplicação.
 Existe um limite de 100 novos itens `file` por dia e por workspace.
 </Warning>
 
@@ -91,18 +91,17 @@ Existe um limite de 100 novos itens `file` por dia e por workspace.
 
 `GET /library/folders/{id}/items` aceita o filtro opcional `type`.
 
-## Catalogo publico
+## Catálogo público
 
-| Metodo | Endpoint | Descricao |
+| Método | Endpoint | Descrição |
 |---|---|---|
-| `GET` | `/library/public/folders` | Pastas publicas aprovadas |
-| `GET` | `/library/public/folders/{id}/items` | Itens publicos de uma pasta |
-| `GET` | `/library/public/items` | Itens publicos aprovados |
+| `GET` | `/library/public/folders` | Pastas públicas aprovadas |
+| `GET` | `/library/public/folders/{id}/items` | Itens públicos de uma pasta |
+| `GET` | `/library/public/items` | Itens públicos aprovados |
 
-Esses endpoints continuam exigindo Bearer token. `public` significa visivel a outros
-usuarios autenticados. Apenas registros com `visibility: public` e `is_approved: true`
-entram no catalogo.
+Esses endpoints continuam exigindo Bearer token. `public` significa visível a outros
+usuários autenticados. Apenas registros com `visibility: public` e `is_approved: true`
+entram no catálogo.
 
-As listagens publicas aceitam `limit` (padrao 30, maximo 100), `page`, `type` e, na
+As listagens públicas aceitam `limit` (padrão 30, máximo 100), `page`, `type` e, na
 listagem geral de itens, `folder_id`.
-

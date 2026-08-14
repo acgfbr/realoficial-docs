@@ -1,7 +1,7 @@
 ---
 title: 'Renderizar em Lote'
 api: 'POST /renders/bulk'
-description: 'Renderize multiplos shorts de uma vez'
+description: 'Renderize múltiplos shorts de uma vez'
 ---
 
 ## Endpoint
@@ -11,7 +11,7 @@ POST https://api.realoficial.com.br/api/v1/renders/bulk
 ```
 
 <Note>
-Este endpoint requer autenticacao via Bearer Token.
+Este endpoint requer autenticação via Bearer Token.
 </Note>
 
 ## Body Parameters
@@ -23,11 +23,11 @@ Este endpoint requer autenticacao via Bearer Token.
 ## Requisitos
 
 <Warning>
-**Para usar renderizacao em lote:**
-- Usuario deve ter um plano ativo
-- O limite e de 999999 cortes por hora para todos os planos
-- O pedido nao e rejeitado com base no tamanho atual da fila de processamento
-- Usuarios que nunca fizeram deposito terao **marca d'agua** nos videos
+**Para usar renderização em lote:**
+- Usuário deve ter um plano ativo
+- O limite é de 999999 cortes por hora para todos os planos
+- O pedido não é rejeitado com base no tamanho atual da fila de processamento
+- Usuários que nunca fizeram depósito terão **marca d'água** nos vídeos
 </Warning>
 
 <RequestExample>
@@ -122,13 +122,13 @@ $data = json_decode($response, true);
 }
 ```
 
-```json 400 - Limite Horario Atingido
+```json 400 - Limite Horário Atingido
 {
   "error": "Você já gerou 999999 cortes na última hora. Seu plano permite 999999 cortes por hora. Aguarde alguns minutos e tente novamente."
 }
 ```
 
-```json 400 - Plano Ativo Necessario
+```json 400 - Plano Ativo Necessário
 {
   "error": "Para gerar vídeos em massa, é necessário um plano ativo."
 }
@@ -137,7 +137,7 @@ $data = json_decode($response, true);
 
 ## Acompanhando o Progresso
 
-Apos iniciar a renderizacao em lote, acompanhe o progresso consultando o endpoint `GET /renders`:
+Após iniciar a renderização em lote, acompanhe o progresso consultando o endpoint `GET /renders`:
 
 ```javascript
 async function checkBulkRenders() {
@@ -162,5 +162,5 @@ async function checkBulkRenders() {
 ```
 
 <Info>
-O tempo medio de renderizacao e de **30 segundos a 2 minutos** por corte. Em lote, os cortes sao processados em paralelo quando possivel.
+O tempo médio de renderização é de **30 segundos a 2 minutos** por corte. Em lote, os cortes são processados em paralelo quando possível.
 </Info>

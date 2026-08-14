@@ -1,7 +1,7 @@
 ---
 title: 'Reprompt (Regerar Cortes)'
 api: 'POST /projects/{projectId}/reprompt'
-description: 'Gere novos cortes de um video ja processado, guiando a IA com um prompt'
+description: 'Gere novos cortes de um vídeo já processado, guiando a IA com um prompt'
 ---
 
 ## Endpoint
@@ -11,16 +11,16 @@ POST https://api.realoficial.com.br/api/v1/projects/{projectId}/reprompt
 ```
 
 <Note>
-Este endpoint requer autenticacao via Bearer Token e **assinatura ativa**.
+Este endpoint requer autenticação via Bearer Token e **assinatura ativa**.
 </Note>
 
-O reprompt reaproveita a URL e as configuracoes de um projeto ja existente para gerar
-cortes novos, guiados por uma instrucao em texto. E util quando os cortes automaticos nao
-capturaram o angulo que voce queria.
+O reprompt reaproveita a URL e as configurações de um projeto já existente para gerar
+cortes novos, guiados por uma instrução em texto. É útil quando os cortes automáticos não
+capturaram o ângulo que você queria.
 
 <Warning>
-O reprompt **cria um projeto novo** — ele nao altera nem adiciona cortes ao projeto
-original. O projeto retornado tem `source_project_id` apontando para o original, e comeca
+O reprompt **cria um projeto novo** — ele não altera nem adiciona cortes ao projeto
+original. O projeto retornado tem `source_project_id` apontando para o original, e começa
 do zero no fluxo de processamento.
 </Warning>
 
@@ -33,13 +33,13 @@ do zero no fluxo de processamento.
 ## Body Parameters
 
 <ParamField body="prompt" type="string" required>
-  Instrucao para a IA sobre quais momentos priorizar. Maximo 2000 caracteres.
+  Instrução para a IA sobre quais momentos priorizar. Máximo 2000 caracteres.
 
-  Exemplo: `"foque em momentos sobre saude publica e SUS"`
+  Exemplo: `"foque em momentos sobre saúde pública e SUS"`
 </ParamField>
 
 <ParamField body="startTime" type="number" required>
-  Inicio do intervalo a analisar, em segundos.
+  Início do intervalo a analisar, em segundos.
 </ParamField>
 
 <ParamField body="endTime" type="number" required>
@@ -47,7 +47,7 @@ do zero no fluxo de processamento.
 </ParamField>
 
 <ParamField body="clipDuration" type="string">
-  Duracao alvo dos cortes. Herda do projeto original se omitido.
+  Duração alvo dos cortes. Herda do projeto original se omitido.
 </ParamField>
 
 <ParamField body="aspect_ratio" type="string">
@@ -57,7 +57,7 @@ do zero no fluxo de processamento.
 </ParamField>
 
 <ParamField body="layout" type="string">
-  Layout do video: `auto`, `single`, `center`, `split`, `react` ou `pf`.
+  Layout do vídeo: `auto`, `single`, `center`, `split`, `react` ou `pf`.
   Herda do projeto original se omitido.
 </ParamField>
 
@@ -73,37 +73,37 @@ do zero no fluxo de processamento.
   Gera os cortes sem legendas.
 </ParamField>
 
-## Validacoes
+## Validações
 
 | Regra | Limite |
 |-------|--------|
-| Intervalo minimo (`endTime - startTime`) | 5 minutos (300 segundos) |
+| Intervalo mínimo (`endTime - startTime`) | 5 minutos (300 segundos) |
 | Tamanho do `prompt` | 2000 caracteres |
 | Assinatura | Ativa, com cota de reprompt maior que zero |
 
-## Custo e cota diaria
+## Custo e cota diária
 
 Cada plano tem uma cota de reprompts **gratuitos por dia**. Enquanto houver cota, o
-reprompt nao consome creditos.
+reprompt não consome créditos.
 
-| Plano | Reprompts gratis/dia |
+| Plano | Reprompts grátis/dia |
 |-------|----------------------|
 | Viral | 3 |
 | Criador | 2 |
 | Lite | 1 |
 | Sem assinatura ativa | 0 (endpoint retorna `403`) |
 
-Esgotada a cota do dia, o reprompt passa a ser cobrado em creditos:
+Esgotada a cota do dia, o reprompt passa a ser cobrado em créditos:
 
 ```
 custo = ceil(ceil((endTime - startTime) / 60) * 0.5)
 ```
 
-Ou seja, meio credito por minuto do intervalo, arredondado para cima. Um intervalo de 15
-minutos custa 8 creditos.
+Ou seja, meio crédito por minuto do intervalo, arredondado para cima. Um intervalo de 15
+minutos custa 8 créditos.
 
 Acompanhe o consumo pelos campos de reprompt retornados em
-[Dados do Usuario](/api-reference/auth/user).
+[Dados do Usuário](/api-reference/auth/user).
 
 ## Resposta de Sucesso
 
@@ -113,16 +113,16 @@ Acompanhe o consumo pelos campos de reprompt retornados em
 </ResponseField>
 
 <ResponseField name="is_free" type="boolean">
-  `true` se este reprompt usou a cota diaria gratuita, `false` se foi cobrado em creditos.
+  `true` se este reprompt usou a cota diária gratuita, `false` se foi cobrado em créditos.
 </ResponseField>
 
 <ResponseField name="credits_charged" type="integer">
-  Creditos debitados. `0` quando `is_free` e `true`.
+  Créditos debitados. `0` quando `is_free` é `true`.
 </ResponseField>
 
 <Note>
-A resposta usa o envelope `project`, e nao `data` como o `createShorts`. Os campos de cota
-(`reprompts_today`, `reprompts_free_remaining`) **nao** sao retornados aqui — consulte
+A resposta usa o envelope `project`, e não `data` como o `createShorts`. Os campos de cota
+(`reprompts_today`, `reprompts_free_remaining`) **não** são retornados aqui — consulte
 `/user` para o estado atualizado.
 </Note>
 
@@ -202,7 +202,7 @@ data = response.json()
 }
 ```
 
-```json 422 - Validacao
+```json 422 - Validação
 {
   "message": "The end time field is required.",
   "errors": {
@@ -211,13 +211,13 @@ data = response.json()
 }
 ```
 
-```json 400 - Intervalo Invalido
+```json 400 - Intervalo Inválido
 {
   "error": "Selecione pelo menos 5 minutos de vídeo."
 }
 ```
 
-```json 400 - Creditos Insuficientes
+```json 400 - Créditos Insuficientes
 {
   "error": "Créditos insuficientes para este reprompt."
 }
@@ -229,7 +229,7 @@ data = response.json()
 }
 ```
 
-```json 404 - Projeto Nao Encontrado
+```json 404 - Projeto Não Encontrado
 {
   "error": "Projeto não encontrado."
 }
@@ -244,7 +244,7 @@ data = response.json()
 
 ## Acompanhando o resultado
 
-O projeto retornado comeca com `status: null` e segue o fluxo normal de processamento.
+O projeto retornado começa com `status: null` e segue o fluxo normal de processamento.
 Para saber quando os cortes ficam prontos, use
 [Listar Shorts](/api-reference/shorts/list) no ID do **novo** projeto, ou configure um
 `webhook_url` em [Atualizar Perfil](/api-reference/auth/profile) para receber o evento

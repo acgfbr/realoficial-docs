@@ -11,87 +11,87 @@ POST https://api.realoficial.com.br/api/v1/profile
 ```
 
 <Note>
-Este endpoint requer autenticacao via Bearer Token.
+Este endpoint requer autenticação via Bearer Token.
 </Note>
 
 <Warning>
-Este endpoint aceita apenas `POST`. Uma requisicao `GET` retorna `405 Method Not Allowed`
-— para **ler** os dados do perfil, use [Dados do Usuario](/api-reference/auth/user).
+Este endpoint aceita apenas `POST`. Uma requisição `GET` retorna `405 Method Not Allowed`
+— para **ler** os dados do perfil, use [Dados do Usuário](/api-reference/auth/user).
 </Warning>
 
-Todos os campos sao opcionais: envie apenas os que quiser alterar. Campos ausentes do body
+Todos os campos são opcionais: envie apenas os que quiser alterar. Campos ausentes do body
 permanecem inalterados.
 
 ## Body Parameters
 
 <ParamField body="name" type="string">
-  Nome do usuario. Maximo 255 caracteres.
+  Nome do usuário. Máximo 255 caracteres.
 </ParamField>
 
 <ParamField body="nickname" type="string">
-  Apelido/nome de exibicao. Maximo 255 caracteres.
+  Apelido/nome de exibição. Máximo 255 caracteres.
 </ParamField>
 
 <ParamField body="email" type="string">
-  Email do usuario. Precisa ser unico e ter formato valido. Maximo 255 caracteres.
+  Email do usuário. Precisa ser único e ter formato válido. Máximo 255 caracteres.
 </ParamField>
 
 <ParamField body="phone" type="string">
-  Telefone. Maximo 20 caracteres.
+  Telefone. Máximo 20 caracteres.
 </ParamField>
 
 <ParamField body="tax_id" type="string">
-  CPF ou CNPJ. Maximo 20 caracteres.
+  CPF ou CNPJ. Máximo 20 caracteres.
 </ParamField>
 
 <ParamField body="pix_key" type="string">
-  Chave PIX usada para recebimentos. Maximo 255 caracteres.
+  Chave PIX usada para recebimentos. Máximo 255 caracteres.
 </ParamField>
 
 <ParamField body="ignore_notifications" type="boolean">
-  Desliga o envio de notificacoes por email.
+  Desliga o envio de notificações por email.
 </ParamField>
 
 <ParamField body="webhook_url" type="string">
-  URL que recebera os eventos de webhook. Envie `null` ou string vazia para desativar.
+  URL que receberá os eventos de webhook. Envie `null` ou string vazia para desativar.
 
-  Veja [Webhooks](#webhooks) abaixo para as restricoes de URL.
+  Veja [Webhooks](#webhooks) abaixo para as restrições de URL.
 </ParamField>
 
 <Note>
-Campos nao listados aqui — como `balance`, `token`, `read_only_token` ou os campos de cota
-— **nao sao editaveis** por este endpoint, mesmo aparecendo no `GET /user`. Enviar esses
-campos nao produz erro; eles simplesmente sao ignorados.
+Campos não listados aqui — como `balance`, `token`, `read_only_token` ou os campos de cota
+— **não são editáveis** por este endpoint, mesmo aparecendo no `GET /user`. Enviar esses
+campos não produz erro; eles simplesmente são ignorados.
 </Note>
 
 ## Webhooks
 
 Ao definir `webhook_url`, a Real Oficial passa a enviar `POST` com JSON para essa URL
-quando um projeto fica pronto (`project.ready`) ou uma renderizacao termina
+quando um projeto fica pronto (`project.ready`) ou uma renderização termina
 (`render.completed`).
 
-A URL passa por validacao de seguranca e precisa:
+A URL passa por validação de segurança e precisa:
 
 - usar esquema `http` ou `https`;
-- apontar para um host publico resolvivel.
+- apontar para um host público resolvível.
 
-URLs apontando para enderecos internos/privados sao rejeitadas com `422`.
+URLs apontando para endereços internos/privados são rejeitadas com `422`.
 
 <Warning>
-Trate a URL de webhook como um **segredo**. Ela e o unico fator que autentica as
-notificacoes recebidas — quem souber a URL consegue enviar payloads forjados para o seu
-endpoint. Prefira uma URL longa e com componente aleatorio, e valide o conteudo recebido
+Trate a URL de webhook como um **segredo**. Ela é o único fator que autentica as
+notificações recebidas — quem souber a URL consegue enviar payloads forjados para o seu
+endpoint. Prefira uma URL longa e com componente aleatório, e valide o conteúdo recebido
 antes de agir sobre ele.
 </Warning>
 
 ## Resposta de Sucesso
 
 <ResponseField name="message" type="string">
-  Mensagem de confirmacao
+  Mensagem de confirmação
 </ResponseField>
 
 <ResponseField name="user" type="object">
-  O objeto do usuario ja com os dados atualizados.
+  O objeto do usuário já com os dados atualizados.
 </ResponseField>
 
 <RequestExample>
@@ -151,7 +151,7 @@ data = response.json()
 }
 ```
 
-```json 422 - Webhook Invalido
+```json 422 - Webhook Inválido
 {
   "message": "A URL de webhook informada não é válida.",
   "errors": {
@@ -172,7 +172,7 @@ data = response.json()
 
 ## Desativando o webhook
 
-Envie `null` (ou string vazia) para parar de receber notificacoes:
+Envie `null` (ou string vazia) para parar de receber notificações:
 
 ```bash
 curl -X POST "https://api.realoficial.com.br/api/v1/profile" \

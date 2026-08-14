@@ -11,7 +11,7 @@ GET https://api.realoficial.com.br/api/v1/shorts/{projectId}
 ```
 
 <Note>
-Este endpoint requer autenticacao via Bearer Token.
+Este endpoint requer autenticação via Bearer Token.
 </Note>
 
 ## Path Parameters
@@ -23,32 +23,32 @@ Este endpoint requer autenticacao via Bearer Token.
 ## Query Parameters
 
 <ParamField query="page" type="integer">
-  Numero da pagina (padrao: 1)
+  Número da página (padrão: 1)
 </ParamField>
 
 <ParamField query="limit" type="integer">
-  Quantidade de itens por pagina (1-100, padrao: 20)
+  Quantidade de itens por página (1-100, padrão: 20)
 </ParamField>
 
 <ParamField query="sort" type="string">
-  Ordenacao dos resultados:
-  - `score` (padrao) - Por pontuacao de relevancia
-  - `time` - Por tempo de inicio no video
-  - `duration` - Por duracao do corte
+  Ordenação dos resultados:
+  - `score` (padrão) - Por pontuação de relevância
+  - `time` - Por tempo de início no vídeo
+  - `duration` - Por duração do corte
 </ParamField>
 
 <ParamField query="render" type="string">
-  Filtrar por status de renderizacao:
-  - `all` (padrao) - Todos os cortes
+  Filtrar por status de renderização:
+  - `all` (padrão) - Todos os cortes
   - `rendered` - Apenas renderizados
-  - `not_rendered` - Apenas nao renderizados
+  - `not_rendered` - Apenas não renderizados
   - `liked` - Apenas marcados como favoritos
 </ParamField>
 
 ## Resposta de Sucesso
 
 <ResponseField name="message" type="string">
-  Mensagem de confirmacao
+  Mensagem de confirmação
 </ResponseField>
 
 <ResponseField name="project" type="object">
@@ -59,47 +59,47 @@ Este endpoint requer autenticacao via Bearer Token.
   Objeto paginado com os shorts
   <Expandable title="Propriedades do short">
     <ResponseField name="id" type="string">
-      ID unico do short (ULID)
+      ID único do short (ULID)
     </ResponseField>
     <ResponseField name="title" type="string">
-      Titulo do corte
+      Título do corte
     </ResponseField>
     <ResponseField name="start_time" type="number">
-      Tempo de inicio no video original (segundos)
+      Tempo de início no vídeo original (segundos)
     </ResponseField>
     <ResponseField name="end_time" type="number">
-      Tempo de fim no video original (segundos)
+      Tempo de fim no vídeo original (segundos)
     </ResponseField>
     <ResponseField name="score" type="number">
-      Pontuacao de relevancia (0-10, normalmente com uma casa decimal)
+      Pontuação de relevância (0-10, normalmente com uma casa decimal)
     </ResponseField>
     <ResponseField name="status" type="string">
       Status do processamento
     </ResponseField>
     <ResponseField name="has_render" type="boolean">
-      Se ja foi renderizado
+      Se já foi renderizado
     </ResponseField>
     <ResponseField name="thumbnail_url" type="string">
       Imagem de capa **deste corte** (frame real do trecho).
 
-      Nao confunda com o `thumbnail_url` do nivel `project`, que e a capa do video
-      original e e igual para todos os cortes.
+      Não confunda com o `thumbnail_url` do nível `project`, que é a capa do vídeo
+      original e é igual para todos os cortes.
     </ResponseField>
     <ResponseField name="preview_thumbnail_url" type="string">
-      JPG de thumbnail do corte, servido pelo CDN publico:
+      JPG de thumbnail do corte, servido pelo CDN público:
       `https://cdn.realoficial.com.br/shorts/{projectId}/{shortId}_thumbnail.jpg`
 
-      Veja [Preview do Short](/api-reference/shorts/preview) para o video MP4 de
-      pre-visualizacao equivalente.
+      Veja [Preview do Short](/api-reference/shorts/preview) para o vídeo MP4 de
+      pré-visualização equivalente.
     </ResponseField>
     <ResponseField name="feedback" type="string">
-      Feedback do usuario (`like`, `dislike`, ou array de motivos)
+      Feedback do usuário (`like`, `dislike`, ou array de motivos)
     </ResponseField>
     <ResponseField name="timeline" type="object">
-      Dados da timeline para edicao (assets, tracks, items)
+      Dados da timeline para edição (assets, tracks, items)
     </ResponseField>
     <ResponseField name="renders" type="array">
-      Lista de renderizacoes deste short
+      Lista de renderizações deste short
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -108,10 +108,10 @@ Este endpoint requer autenticacao via Bearer Token.
   Metadados agregados
   <Expandable title="Propriedades">
     <ResponseField name="average_score" type="number">
-      Pontuacao media dos cortes
+      Pontuação média dos cortes
     </ResponseField>
     <ResponseField name="average_duration" type="number">
-      Duracao media em segundos
+      Duração média em segundos
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -141,7 +141,7 @@ const response = await fetch(
 
 const data = await response.json();
 console.log(data.data.data); // Array de shorts
-console.log(data.meta.average_score); // Pontuacao media
+console.log(data.meta.average_score); // Pontuação média
 ```
 
 ```python Python
@@ -261,37 +261,37 @@ $shorts = $data['data']['data'];
 }
 ```
 
-```json 404 - Projeto Nao Encontrado
+```json 404 - Projeto Não Encontrado
 {
   "error": "Projeto não encontrado ou você não tem permissão para acessar."
 }
 ```
 
-```json 400 - Ordenacao Invalida
+```json 400 - Ordenação Inválida
 {
   "error": "Ordenação inválida. Use \"score\", \"time\" ou \"duration\"."
 }
 ```
 </ResponseExample>
 
-## Entendendo a Pontuacao (Score)
+## Entendendo a Pontuação (Score)
 
-A pontuacao indica a relevancia do corte identificado pela IA:
+A pontuação indica a relevância do corte identificado pela IA:
 
-| Faixa | Classificacao | Descricao |
+| Faixa | Classificação | Descrição |
 |-------|---------------|-----------|
 | 8.0-10.0 | Excelente | Momentos de alto engajamento potencial |
-| 6.0-7.9 | Bom | Bons trechos para conteudo |
-| 4.0-5.9 | Medio | Pode funcionar com edicao |
+| 6.0-7.9 | Bom | Bons trechos para conteúdo |
+| 4.0-5.9 | Médio | Pode funcionar com edição |
 | 0.0-3.9 | Baixo | Menos recomendado |
 
 <Info>
-**Dica**: Comece renderizando os cortes com maior pontuacao para maximizar o engajamento.
+**Dica**: Comece renderizando os cortes com maior pontuação para maximizar o engajamento.
 </Info>
 
-## Obter Short Especifico
+## Obter Short Específico
 
-Para obter detalhes de um short especifico:
+Para obter detalhes de um short específico:
 
 ```
 GET /shorts/{projectId}/{shortId}
@@ -305,4 +305,4 @@ curl -X GET "https://api.realoficial.com.br/api/v1/shorts/PROJECT_ID/SHORT_ID" \
 ```
 </RequestExample>
 
-Retorna o objeto completo do short incluindo a timeline para edicao.
+Retorna o objeto completo do short incluindo a timeline para edição.

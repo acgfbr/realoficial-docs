@@ -1,7 +1,7 @@
 ---
 title: 'Criar Projeto'
 api: 'POST /createShorts'
-description: 'Crie um novo projeto a partir de uma URL de video e gere cortes automaticamente'
+description: 'Crie um novo projeto a partir de uma URL de vídeo e gere cortes automaticamente'
 ---
 
 ## Endpoint
@@ -11,17 +11,17 @@ POST https://api.realoficial.com.br/api/v1/createShorts
 ```
 
 <Note>
-Este endpoint requer autenticacao e consome creditos do usuario.
+Este endpoint requer autenticação e consome créditos do usuário.
 </Note>
 
 ## Body Parameters
 
 <ParamField body="url" type="string" required>
-  URL do video (YouTube, Google Drive ou link direto .mp4)
+  URL do vídeo (YouTube, Google Drive ou link direto .mp4)
 </ParamField>
 
 <ParamField body="clipDuration" type="string" required>
-  Duracao alvo dos cortes: `30`, `60`, `90`, `120` ou `auto`
+  Duração alvo dos cortes: `30`, `60`, `90`, `120` ou `auto`
 </ParamField>
 
 <ParamField body="startTime" type="number" required>
@@ -33,17 +33,17 @@ Este endpoint requer autenticacao e consome creditos do usuario.
 </ParamField>
 
 <ParamField body="aspect_ratio" type="string" required>
-  Formato do video: `vertical` (9:16) ou `horizontal` (16:9)
+  Formato do vídeo: `vertical` (9:16) ou `horizontal` (16:9)
 </ParamField>
 
 <ParamField body="layout" type="string">
-  Layout do video: `auto`, `single`, `split`, `react`, `gaming`
+  Layout do vídeo: `auto`, `single`, `split`, `react`, `gaming`
 
   - `auto`: Layout combinado entre single / split e center
-  - `single`: Video unico com face tracking
-  - `split`: Tela dividida (face + conteudo)
+  - `single`: Vídeo único com face tracking
+  - `split`: Tela dividida (face + conteúdo)
   - `center`: Vídeo centralizado na tela
-  - `react`: Estilo reacao
+  - `react`: Estilo reação
   - `gaming`: Para gameplays
 </ParamField>
 
@@ -51,7 +51,7 @@ Este endpoint requer autenticacao e consome creditos do usuario.
   Tipo de processamento. Valores aceitos: `shorts` ou `reframe`.
 
   <Warning>
-  Este campo e **obrigatorio**. Omiti-lo retorna `422`:
+  Este campo é **obrigatório**. Omiti-lo retorna `422`:
 
   ```json
   {
@@ -63,16 +63,16 @@ Este endpoint requer autenticacao e consome creditos do usuario.
   ```
   </Warning>
 
-  O modo escolhido muda as regras de duracao do intervalo — veja
-  [Validacoes](#validacoes).
+  O modo escolhido muda as regras de duração do intervalo — veja
+  [Validações](#validacoes).
 </ParamField>
 
 <ParamField body="title" type="string">
-  Titulo personalizado do projeto (usa titulo do video se nao informado)
+  Título personalizado do projeto (usa título do vídeo se não informado)
 </ParamField>
 
 <ParamField body="captionFont" type="string">
-  Fonte padrao para legendas
+  Fonte padrão para legendas
 </ParamField>
 
 <ParamField body="captionTemplate" type="json">
@@ -86,7 +86,7 @@ Este endpoint requer autenticacao e consome creditos do usuario.
 </ParamField>
 
 <ParamField body="prompt" type="string">
-  Prompt customizado para guiar a geracao dos cortes. Maximo de **1000 caracteres**.
+  Prompt customizado para guiar a geração dos cortes. Máximo de **1000 caracteres**.
 </ParamField>
 
 <ParamField body="emojisEnabled" type="boolean" default="false">
@@ -94,37 +94,37 @@ Este endpoint requer autenticacao e consome creditos do usuario.
 </ParamField>
 
 <ParamField body="show_in_content_hub" type="boolean" default="true">
-  Se `true`, compartilha os cortes no hub de conteudo.
+  Se `true`, compartilha os cortes no hub de conteúdo.
 </ParamField>
 
 <ParamField body="autoCta" type="boolean" default="false">
-  Se `true`, adiciona uma chamada para acao (CTA) nos primeiros 3 segundos do corte.
+  Se `true`, adiciona uma chamada para ação (CTA) nos primeiros 3 segundos do corte.
 </ParamField>
 
-## Custo em Creditos
+## Custo em Créditos
 
 <Warning>
-**1 credito = 1 minuto de video processado**
+**1 crédito = 1 minuto de vídeo processado**
 
-O custo e calculado automaticamente com base no intervalo `endTime - startTime`.
+O custo é calculado automaticamente com base no intervalo `endTime - startTime`.
 </Warning>
 
-## Validacoes
+## Validações
 
-As regras de intervalo dependem do `video_type` (e, no modo `reframe`, tambem do
-`layout`). O intervalo e sempre `endTime - startTime`.
+As regras de intervalo dependem do `video_type` (e, no modo `reframe`, também do
+`layout`). O intervalo é sempre `endTime - startTime`.
 
 ### Modo `shorts`
 
 | Regra | Limite |
 |-------|--------|
-| Intervalo minimo | **5 minutos** (300 segundos) |
-| Intervalo maximo | 20 horas (72000 segundos) |
-| Duracao maxima do video | 10 horas |
-| Videos > 5h | Intervalo minimo de 1 hora |
-| Videos > 3h | Requer assinatura ativa |
+| Intervalo mínimo | **5 minutos** (300 segundos) |
+| Intervalo máximo | 20 horas (72000 segundos) |
+| Duração máxima do vídeo | 10 horas |
+| Vídeos > 5h | Intervalo mínimo de 1 hora |
+| Vídeos > 3h | Requer assinatura ativa |
 
-Um intervalo de exatamente 300 segundos e aceito; 299 segundos ou menos retorna `400`:
+Um intervalo de exatamente 300 segundos é aceito; 299 segundos ou menos retorna `400`:
 
 ```json
 { "error": "Você precisa selecionar um intervalo de pelo menos 5 minutos." }
@@ -134,12 +134,12 @@ Um intervalo de exatamente 300 segundos e aceito; 299 segundos ou menos retorna 
 
 | Regra | Limite |
 |-------|--------|
-| Intervalo minimo | 15 segundos |
-| Intervalo maximo com `layout: center` | 60 minutos (3600 segundos) |
-| Intervalo maximo nos demais layouts | 5 minutos (300 segundos) |
+| Intervalo mínimo | 15 segundos |
+| Intervalo máximo com `layout: center` | 60 minutos (3600 segundos) |
+| Intervalo máximo nos demais layouts | 5 minutos (300 segundos) |
 
 <Note>
-Repare que o intervalo de 5 minutos e o **piso** no modo `shorts` e o **teto** no modo
+Repare que o intervalo de 5 minutos é o **piso** no modo `shorts` e o **teto** no modo
 `reframe` (fora do layout `center`).
 </Note>
 
@@ -245,7 +245,7 @@ $project = json_decode($response, true);
 {
   "data": {
     "id": "01k3ab12yqtsyrzjb0fveqy5zx",
-    "title": "Titulo do Video",
+    "title": "Título do Vídeo",
     "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "status": "pending",
     "goal": "shorts",
@@ -257,7 +257,7 @@ $project = json_decode($response, true);
     "created_at": "2025-01-24T10:30:00.000000Z",
     "thumbnail_url": "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
     "metadata": {
-      "title": "Titulo do Video",
+      "title": "Título do Vídeo",
       "duration": "45:30",
       "channel_title": "Canal do Autor"
     }
@@ -265,13 +265,13 @@ $project = json_decode($response, true);
 }
 ```
 
-```json 400 - Creditos Insuficientes
+```json 400 - Créditos Insuficientes
 {
   "error": "Créditos insuficientes para gerar os cortes. Atualize seu plano ou compre mais créditos para continuar."
 }
 ```
 
-```json 400 - Intervalo Invalido
+```json 400 - Intervalo Inválido
 {
   "error": "Você precisa selecionar um intervalo de pelo menos 5 minutos."
 }
@@ -286,40 +286,40 @@ $project = json_decode($response, true);
 
 ## Status do Projeto
 
-Apos criar o projeto, ele passara pelos seguintes status:
+Após criar o projeto, ele passará pelos seguintes status:
 
-| Status | Descricao |
+| Status | Descrição |
 |--------|-----------|
 | `pending` | Aguardando processamento |
-| `downloading` | Baixando o video |
-| `transcribing` | Transcrevendo audio |
-| `transcribed` | Transcricao concluida |
+| `downloading` | Baixando o vídeo |
+| `transcribing` | Transcrevendo áudio |
+| `transcribed` | Transcrição concluída |
 | `shorts_created` | Cortes identificados |
 | `face_analysis_done` | Pronto para uso |
 | `refunded` | Reembolsado |
 
 <Info>
-**Polling recomendado**: Consulte `GET /shorts/{projectId}` a cada 10-30 segundos para verificar quando os cortes estao prontos.
+**Polling recomendado**: Consulte `GET /shorts/{projectId}` a cada 10-30 segundos para verificar quando os cortes estão prontos.
 </Info>
 
 ## Visualizar Cortes
 
-Apos o projeto ser processado, voce pode visualizar os cortes gerados atraves de uma pagina de preview:
+Após o projeto ser processado, você pode visualizar os cortes gerados através de uma página de preview:
 
 ```
 https://app.realoficial.com.br/share/{projectId}?token={seu_token}
 ```
 
 <Frame>
-  <img src="/images/preview_share.jpeg" alt="Pagina de preview dos cortes" />
+  <img src="/images/preview_share.jpeg" alt="Página de preview dos cortes" />
 </Frame>
 
 <ParamField path="projectId" type="string" required>
-  ID do projeto retornado na criacao
+  ID do projeto retornado na criação
 </ParamField>
 
 <ParamField query="token" type="string" required>
-  Seu token de autenticacao (o mesmo usado nas requisicoes da API)
+  Seu token de autenticação (o mesmo usado nas requisições da API)
 </ParamField>
 
 ### Exemplo de URL
@@ -329,7 +329,7 @@ https://app.realoficial.com.br/share/01k3ab12yqtsyrzjb0fveqy5zx?token=seu_token_
 ```
 
 <Tip>
-Use essa URL para compartilhar a previa dos cortes com sua equipe ou integrar em sua aplicacao via iframe. Nenhuma menção ao real oficial é feita nela
+Use essa URL para compartilhar a prévia dos cortes com sua equipe ou integrar em sua aplicação via iframe. Nenhuma menção ao real oficial é feita nela
 </Tip>
 
 ## URLs Suportadas
@@ -338,15 +338,15 @@ Use essa URL para compartilhar a previa dos cortes com sua equipe ou integrar em
   <Accordion title="YouTube">
     - `https://www.youtube.com/watch?v=VIDEO_ID`
     - `https://youtu.be/VIDEO_ID`
-    - Videos com duracao suficiente para o intervalo minimo (veja [Validacoes](#validacoes))
-    - YouTube Shorts **nao** sao suportados
+    - Vídeos com duração suficiente para o intervalo mínimo (veja [Validações](#validacoes))
+    - YouTube Shorts **não** são suportados
   </Accordion>
   <Accordion title="Google Drive">
-    - Links de compartilhamento publico
-    - Maximo 10GB por arquivo
+    - Links de compartilhamento público
+    - Máximo 10GB por arquivo
   </Accordion>
   <Accordion title="Link Direto">
     - URLs terminando em `.mp4`
-    - Maximo 10GB por arquivo
+    - Máximo 10GB por arquivo
   </Accordion>
 </AccordionGroup>

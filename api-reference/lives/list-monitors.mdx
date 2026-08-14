@@ -1,7 +1,7 @@
 ---
 title: 'Listar Meus Monitors'
 api: 'GET /lives/monitors'
-description: 'Lista os monitors do usuario autenticado'
+description: 'Lista os monitors do usuário autenticado'
 ---
 
 ## Endpoint
@@ -11,10 +11,10 @@ GET https://api.realoficial.com.br/api/v1/lives/monitors
 ```
 
 <Note>
-Este endpoint requer autenticacao via Bearer Token.
+Este endpoint requer autenticação via Bearer Token.
 </Note>
 
-Retorna os monitors do usuario autenticado em um paginator Laravel configurado atualmente
+Retorna os monitors do usuário autenticado em um paginator Laravel configurado atualmente
 com `per_page: 1000`.
 
 ## Query Parameters
@@ -24,11 +24,11 @@ com `per_page: 1000`.
 </ParamField>
 
 <ParamField query="page" type="integer">
-  Numero da pagina (padrao: 1)
+  Número da página (padrão: 1)
 </ParamField>
 
 <Warning>
-O endpoint nao aceita `per_page` no contrato atual. O backend usa o valor fixo `1000`.
+O endpoint não aceita `per_page` no contrato atual. O backend usa o valor fixo `1000`.
 </Warning>
 
 <RequestExample>

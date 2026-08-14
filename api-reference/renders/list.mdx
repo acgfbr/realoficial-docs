@@ -1,7 +1,7 @@
 ---
 title: 'Listar Renders'
 api: 'GET /renders'
-description: 'Liste todas as renderizacoes do usuario'
+description: 'Liste todas as renderizações do usuário'
 ---
 
 ## Endpoint
@@ -11,38 +11,38 @@ GET https://api.realoficial.com.br/api/v1/renders
 ```
 
 <Note>
-Este endpoint requer autenticacao via Bearer Token.
+Este endpoint requer autenticação via Bearer Token.
 </Note>
 
 ## Query Parameters
 
 <ParamField query="page" type="integer">
-  Numero da pagina (padrao: 1)
+  Número da página (padrão: 1)
 </ParamField>
 
 <ParamField query="limit" type="integer">
-  Quantidade de itens por pagina (padrao: 20)
+  Quantidade de itens por página (padrão: 20)
 </ParamField>
 
 <ParamField query="project_id" type="string">
-  Filtrar por ID de projeto especifico
+  Filtrar por ID de projeto específico
 </ParamField>
 
 <ParamField query="fromPublishScreen" type="boolean">
-  Otimiza resposta para listagem de videos prontos (apenas status `done`)
+  Otimiza resposta para listagem de vídeos prontos (apenas status `done`)
 </ParamField>
 
 ## Resposta de Sucesso
 
 <ResponseField name="message" type="string">
-  Mensagem de confirmacao
+  Mensagem de confirmação
 </ResponseField>
 
 <ResponseField name="data" type="object">
   Objeto paginado com os renders
   <Expandable title="Propriedades do render">
     <ResponseField name="id" type="string">
-      ID unico da renderizacao (ULID)
+      ID único da renderização (ULID)
     </ResponseField>
     <ResponseField name="short_id" type="string">
       ID do short renderizado
@@ -51,16 +51,16 @@ Este endpoint requer autenticacao via Bearer Token.
       Status: `pending`, `processing`, `done`, `error`
     </ResponseField>
     <ResponseField name="download_url" type="string">
-      URL para download do video (quando status = `done`)
+      URL para download do vídeo (quando status = `done`)
     </ResponseField>
     <ResponseField name="render_hash" type="string">
-      Hash unico da configuracao (para detectar alteracoes)
+      Hash único da configuração (para detectar alterações)
     </ResponseField>
     <ResponseField name="storage_provider" type="string">
       Provider de armazenamento: `r2` ou `wasabi`
     </ResponseField>
     <ResponseField name="created_at" type="string">
-      Data de criacao (ISO 8601)
+      Data de criação (ISO 8601)
     </ResponseField>
     <ResponseField name="short" type="object">
       Dados do short associado
@@ -69,16 +69,16 @@ Este endpoint requer autenticacao via Bearer Token.
           ID do short
         </ResponseField>
         <ResponseField name="title" type="string">
-          Titulo do corte
+          Título do corte
         </ResponseField>
         <ResponseField name="start_time" type="number">
-          Tempo de inicio
+          Tempo de início
         </ResponseField>
         <ResponseField name="end_time" type="number">
           Tempo de fim
         </ResponseField>
         <ResponseField name="thumbnail_url" type="string">
-          Capa do video original. Este valor pode ser igual entre todos os cortes do
+          Capa do vídeo original. Este valor pode ser igual entre todos os cortes do
           projeto.
         </ResponseField>
         <ResponseField name="preview_thumbnail_url" type="string">
@@ -86,12 +86,12 @@ Este endpoint requer autenticacao via Bearer Token.
           diferente para cada short.
         </ResponseField>
         <ResponseField name="project" type="object">
-          Dados basicos do projeto
+          Dados básicos do projeto
         </ResponseField>
       </Expandable>
     </ResponseField>
     <ResponseField name="published_platforms" type="array">
-      Plataformas onde o video ja foi publicado
+      Plataformas onde o vídeo já foi publicado
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -244,21 +244,21 @@ $renders = $data['data']['data'];
 
 ## Filtrar por Projeto
 
-Para listar renders de um projeto especifico:
+Para listar renders de um projeto específico:
 
 ```bash
 GET /renders?project_id=01k3ab12yqtsyrzjb0fveqy5zx
 ```
 
-## Download do Video
+## Download do Vídeo
 
-Quando o status e `done`, o campo `download_url` contem a URL direta para o arquivo MP4:
+Quando o status é `done`, o campo `download_url` contém a URL direta para o arquivo MP4:
 
 ```javascript
-// Baixar video programaticamente
+// Baixar vídeo programaticamente
 async function downloadVideo(render) {
   if (render.status !== 'done') {
-    throw new Error('Render ainda nao concluido');
+    throw new Error('Render ainda não concluído');
   }
 
   const response = await fetch(render.download_url);
@@ -277,26 +277,26 @@ async function downloadVideo(render) {
 
 <CardGroup cols={2}>
   <Card title="pending" icon="clock">
-    Na fila de processamento. Aguardando worker disponivel.
+    Na fila de processamento. Aguardando worker disponível.
   </Card>
   <Card title="processing" icon="spinner">
     Sendo renderizado. Pode levar de 30s a 2 minutos.
   </Card>
   <Card title="done" icon="check">
-    Concluido! Campo `download_url` disponivel.
+    Concluído! Campo `download_url` disponível.
   </Card>
   <Card title="error" icon="xmark">
-    Erro durante renderizacao. Tente novamente.
+    Erro durante renderização. Tente novamente.
   </Card>
 </CardGroup>
 
 ## CDN e Cache
 
 <Info>
-Os videos sao armazenados em CDN global (Wasabi) e ficam disponiveis por tempo indeterminado. As URLs incluem um parametro de versao para cache busting.
+Os vídeos são armazenados em CDN global (Wasabi) e ficam disponíveis por tempo indeterminado. As URLs incluem um parâmetro de versão para cache busting.
 </Info>
 
-## Exemplo de Integracao Completa
+## Exemplo de Integração Completa
 
 ```javascript
 // Fluxo completo: criar projeto -> aguardar cortes -> renderizar -> baixar
@@ -351,7 +351,7 @@ async function processVideo(youtubeUrl) {
   // 4. Aguardar renders
   await new Promise(r => setTimeout(r, 120000)); // 2 minutos
 
-  // 5. Obter URLs dos videos
+  // 5. Obter URLs dos vídeos
   const rendersResponse = await fetch(
     `https://api.realoficial.com.br/api/v1/renders?project_id=${project.data.id}`,
     { headers }

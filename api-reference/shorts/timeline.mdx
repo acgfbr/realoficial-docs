@@ -12,25 +12,25 @@ POST https://api.realoficial.com.br/api/v1/shorts/{projectId}/{shortId}/updateTi
 
 O endpoint recebe a timeline completa usada pelo editor e a salva no short. Ele pode ser
 usado para reposicionar elementos, alterar legendas, adicionar imagens e preparar o corte
-antes de iniciar uma renderizacao.
+antes de iniciar uma renderização.
 
 <Warning>
-O body substitui a timeline inteira. Primeiro obtenha a versao atual em
-`GET /shorts/{projectId}/{shortId}`, altere apenas os elementos necessarios e envie o
+O body substitui a timeline inteira. Primeiro obtenha a versão atual em
+`GET /shorts/{projectId}/{shortId}`, altere apenas os elementos necessários e envie o
 objeto completo de volta.
 </Warning>
 
-## Autenticacao
+## Autenticação
 
 O endpoint principal aceita o Bearer token normal da API. Por compatibilidade com
-integracoes de edicao compartilhada, existe tambem esta rota:
+integrações de edição compartilhada, existe também esta rota:
 
 ```text
 POST https://api.realoficial.com.br/api/v1/readonly/shorts/{projectId}/{shortId}/updateTimeline
 ```
 
-Nessa segunda rota, envie o `read_only_token` como Bearer token. Apesar do nome historico
-da credencial, a atualizacao de timeline e uma excecao de escrita suportada por esse fluxo.
+Nessa segunda rota, envie o `read_only_token` como Bearer token. Apesar do nome histórico
+da credencial, a atualização de timeline é uma exceção de escrita suportada por esse fluxo.
 
 ## Path Parameters
 
@@ -49,13 +49,13 @@ da credencial, a atualizacao de timeline e uma excecao de escrita suportada por 
   `compositionHeight`, `tracks`, `items` e `assets`.
 </ParamField>
 
-O backend normaliza a timeline antes de salvar. Calculos de duracao respeitam o `fps`
-informado na propria timeline.
+O backend normaliza a timeline antes de salvar. Cálculos de duração respeitam o `fps`
+informado na própria timeline.
 
 | Regra | Limite |
 |---|---:|
-| Duracao em plano pago | 900 segundos |
-| Duracao no free tier | 180 segundos |
+| Duração em plano pago | 900 segundos |
+| Duração no free tier | 180 segundos |
 | Quantidade de assets | 100 |
 
 <RequestExample>
@@ -94,7 +94,7 @@ const response = await fetch(
 
 ## Resposta
 
-O backend devolve a versao canonica da timeline depois da normalizacao.
+O backend devolve a versão canônica da timeline depois da normalização.
 
 <ResponseExample>
 ```json 200 - Timeline atualizada
@@ -121,7 +121,7 @@ O backend devolve a versao canonica da timeline depois da normalizacao.
 }
 ```
 
-```json 400 - Duracao excedida
+```json 400 - Duração excedida
 {
   "error": "A timeline excede o limite máximo permitido.",
   "duration": 901.2,
@@ -130,9 +130,8 @@ O backend devolve a versao canonica da timeline depois da normalizacao.
 ```
 </ResponseExample>
 
-## Shorts publicos de lives
+## Shorts públicos de lives
 
-Ao editar um short publico de live, o backend pode criar uma copia privada no workspace.
-Nesse caso, `materialized` sera `true`. Passe a usar os valores retornados em `short_id` e
-`project_id` nas proximas leituras e renderizacoes.
-
+Ao editar um short público de live, o backend pode criar uma cópia privada no workspace.
+Nesse caso, `materialized` será `true`. Passe a usar os valores retornados em `short_id` e
+`project_id` nas próximas leituras e renderizações.

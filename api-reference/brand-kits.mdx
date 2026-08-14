@@ -1,13 +1,13 @@
 ---
 title: 'Brand Kits'
-description: 'Crie e gerencie configuracoes reutilizaveis de marca'
+description: 'Crie e gerencie configurações reutilizáveis de marca'
 ---
 
-Brand Kits armazenam logos, marcas d'agua e estilos de legenda no workspace.
+Brand Kits armazenam logos, marcas d'água e estilos de legenda no workspace.
 
 ## Endpoints
 
-| Metodo | Endpoint | Descricao |
+| Método | Endpoint | Descrição |
 |---|---|---|
 | `GET` | `/brand-kits` | Lista Brand Kits |
 | `POST` | `/brand-kits` | Cria Brand Kit |
@@ -16,13 +16,13 @@ Brand Kits armazenam logos, marcas d'agua e estilos de legenda no workspace.
 | `POST` | `/brand-kits/{id}/duplicate` | Duplica Brand Kit |
 | `DELETE` | `/brand-kits/{id}` | Remove Brand Kit |
 
-Criacao e duplicacao exigem assinatura ativa. Operacoes de escrita exigem permissao para
+Criação e duplicação exigem assinatura ativa. Operações de escrita exigem permissão para
 gerenciar projetos no workspace.
 
 ## Criar
 
 <ParamField body="name" type="string" required>
-  Nome com ate 255 caracteres.
+  Nome com até 255 caracteres.
 </ParamField>
 
 <ParamField body="format" type="string" required>
@@ -30,13 +30,13 @@ gerenciar projetos no workspace.
 </ParamField>
 
 <ParamField body="data" type="object" required>
-  Conteudo do Brand Kit. Aceita `version`, `logos`, `watermarks` e `caption`.
+  Conteúdo do Brand Kit. Aceita `version`, `logos`, `watermarks` e `caption`.
 </ParamField>
 
 Cada item de `logos` e `watermarks` aceita:
 
 - `id`;
-- `url` obrigatoria;
+- `url` obrigatória;
 - `fileKey`;
 - `position`;
 - `size`;
@@ -92,19 +92,18 @@ curl -X POST "https://api.realoficial.com.br/api/v1/brand-kits" \
 
 ## Atualizar e duplicar
 
-`PUT /brand-kits/{id}` aceita `name`, `format` e `data`. Todos sao opcionais, mas um
-campo enviado precisa respeitar o mesmo schema da criacao.
+`PUT /brand-kits/{id}` aceita `name`, `format` e `data`. Todos são opcionais, mas um
+campo enviado precisa respeitar o mesmo schema da criação.
 
-`POST /brand-kits/{id}/duplicate` nao exige body. A copia recebe o sufixo `(cópia)`.
+`POST /brand-kits/{id}/duplicate` não exige body. A cópia recebe o sufixo `(cópia)`.
 
-## Aplicacao em shorts
+## Aplicação em shorts
 
 <Warning>
-O contrato atual nao possui endpoint para vincular um `brand_kit_id` a um projeto, short
-ou render. Enviar `brand_kit_id` em `/createShorts` ou `/render` nao aplica o kit.
+O contrato atual não possui endpoint para vincular um `brand_kit_id` a um projeto, short
+ou render. Enviar `brand_kit_id` em `/createShorts` ou `/render` não aplica o kit.
 </Warning>
 
-Para automacao avancada, leia `data` do Brand Kit, altere a timeline completa do short e
-salve com [Atualizar Timeline](/api-reference/shorts/timeline). Essa operacao e de baixo
-nivel: a integracao e responsavel por criar os assets, items e tracks correspondentes.
-
+Para automação avançada, leia `data` do Brand Kit, altere a timeline completa do short e
+salve com [Atualizar Timeline](/api-reference/shorts/timeline). Essa operação é de baixo
+nível: a integração é responsável por criar os assets, items e tracks correspondentes.

@@ -1,7 +1,7 @@
 ---
 title: 'Listar Projetos'
 api: 'GET /projects'
-description: 'Liste todos os projetos do usuario autenticado'
+description: 'Liste todos os projetos do usuário autenticado'
 ---
 
 ## Endpoint
@@ -11,17 +11,17 @@ GET https://api.realoficial.com.br/api/v1/projects
 ```
 
 <Note>
-Este endpoint requer autenticacao via Bearer Token.
+Este endpoint requer autenticação via Bearer Token.
 </Note>
 
 ## Query Parameters
 
 <ParamField query="page" type="integer">
-  Numero da pagina (padrao: 1)
+  Número da página (padrão: 1)
 </ParamField>
 
 <ParamField query="per_page" type="integer">
-  Quantidade de itens por pagina (1-20, padrao: 10)
+  Quantidade de itens por página (1-20, padrão: 10)
 </ParamField>
 
 ## Resposta de Sucesso
@@ -30,13 +30,13 @@ Este endpoint requer autenticacao via Bearer Token.
   Lista de projetos
   <Expandable title="Propriedades do projeto">
     <ResponseField name="id" type="string">
-      ID unico do projeto (ULID)
+      ID único do projeto (ULID)
     </ResponseField>
     <ResponseField name="title" type="string">
-      Titulo do projeto
+      Título do projeto
     </ResponseField>
     <ResponseField name="url" type="string">
-      URL do video original
+      URL do vídeo original
     </ResponseField>
     <ResponseField name="status" type="string">
       Status atual do projeto
@@ -51,7 +51,7 @@ Este endpoint requer autenticacao via Bearer Token.
       Formato: `vertical` ou `horizontal`
     </ResponseField>
     <ResponseField name="clip_duration" type="string">
-      Duracao alvo dos cortes
+      Duração alvo dos cortes
     </ResponseField>
     <ResponseField name="start_time" type="number">
       Tempo inicial processado
@@ -60,23 +60,23 @@ Este endpoint requer autenticacao via Bearer Token.
       Tempo final processado
     </ResponseField>
     <ResponseField name="created_at" type="string">
-      Data de criacao (ISO 8601)
+      Data de criação (ISO 8601)
     </ResponseField>
     <ResponseField name="thumbnail_url" type="string">
-      URL da thumbnail do video
+      URL da thumbnail do vídeo
     </ResponseField>
     <ResponseField name="metadata" type="object">
-      Metadados do video original
+      Metadados do vídeo original
     </ResponseField>
   </Expandable>
 </ResponseField>
 
 <ResponseField name="links" type="object">
-  Links de navegacao da paginacao
+  Links de navegação da paginação
 </ResponseField>
 
 <ResponseField name="meta" type="object">
-  Metadados da paginacao
+  Metadados da paginação
 </ResponseField>
 
 <RequestExample>
@@ -206,7 +206,7 @@ $projects = $data['data'];
 }
 ```
 
-```json 400 - Parametro Invalido
+```json 400 - Parâmetro Inválido
 {
   "error": "O per_page deve ser entre 1 e 20."
 }
@@ -214,8 +214,8 @@ $projects = $data['data'];
 </ResponseExample>
 
 <Warning>
-Nao existe `GET /projects/{id}` no contrato atual. Para localizar um projeto especifico,
-use esta listagem paginada. Se voce tambem precisa dos cortes, `GET /shorts/{projectId}`
+Não existe `GET /projects/{id}` no contrato atual. Para localizar um projeto específico,
+use esta listagem paginada. Se você também precisa dos cortes, `GET /shorts/{projectId}`
 retorna o projeto no campo `project` junto da lista de shorts.
 </Warning>
 
@@ -229,7 +229,7 @@ retorna o projeto no campo `project` junto da lista de shorts.
     - `transcribed` - Transcrito
     - `shorts_created` - Cortes criados
   </Card>
-  <Card title="Concluido" icon="check">
+  <Card title="Concluído" icon="check">
     - `face_analysis_done` - Pronto para uso
     - `refunded` - Reembolsado
   </Card>

@@ -1,7 +1,7 @@
 ---
-title: 'Detalhes do Usuario'
+title: 'Detalhes do Usuário'
 api: 'GET /user'
-description: 'Obtenha os dados do usuario autenticado'
+description: 'Obtenha os dados do usuário autenticado'
 ---
 
 ## Endpoint
@@ -11,73 +11,73 @@ GET https://api.realoficial.com.br/api/v1/user
 ```
 
 <Note>
-Este endpoint requer autenticacao via Bearer Token.
+Este endpoint requer autenticação via Bearer Token.
 </Note>
 
 ## Headers
 
 <ParamField header="Authorization" type="string" required>
-  Bearer Token do usuario
+  Bearer Token do usuário
 </ParamField>
 
 ## Resposta de Sucesso
 
 <ResponseField name="user" type="object">
-  Dados completos do usuario
-  <Expandable title="Propriedades do usuario">
+  Dados completos do usuário
+  <Expandable title="Propriedades do usuário">
     <ResponseField name="id" type="string">
-      ID unico do usuario (ULID)
+      ID único do usuário (ULID)
     </ResponseField>
     <ResponseField name="name" type="string">
-      Nome do usuario
+      Nome do usuário
     </ResponseField>
     <ResponseField name="email" type="string">
-      Email do usuario
+      Email do usuário
     </ResponseField>
     <ResponseField name="token" type="string">
-      Token de autenticacao
+      Token de autenticação
     </ResponseField>
     <ResponseField name="balance" type="integer">
-      Saldo atual de creditos
+      Saldo atual de créditos
     </ResponseField>
     <ResponseField name="webhook_url" type="string">
-      URL configurada para receber webhooks. `null` se nao configurada.
-      Editavel via [Atualizar Perfil](/api-reference/auth/profile).
+      URL configurada para receber webhooks. `null` se não configurada.
+      Editável via [Atualizar Perfil](/api-reference/auth/profile).
     </ResponseField>
     <ResponseField name="reprompts_daily_limit" type="integer">
       Quantidade de [reprompts](/api-reference/projects/reprompt) gratuitos por dia,
       conforme o plano.
     </ResponseField>
     <ResponseField name="reprompts_today" type="integer">
-      Reprompts ja realizados hoje.
+      Reprompts já realizados hoje.
     </ResponseField>
     <ResponseField name="reprompts_free_remaining" type="integer">
-      Reprompts gratuitos restantes hoje. Chegando a `0`, os proximos passam a consumir
-      creditos.
+      Reprompts gratuitos restantes hoje. Chegando a `0`, os próximos passam a consumir
+      créditos.
     </ResponseField>
     <ResponseField name="reprompts_reset_at" type="string">
-      Data/hora em que a cota diaria de reprompts e reiniciada (ISO 8601).
+      Data/hora em que a cota diária de reprompts é reiniciada (ISO 8601).
     </ResponseField>
     <ResponseField name="phone" type="string">
-      Telefone do usuario (se cadastrado)
+      Telefone do usuário (se cadastrado)
     </ResponseField>
     <ResponseField name="nickname" type="string">
-      Apelido do usuario
+      Apelido do usuário
     </ResponseField>
     <ResponseField name="is_phone_confirmed" type="boolean">
       Se o telefone foi confirmado
     </ResponseField>
     <ResponseField name="eligible_for_trial" type="boolean">
-      Se esta elegivel para trial
+      Se está elegível para trial
     </ResponseField>
     <ResponseField name="eligible_for_roulette" type="boolean">
-      Se pode girar a roleta de bonus
+      Se pode girar a roleta de bônus
     </ResponseField>
     <ResponseField name="roulette_cooldown" type="integer">
-      Tempo restante para proxima roleta (segundos)
+      Tempo restante para próxima roleta (segundos)
     </ResponseField>
     <ResponseField name="checkin_cooldown" type="integer">
-      Tempo restante para proximo check-in (segundos)
+      Tempo restante para próximo check-in (segundos)
     </ResponseField>
     <ResponseField name="subscription" type="object">
       Dados da assinatura ativa
@@ -92,7 +92,7 @@ Este endpoint requer autenticacao via Bearer Token.
           Dados do plano
         </ResponseField>
         <ResponseField name="ends_at" type="string">
-          Data de expiracao (ISO 8601)
+          Data de expiração (ISO 8601)
         </ResponseField>
       </Expandable>
     </ResponseField>
@@ -185,37 +185,37 @@ print_r($data['user']);
 }
 ```
 
-```json 401 - Nao Autenticado
+```json 401 - Não Autenticado
 {
   "error": "Unauthenticated"
 }
 ```
 
-```json 404 - Usuario Nao Encontrado
+```json 404 - Usuário Não Encontrado
 {
   "error": "Usuário não encontrado"
 }
 ```
 </ResponseExample>
 
-## Sistema de Creditos
+## Sistema de Créditos
 
 <Info>
-**1 credito = 1 minuto de processamento de video**
+**1 crédito = 1 minuto de processamento de vídeo**
 
-Os creditos sao usados para:
-- Processar novos videos (criar cortes)
+Os créditos são usados para:
+- Processar novos vídeos (criar cortes)
 - Gerar imagens com IA
 </Info>
 
-### Fontes de Creditos
+### Fontes de Créditos
 
-| Fonte | Creditos |
+| Fonte | Créditos |
 |-------|----------|
-| Bonus de registro | 60 |
-| Check-in diario | 2-4 |
+| Bônus de registro | 60 |
+| Check-in diário | 2-4 |
 | Roleta  mensal| 150-1800 |
 | Plano Lite (mensal) | 180 |
 | Plano Criador (mensal) | 420 |
 | Plano Viral (mensal) | 900 |
-| Compra avulsa | Variavel |
+| Compra avulsa | Variável |

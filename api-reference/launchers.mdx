@@ -1,28 +1,28 @@
 ---
 title: 'Launchers'
-description: 'Fila automatica de publicacao com contas, horarios e shorts ordenados'
+description: 'Fila automática de publicação com contas, horários e shorts ordenados'
 ---
 
-Launchers funcionam como uma fila recorrente: voce define contas e horarios semanais,
-adiciona shorts e o backend calcula os proximos agendamentos.
+Launchers funcionam como uma fila recorrente: você define contas e horários semanais,
+adiciona shorts e o backend calcula os próximos agendamentos.
 
 <Note>
-Criacao e uso de Launcher exigem assinatura ativa dos planos Criador ou Viral e permissao
-de publicacao no workspace.
+Criação e uso de Launcher exigem assinatura ativa dos planos Criador ou Viral e permissão
+de publicação no workspace.
 </Note>
 
 ## Endpoints
 
-| Metodo | Endpoint | Descricao |
+| Método | Endpoint | Descrição |
 |---|---|---|
 | `GET` | `/launchers` | Lista launchers |
 | `POST` | `/launchers` | Cria launcher |
-| `GET` | `/launchers/{id}` | Detalha launcher, fila e historico recente |
-| `PUT` | `/launchers/{id}` | Atualiza configuracao ou pausa/retoma |
+| `GET` | `/launchers/{id}` | Detalha launcher, fila e histórico recente |
+| `PUT` | `/launchers/{id}` | Atualiza configuração ou pausa/retoma |
 | `DELETE` | `/launchers/{id}` | Remove launcher |
-| `PUT` | `/launchers/{id}/slots` | Substitui todos os horarios |
-| `GET` | `/launchers/{id}/slots/suggest` | Sugere horarios por plataforma |
-| `POST` | `/launchers/{id}/suggest-description` | Sugere descricao para um short |
+| `PUT` | `/launchers/{id}/slots` | Substitui todos os horários |
+| `GET` | `/launchers/{id}/slots/suggest` | Sugere horários por plataforma |
+| `POST` | `/launchers/{id}/suggest-description` | Sugere descrição para um short |
 | `POST` | `/launchers/{id}/items` | Adiciona short a fila |
 | `PUT` | `/launchers/{id}/items/reorder` | Reordena a fila |
 | `PUT` | `/launchers/{id}/items/reschedule` | Desloca itens por N dias |
@@ -31,11 +31,11 @@ de publicacao no workspace.
 ## Criar Launcher
 
 <ParamField body="name" type="string" required>
-  Nome, com ate 255 caracteres.
+  Nome, com até 255 caracteres.
 </ParamField>
 
 <ParamField body="timezone" type="string">
-  Fuso dos slots. Padrao: `America/Sao_Paulo`.
+  Fuso dos slots. Padrão: `America/Sao_Paulo`.
 </ParamField>
 
 <ParamField body="social_account_ids" type="array" required>
@@ -43,16 +43,16 @@ de publicacao no workspace.
 </ParamField>
 
 <ParamField body="slots" type="array">
-  Horarios semanais. `day_of_week` vai de 0 (domingo) a 6 (sabado) e `time_of_day`
+  Horários semanais. `day_of_week` vai de 0 (domingo) a 6 (sábado) e `time_of_day`
   usa `HH:mm`.
 </ParamField>
 
 <ParamField body="default_caption_template" type="object">
-  Configuracao padrao de legenda aplicada pelo Launcher.
+  Configuração padrão de legenda aplicada pelo Launcher.
 </ParamField>
 
 <ParamField body="default_tags" type="array">
-  Tags padrao.
+  Tags padrão.
 </ParamField>
 
 <RequestExample>
@@ -62,7 +62,7 @@ curl -X POST "https://api.realoficial.com.br/api/v1/launchers" \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   -d '{
-    "name": "Publicacao diaria",
+    "name": "Publicação diária",
     "timezone": "America/Sao_Paulo",
     "social_account_ids": ["01ksocialaccount000000000001"],
     "slots": [
@@ -74,25 +74,25 @@ curl -X POST "https://api.realoficial.com.br/api/v1/launchers" \
 ```
 </RequestExample>
 
-O Launcher e criado com status `active`. `PUT /launchers/{id}` aceita `active` ou
-`paused`, alem dos campos de configuracao.
+O Launcher é criado com status `active`. `PUT /launchers/{id}` aceita `active` ou
+`paused`, além dos campos de configuração.
 
 ## Atualizar slots
 
 `PUT /launchers/{id}/slots` recebe `{ "slots": [...] }` e substitui atomicamente todos os
-horarios. A fila pendente e recalculada depois da troca.
+horários. A fila pendente é recalculada depois da troca.
 
-As sugestoes de `GET /launchers/{id}/slots/suggest` usam benchmarks genericos por
-plataforma. Elas nao sao uma previsao baseada no historico individual da conta.
+As sugestões de `GET /launchers/{id}/slots/suggest` usam benchmarks genéricos por
+plataforma. Elas não são uma previsão baseada no histórico individual da conta.
 
 ## Adicionar um short
 
 <ParamField body="short_id" type="string" required>
-  Short do workspace com timeline renderizavel.
+  Short do workspace com timeline renderizável.
 </ParamField>
 
 <ParamField body="description" type="string">
-  Descricao padrao, com ate 5000 caracteres.
+  Descrição padrão, com até 5000 caracteres.
 </ParamField>
 
 <ParamField body="caption_overrides" type="object">
@@ -100,11 +100,11 @@ plataforma. Elas nao sao uma previsao baseada no historico individual da conta.
 </ParamField>
 
 <ParamField body="tiktok_guidelines_filter_enabled" type="boolean">
-  Padrao: `true`.
+  Padrão: `true`.
 </ParamField>
 
 <ParamField body="auto_reply_config" type="object">
-  Mesma configuracao opcional aceita pela API de publicacoes.
+  Mesma configuração opcional aceita pela API de publicações.
 </ParamField>
 
 ```bash
@@ -118,7 +118,7 @@ curl -X POST "https://api.realoficial.com.br/api/v1/launchers/LAUNCHER_ID/items"
   }'
 ```
 
-O mesmo short nao pode aparecer duas vezes na fila pendente do Launcher.
+O mesmo short não pode aparecer duas vezes na fila pendente do Launcher.
 
 ## Reordenar e reagendar
 
@@ -138,5 +138,4 @@ Para deslocar itens por dias, use `items/reschedule`:
 ```
 
 `days` aceita valores entre -365 e 365, exceto zero. Um deslocamento que coloque a
-publicacao no passado retorna `422` com o codigo `scheduled_in_past`.
-
+publicação no passado retorna `422` com o código `scheduled_in_past`.

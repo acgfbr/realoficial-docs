@@ -1,28 +1,28 @@
 ---
-title: 'Publicacoes e Agendamento'
+title: 'Publicações e Agendamento'
 description: 'Publique imediatamente ou agende um short em uma ou mais redes sociais'
 ---
 
 ## Endpoints
 
-| Metodo | Endpoint | Descricao |
+| Método | Endpoint | Descrição |
 |---|---|---|
-| `GET` | `/social/posts` | Lista publicacoes |
+| `GET` | `/social/posts` | Lista publicações |
 | `POST` | `/social/posts` | Publica ou agenda um short |
-| `GET` | `/social/posts/{id}` | Retorna uma publicacao |
-| `PATCH` | `/social/posts/{id}` | Atualiza a publicacao e seus destinos |
+| `GET` | `/social/posts/{id}` | Retorna uma publicação |
+| `PATCH` | `/social/posts/{id}` | Atualiza a publicação e seus destinos |
 | `DELETE` | `/social/posts/{id}` | Remove o registro local |
 | `POST` | `/social/posts/{id}/retry` | Tenta novamente todos os destinos com falha |
 | `POST` | `/social/posts/{id}/retry/{socialPostId}` | Tenta novamente um destino |
 
-## Listar publicacoes
+## Listar publicações
 
 <ParamField query="limit" type="integer">
-  Itens por pagina, entre 1 e 1000. Padrao: 20.
+  Itens por página, entre 1 e 1000. Padrão: 20.
 </ParamField>
 
 <ParamField query="status" type="string | array">
-  Um status ou uma lista separada por virgulas: `draft`, `scheduled`, `processing`,
+  Um status ou uma lista separada por vírgulas: `draft`, `scheduled`, `processing`,
   `published` ou `failed`.
 </ParamField>
 
@@ -32,14 +32,14 @@ curl "https://api.realoficial.com.br/api/v1/social/posts?status=scheduled,failed
   -H "Accept: application/json"
 ```
 
-## Criar publicacao
+## Criar publicação
 
 ```text
 POST /social/posts
 ```
 
 <ParamField body="short_id" type="string" required>
-  ID de um short do workspace com timeline renderizavel.
+  ID de um short do workspace com timeline renderizável.
 </ParamField>
 
 <ParamField body="social_accounts" type="array" required>
@@ -47,33 +47,33 @@ POST /social/posts
 </ParamField>
 
 <ParamField body="title" type="string" required>
-  Titulo padrao, com ate 255 caracteres.
+  Título padrão, com até 255 caracteres.
 </ParamField>
 
 <ParamField body="description" type="string">
-  Descricao padrao, com ate 5000 caracteres.
+  Descrição padrão, com até 5000 caracteres.
 </ParamField>
 
 <ParamField body="scheduled_at" type="string">
-  Horario futuro no formato `YYYY-MM-DD HH:mm:ss`, interpretado no fuso
-  `America/Sao_Paulo`. O agendamento pode ficar no maximo 60 dias no futuro.
+  Horário futuro no formato `YYYY-MM-DD HH:mm:ss`, interpretado no fuso
+  `America/Sao_Paulo`. O agendamento pode ficar no máximo 60 dias no futuro.
 </ParamField>
 
 <ParamField body="tiktok_guidelines_filter_enabled" type="boolean">
-  Ativa o filtro de diretrizes do TikTok. Padrao: `true`.
+  Ativa o filtro de diretrizes do TikTok. Padrão: `true`.
 </ParamField>
 
 <ParamField body="tags" type="array">
-  Ate 10 tags, com no maximo 50 caracteres cada.
+  Até 10 tags, com no máximo 50 caracteres cada.
 </ParamField>
 
 <ParamField body="auto_reply_config" type="object">
-  Automacao opcional. `name` e `dm_message` sao obrigatorios quando o objeto e enviado;
-  tambem aceita `comment_reply`, `keywords` e `match_mode` (`exact` ou `contains`).
+  Automação opcional. `name` e `dm_message` são obrigatórios quando o objeto é enviado;
+  também aceita `comment_reply`, `keywords` e `match_mode` (`exact` ou `contains`).
 </ParamField>
 
-Se `scheduled_at` for omitido, a publicacao e iniciada imediatamente. Caso o short ainda
-nao tenha render final, o fluxo cria ou aguarda a renderizacao antes de publicar.
+Se `scheduled_at` for omitido, a publicação é iniciada imediatamente. Caso o short ainda
+não tenha render final, o fluxo cria ou aguarda a renderização antes de publicar.
 
 <RequestExample>
 ```bash cURL
@@ -89,7 +89,7 @@ curl -X POST "https://api.realoficial.com.br/api/v1/social/posts" \
     "social_accounts": [
       {
         "id": "01ksocialaccount000000000001",
-        "title": "Titulo especifico para esta conta"
+        "title": "Título específico para esta conta"
       }
     ]
   }'
@@ -115,18 +115,17 @@ curl -X POST "https://api.realoficial.com.br/api/v1/social/posts" \
 
 `PATCH /social/posts/{id}` aceita `title`, `description`, `scheduled_at`,
 `tiktok_guidelines_filter_enabled`, `auto_reply_config` e exige `social_accounts` com ao
-menos um destino. Titulos e descricoes podem ser personalizados por conta.
+menos um destino. Títulos e descrições podem ser personalizados por conta.
 
-Uma atualizacao pode responder `207 Multi-Status` quando o registro local foi salvo, mas
-alguma plataforma nao permite ou recusou a alteracao do post ja publicado.
+Uma atualização pode responder `207 Multi-Status` quando o registro local foi salvo, mas
+alguma plataforma não permite ou recusou a alteração do post já publicado.
 
 ## Excluir
 
 `DELETE /social/posts/{id}` remove o post e seus destinos do banco da Real Oficial. A
-operacao atual **nao apaga videos que ja foram publicados nas plataformas externas**.
+operação atual **não apaga vídeos que já foram publicados nas plataformas externas**.
 
 ## Retry
 
 Use os endpoints de retry somente para destinos com status `failed`. O retorno informa os
-destinos reenfileirados e os erros que nao puderam ser recuperados.
-
+destinos reenfileirados e os erros que não puderam ser recuperados.

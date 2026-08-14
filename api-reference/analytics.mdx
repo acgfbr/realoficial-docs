@@ -1,25 +1,25 @@
 ---
 title: 'Analytics'
-description: 'KPIs, desempenho de posts, crescimento e exportacao de dados sociais'
+description: 'KPIs, desempenho de posts, crescimento e exportação de dados sociais'
 ---
 
-Os endpoints de Analytics combinam metricas sincronizadas das contas sociais com dados de
+Os endpoints de Analytics combinam métricas sincronizadas das contas sociais com dados de
 projetos e shorts da Real Oficial.
 
 ## Filtros comuns
 
 <ParamField query="range" type="integer">
-  Janela em dias: `30`, `60` ou `90`. Valores diferentes usam o padrao 30.
+  Janela em dias: `30`, `60` ou `90`. Valores diferentes usam o padrão 30.
 </ParamField>
 
 <ParamField query="platforms" type="string | array">
-  Plataformas separadas por virgula (`instagram,tiktok`) ou como array de query string.
+  Plataformas separadas por vírgula (`instagram,tiktok`) ou como array de query string.
   Quando omitido, inclui todas.
 </ParamField>
 
 <ParamField query="social_account_ids" type="string | array">
-  IDs separados por virgula ou como array. Tambem e aceito o singular
-  `social_account_id`. Maximo de 100 IDs.
+  IDs separados por vírgula ou como array. Também é aceito o singular
+  `social_account_id`. Máximo de 100 IDs.
 </ParamField>
 
 ## Endpoints principais
@@ -29,22 +29,22 @@ Todos usam o prefixo `/dashboard/analytics`.
 | Endpoint | Resultado |
 |---|---|
 | `GET /overview` | KPIs de views, shorts, minutos e origem dos dados |
-| `GET /posts` | Lista paginada de posts e metricas |
-| `GET /timeseries` | Serie temporal do periodo |
+| `GET /posts` | Lista paginada de posts e métricas |
+| `GET /timeseries` | Série temporal do período |
 | `GET /top-posts` | Posts de melhor desempenho |
-| `GET /platforms` | Comparacao por plataforma |
-| `GET /accounts` | Comparacao por conta social |
-| `GET /best-time` | Horarios de melhor desempenho |
-| `GET /fatigue` | Sinais de fadiga de conteudo |
+| `GET /platforms` | Comparação por plataforma |
+| `GET /accounts` | Comparação por conta social |
+| `GET /best-time` | Horários de melhor desempenho |
+| `GET /fatigue` | Sinais de fadiga de conteúdo |
 | `GET /follower-growth` | Crescimento de seguidores |
-| `GET /youtube/post/{socialPostId}/daily` | Views diarias no YouTube |
+| `GET /youtube/post/{socialPostId}/daily` | Views diárias no YouTube |
 | `GET /instagram/demographics` | Demografia do Instagram |
 | `GET /content-decay` | Decaimento de desempenho |
-| `GET /repurpose-suggestions` | Sugestoes de conteudo para reaproveitar |
+| `GET /repurpose-suggestions` | Sugestões de conteúdo para reaproveitar |
 | `GET /hashtag-trends` | Tendencias de hashtags |
 | `GET /competitor-benchmark` | Benchmark de concorrentes |
-| `GET /posts/{socialPostId}/sentiment` | Sentimento dos comentarios |
-| `GET /export` | Exportacao CSV |
+| `GET /posts/{socialPostId}/sentiment` | Sentimento dos comentários |
+| `GET /export` | Exportação CSV |
 
 ## Exemplos
 
@@ -80,15 +80,15 @@ curl \
 - `sortBy`: `date`, `views`, `impressions`, `likes`, `comments`, `shares` ou
   `engagement`;
 - `order`: `asc` ou `desc`;
-- `page`: padrao 1;
-- `limit`: entre 1 e 100, padrao 20.
+- `page`: padrão 1;
+- `limit`: entre 1 e 100, padrão 20.
 
 ### Top posts
 
 `GET /top-posts` aceita `metric` (`views`, `impressions`, `likes`, `comments`, `shares`
 ou `engagement_rate`) e `limit` entre 1 e 50.
 
-### Melhor horario
+### Melhor horário
 
 `GET /best-time` aceita `metric` (`views`, `likes` ou `engagement_rate`) e `scope`
 (`user` ou `global`).
@@ -98,10 +98,10 @@ ou `engagement_rate`) e `limit` entre 1 e 50.
 `GET /instagram/demographics` exige `social_account_id` e aceita `metric` como
 `follower_demographics` ou `engaged_audience_demographics`.
 
-### Sugestoes de reaproveitamento
+### Sugestões de reaproveitamento
 
-`GET /repurpose-suggestions` aceita `min_views` (padrao 5000), `age_days_min` (minimo 7,
-padrao 30) e `limit` (maximo 50, padrao 20).
+`GET /repurpose-suggestions` aceita `min_views` (padrão 5000), `age_days_min` (mínimo 7,
+padrão 30) e `limit` (máximo 50, padrão 20).
 
 ## Exportar CSV
 
@@ -114,7 +114,7 @@ GET /dashboard/analytics/export?type=posts&range=30
 
 ## Metas
 
-| Metodo | Endpoint | Descricao |
+| Método | Endpoint | Descrição |
 |---|---|---|
 | `GET` | `/dashboard/analytics/goals` | Lista metas |
 | `POST` | `/dashboard/analytics/goals` | Cria meta |
@@ -126,11 +126,10 @@ Ao criar uma meta:
 - `metric`: `views`, `followers`, `posts` ou `engagement_rate`;
 - `scope`: `total`, `platform` ou `account`;
 - `period`: `weekly`, `monthly`, `quarterly` ou `custom`;
-- `target_value`, `starts_at` e `ends_at` sao obrigatorios.
+- `target_value`, `starts_at` e `ends_at` são obrigatórios.
 
 <Note>
-As metricas sociais dependem da sincronizacao com os provedores. Consulte
-`last_synced_at`; uma resposta vazia pode significar que a conta ainda nao possui
-snapshots no periodo solicitado.
+As métricas sociais dependem da sincronização com os provedores. Consulte
+`last_synced_at`; uma resposta vazia pode significar que a conta ainda não possui
+snapshots no período solicitado.
 </Note>
-

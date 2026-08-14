@@ -1,6 +1,6 @@
 ---
-title: Introducao
-description: 'Bem-vindo a API do Real Oficial - Crie cortes de video automaticamente'
+title: Introdução
+description: 'Bem-vindo a API do Real Oficial - Crie cortes de vídeo automaticamente'
 ---
 
 <Frame>
@@ -9,29 +9,29 @@ description: 'Bem-vindo a API do Real Oficial - Crie cortes de video automaticam
 
 ## Bem-vindo a API Real Oficial
 
-A API do Real Oficial permite que voce integre nossas funcionalidades de criacao automatica de cortes de video diretamente em sua aplicacao.
+A API do Real Oficial permite que você integre nossas funcionalidades de criação automática de cortes de vídeo diretamente em sua aplicação.
 
 <CardGroup cols={2}>
   <Card
-    title="Autenticacao"
+    title="Autenticação"
     icon="key"
     href="/authentication"
   >
-    Aprenda como autenticar suas requisicoes
+    Aprenda como autenticar suas requisições
   </Card>
   <Card
     title="API Reference"
     icon="code"
     href="/api-reference/overview"
   >
-    Explore todos os endpoints disponiveis
+    Explore todos os endpoints disponíveis
   </Card>
   <Card
     title="Projetos"
     icon="folder"
     href="/api-reference/projects/list"
   >
-    Gerencie seus projetos de video
+    Gerencie seus projetos de vídeo
   </Card>
   <Card
     title="Renders"
@@ -42,61 +42,61 @@ A API do Real Oficial permite que voce integre nossas funcionalidades de criacao
   </Card>
 </CardGroup>
 
-## O que voce pode fazer
+## O que você pode fazer
 
 <AccordionGroup>
-  <Accordion icon="video" title="Criar projetos a partir de videos">
+  <Accordion icon="video" title="Criar projetos a partir de vídeos">
     Envie uma URL do YouTube, Google Drive ou link direto (.mp4) e nosso sistema automaticamente identifica os melhores momentos para cortes.
   </Accordion>
   <Accordion icon="scissors" title="Gerar cortes automaticamente">
-    Utilizamos IA para identificar os melhores trechos do seu video e gerar cortes otimizados para redes sociais.
+    Utilizamos IA para identificar os melhores trechos do seu vídeo e gerar cortes otimizados para redes sociais.
   </Accordion>
   <Accordion icon="download" title="Renderizar e exportar">
-    Exporte seus cortes em alta qualidade, prontos para publicacao no TikTok, Instagram Reels e YouTube Shorts.
+    Exporte seus cortes em alta qualidade, prontos para publicação no TikTok, Instagram Reels e YouTube Shorts.
   </Accordion>
 </AccordionGroup>
 
-## Fluxo basico de integracao
+## Fluxo básico de integração
 
 ```mermaid
 sequenceDiagram
-    participant App as Sua Aplicacao
+    participant App as Sua Aplicação
     participant API as Real Oficial API
     participant Worker as Workers
 
     App->>API: POST /login (credenciais)
-    API-->>App: Token de autenticacao
+    API-->>App: Token de autenticação
 
-    App->>API: POST /createShorts (URL do video)
+    App->>API: POST /createShorts (URL do vídeo)
     API-->>App: Projeto criado
 
-    Worker->>Worker: Processa video e gera cortes
+    Worker->>Worker: Processa vídeo e gera cortes
 
     App->>API: GET /shorts/{projectId}
     API-->>App: Lista de cortes gerados
 
     App->>API: POST /shorts/{projectId}/{shortId}/render
-    API-->>App: Renderizacao iniciada
+    API-->>App: Renderização iniciada
 
     App->>API: GET /renders
-    API-->>App: Status e URL do video renderizado
+    API-->>App: Status e URL do vídeo renderizado
 ```
 
 ## Rate Limits
 
-A API possui limites de requisicoes para garantir estabilidade:
+A API possui limites de requisições para garantir estabilidade:
 
 | Endpoint | Limite |
 |----------|--------|
-| Login | 60 requisicoes/minuto |
-| Criar Projeto | 10 requisicoes/minuto |
+| Login | 60 requisições/minuto |
+| Criar Projeto | 10 requisições/minuto |
 | Renderizar | 999999 cortes/hora |
 
-### Limite de renderizacao
+### Limite de renderização
 
-Todos os usuarios e planos possuem o mesmo limite de **999999 cortes por hora**.
+Todos os usuários e planos possuem o mesmo limite de **999999 cortes por hora**.
 
-Pedidos de renderizacao nao sao rejeitados com base no tamanho atual da fila de processamento. As protecoes contra render duplicado ou ja em andamento continuam ativas.
+Pedidos de renderização não são rejeitados com base no tamanho atual da fila de processamento. As proteções contra render duplicado ou já em andamento continuam ativas.
 
 ## Suporte
 

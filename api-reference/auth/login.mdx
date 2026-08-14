@@ -1,6 +1,6 @@
 ---
 title: 'Login'
-description: 'Autentique um usuario existente e obtenha o token de acesso'
+description: 'Autentique um usuário existente e obtenha o token de acesso'
 ---
 
 ## Endpoint
@@ -10,42 +10,42 @@ POST https://api.realoficial.com.br/api/v1/login
 ```
 
 <Note>
-Este endpoint nao requer autenticacao.
+Este endpoint não requer autenticação.
 </Note>
 
 ## Body Parameters
 
 <ParamField body="email" type="string" required>
-  Email do usuario
+  Email do usuário
 </ParamField>
 
 <ParamField body="password" type="string" required>
-  Senha do usuario
+  Senha do usuário
 </ParamField>
 
 ## Resposta de Sucesso
 
 <ResponseField name="message" type="string">
-  Mensagem de confirmacao do login
+  Mensagem de confirmação do login
 </ResponseField>
 
 <ResponseField name="user" type="object">
-  Objeto com dados do usuario
-  <Expandable title="Propriedades do usuario">
+  Objeto com dados do usuário
+  <Expandable title="Propriedades do usuário">
     <ResponseField name="id" type="string">
-      ID unico do usuario (ULID)
+      ID único do usuário (ULID)
     </ResponseField>
     <ResponseField name="name" type="string">
-      Nome do usuario
+      Nome do usuário
     </ResponseField>
     <ResponseField name="email" type="string">
-      Email do usuario
+      Email do usuário
     </ResponseField>
     <ResponseField name="token" type="string">
-      Token de autenticacao para usar nas proximas requisicoes
+      Token de autenticação para usar nas próximas requisições
     </ResponseField>
     <ResponseField name="balance" type="integer">
-      Saldo de creditos do usuario
+      Saldo de créditos do usuário
     </ResponseField>
     <ResponseField name="subscription" type="object">
       Dados da assinatura ativa (se houver)
@@ -76,7 +76,7 @@ const response = await fetch('https://api.realoficial.com.br/api/v1/login', {
 });
 
 const data = await response.json();
-console.log(data.user.token); // Use este token nas proximas requisicoes
+console.log(data.user.token); // Use este token nas próximas requisições
 ```
 
 ```python Python
@@ -91,7 +91,7 @@ response = requests.post(
 )
 
 data = response.json()
-token = data['user']['token']  # Use este token nas proximas requisicoes
+token = data['user']['token']  # Use este token nas próximas requisições
 ```
 
 ```php PHP
@@ -110,7 +110,7 @@ curl_setopt_array($ch, [
 
 $response = curl_exec($ch);
 $data = json_decode($response, true);
-$token = $data['user']['token']; // Use este token nas proximas requisicoes
+$token = $data['user']['token']; // Use este token nas próximas requisições
 ```
 </RequestExample>
 
@@ -137,22 +137,22 @@ $token = $data['user']['token']; // Use este token nas proximas requisicoes
 }
 ```
 
-```json 400 - Credenciais Invalidas
+```json 400 - Credenciais Inválidas
 {
   "error": "email ou senha incorreta"
 }
 ```
 
-```json 403 - Usuario Bloqueado
+```json 403 - Usuário Bloqueado
 {
   "error": "Entre em contato com o suporte e informe o erro #98465."
 }
 ```
 </ResponseExample>
 
-## Proximos Passos
+## Próximos Passos
 
-Apos fazer login, use o `token` retornado no header `Authorization` de todas as requisicoes:
+Após fazer login, use o `token` retornado no header `Authorization` de todas as requisições:
 
 ```bash
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...

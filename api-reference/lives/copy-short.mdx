@@ -1,7 +1,7 @@
 ---
 title: 'Copiar Short'
 api: 'POST /lives/shorts/{id}/copy'
-description: 'Copia um short publico para a conta do usuario'
+description: 'Copia um short público para a conta do usuário'
 ---
 
 ## Endpoint
@@ -11,10 +11,10 @@ POST https://api.realoficial.com.br/api/v1/lives/shorts/{id}/copy
 ```
 
 <Note>
-Este endpoint requer autenticacao via Bearer Token.
+Este endpoint requer autenticação via Bearer Token.
 </Note>
 
-Copia um short publico para a conta do usuario. Cria (ou reutiliza) um projeto vinculado a live.
+Copia um short público para a conta do usuário. Cria (ou reutiliza) um projeto vinculado a live.
 
 ## Path Parameters
 
@@ -25,9 +25,9 @@ Copia um short publico para a conta do usuario. Cria (ou reutiliza) um projeto v
 ## Regras
 
 - O short original precisa estar com status `face_analysis_done`
-- Nao e possivel copiar um short que ja e copia
-- Nao e possivel copiar o mesmo short duas vezes
-- **Custo: 1 credito** (gratuito se voce for o dono do monitor)
+- Não é possível copiar um short que já é cópia
+- Não é possível copiar o mesmo short duas vezes
+- **Custo: 1 crédito** (gratuito se você for o dono do monitor)
 - Requer assinatura ativa
 
 <RequestExample>
@@ -52,25 +52,25 @@ curl -X POST "https://api.realoficial.com.br/api/v1/lives/shorts/01short.../copy
 }
 ```
 
-```json 402 - Sem Creditos
+```json 402 - Sem Créditos
 {
   "error": "Sem créditos suficientes"
 }
 ```
 
-```json 403 - Sem Permissao
+```json 403 - Sem Permissão
 {
   "error": "Usuário bloqueado ou sem assinatura"
 }
 ```
 
-```json 409 - Ja Copiado
+```json 409 - Já Copiado
 {
   "error": "Short já copiado"
 }
 ```
 
-```json 422 - Short Invalido
+```json 422 - Short Inválido
 {
   "error": "Short não está pronto ou já é uma cópia"
 }
