@@ -89,16 +89,93 @@
         ]
       },
       {
-        "group": "Publicacao e Redes Sociais",
+        "group": "Social - Contas",
         "pages": [
-          "api-reference/social-accounts",
-          "api-reference/social-posts",
-          "api-reference/launchers"
+          "api-reference/social-accounts/connect",
+          "api-reference/social-accounts/list",
+          "api-reference/social-accounts/disconnect"
         ]
       },
       {
-        "group": "Conteudo e Marca",
+        "group": "Social - Publicacoes",
         "pages": [
+          "api-reference/social-posts/list",
+          "api-reference/social-posts/create",
+          "api-reference/social-posts/show",
+          "api-reference/social-posts/update",
+          "api-reference/social-posts/delete",
+          "api-reference/social-posts/retry",
+          "api-reference/social-posts/retry-destination"
+        ]
+      },
+      {
+        "group": "Social - Launchers",
+        "pages": [
+          "api-reference/launchers/list",
+          "api-reference/launchers/create",
+          "api-reference/launchers/show",
+          "api-reference/launchers/update",
+          "api-reference/launchers/delete",
+          "api-reference/launchers/update-slots",
+          "api-reference/launchers/suggest-slots",
+          "api-reference/launchers/suggest-description",
+          "api-reference/launchers/add-item",
+          "api-reference/launchers/reorder-items",
+          "api-reference/launchers/reschedule-items",
+          "api-reference/launchers/remove-item"
+        ]
+      },
+      {
+        "group": "Conteudo - Brand Kits",
+        "pages": [
+          "api-reference/brand-kits/list",
+          "api-reference/brand-kits/create",
+          "api-reference/brand-kits/show",
+          "api-reference/brand-kits/update",
+          "api-reference/brand-kits/duplicate",
+          "api-reference/brand-kits/delete"
+        ]
+      },
+      {
+        "group": "Conteudo - Templates",
+        "pages": [
+          "api-reference/templates/mine",
+          "api-reference/templates/public",
+          "api-reference/templates/show",
+          "api-reference/templates/create",
+          "api-reference/templates/copy",
+          "api-reference/templates/update",
+          "api-reference/templates/delete",
+          "api-reference/templates/publish",
+          "api-reference/templates/unpublish",
+          "api-reference/templates/use"
+        ]
+      },
+      {
+        "group": "Conteudo - Biblioteca",
+        "pages": [
+          "api-reference/library/folders-list",
+          "api-reference/library/folders-create",
+          "api-reference/library/folders-show",
+          "api-reference/library/folders-update",
+          "api-reference/library/folders-delete",
+          "api-reference/library/folder-items",
+          "api-reference/library/items-list",
+          "api-reference/library/items-create",
+          "api-reference/library/items-show",
+          "api-reference/library/items-update",
+          "api-reference/library/items-delete",
+          "api-reference/library/public-folders",
+          "api-reference/library/public-folder-items",
+          "api-reference/library/public-items"
+        ]
+      },
+      {
+        "group": "Guias de Recursos",
+        "pages": [
+          "api-reference/social-accounts",
+          "api-reference/social-posts",
+          "api-reference/launchers",
           "api-reference/brand-kits",
           "api-reference/templates",
           "api-reference/caption-templates",
