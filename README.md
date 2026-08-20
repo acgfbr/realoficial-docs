@@ -79,6 +79,10 @@ Run using docker:
 make start
 ```
 
+The container starts a small proxy in front of the Mintlify preview. Besides the regular
+documentation pages, it serves the Markdown exports used by **Copy page** and **View as
+Markdown**, the OpenAPI download, and the `llms.txt` files.
+
 ### Troubleshooting
 
 - If Mintlify dev isn't running, try `mintlify install` to reinstall dependencies
