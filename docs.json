@@ -2,13 +2,27 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "Real Oficial API",
+  "description": "Documentação da API para criar, editar, renderizar e publicar cortes de vídeo com a Real Oficial.",
   "colors": {
     "primary": "#6366f1",
     "light": "#818cf8",
     "dark": "#4f46e5"
   },
   "favicon": "/favicon.ico",
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      {
+        "title": "Baixar OpenAPI",
+        "description": "Baixe o contrato OpenAPI para Swagger ou Postman",
+        "icon": "download",
+        "href": "/openapi.json"
+      }
+    ]
+  },
   "api": {
+    "openapi": "openapi.json",
     "mdx": {
       "server": "https://api.realoficial.com.br/api/v1",
       "auth": {
@@ -188,7 +202,10 @@
       },
       {
         "group": "Contrato da API",
-        "pages": ["api-reference/limitations"]
+        "pages": [
+          "api-reference/openapi",
+          "api-reference/limitations"
+        ]
       }
     ]
   },
@@ -198,6 +215,14 @@
   },
   "navbar": {
     "links": [
+      {
+        "label": "OpenAPI",
+        "href": "/openapi.json"
+      },
+      {
+        "label": "Postman",
+        "href": "/api-reference/openapi#postman"
+      },
       {
         "label": "Comunidade",
         "href": "https://discord.gg/realoficial"

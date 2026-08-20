@@ -31,6 +31,18 @@ mintlify dev
 
 2. **Visit `http://localhost:3000` to see your documentation**
 
+## OpenAPI and Postman
+
+The public OpenAPI 3.1 contract is stored in `openapi.json`. Regenerate it from the API
+reference pages whenever an endpoint changes:
+
+```bash
+make openapi
+```
+
+Mintlify serves the file at `/openapi.json`, where it can be downloaded for Swagger or
+imported into Postman as a Collection.
+
 ## Documentation Structure
 
 ```

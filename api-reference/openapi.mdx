@@ -1,0 +1,82 @@
+---
+title: 'OpenAPI, Swagger e Postman'
+description: 'Baixe o contrato OpenAPI e importe todos os endpoints no Swagger ou Postman'
+---
+
+O contrato público da API está disponível em **OpenAPI 3.1**. O mesmo arquivo usado pelo
+Mintlify pode ser baixado, aberto em ferramentas compatíveis com Swagger ou convertido em
+uma Collection do Postman.
+
+<CardGroup cols={2}>
+  <Card title="Baixar OpenAPI" icon="download" href="/openapi.json">
+    Baixe a especificação JSON com endpoints, parâmetros, autenticação e schemas.
+  </Card>
+  <Card title="Importar no Postman" icon="paper-plane" href="#postman">
+    Gere uma Collection usando a URL pública da especificação.
+  </Card>
+  <Card title="Usar no Swagger" icon="code" href="#swagger">
+    Abra o mesmo contrato em ferramentas compatíveis com OpenAPI 3.1.
+  </Card>
+  <Card title="Documentação em Markdown" icon="file-lines" href="/llms.txt">
+    Acesse o índice das páginas disponíveis no formato Markdown.
+  </Card>
+</CardGroup>
+
+## Postman
+
+<Steps>
+  <Step title="Copie a URL do contrato">
+    Abra [openapi.json](/openapi.json) e copie a URL completa exibida pelo navegador.
+  </Step>
+  <Step title="Importe no Postman">
+    No Postman, selecione **Import**, cole a URL do contrato e confirme a importação.
+  </Step>
+  <Step title="Gere a Collection">
+    Selecione **Postman Collection** para criar uma coleção com as operações da API.
+  </Step>
+</Steps>
+
+O Postman reconhece a especificação OpenAPI, cria as requisições e configura a URL base
+`https://api.realoficial.com.br/api/v1`. Defina o token Bearer na coleção e, quando operar
+em equipe, preencha o header opcional `X-Workspace-Id`.
+
+<Note>
+O Postman pode manter especificações OpenAPI 3.0 sincronizadas com Collections. Como este
+contrato usa OpenAPI 3.1, novas versões devem ser reimportadas quando o arquivo mudar.
+</Note>
+
+## Swagger
+
+O arquivo [openapi.json](/openapi.json) pode ser aberto no Swagger Editor, Swagger UI,
+Insomnia e outras ferramentas compatíveis com OpenAPI 3.1. Informe a URL pública do
+arquivo ou faça upload do JSON.
+
+## Markdown
+
+O Mintlify disponibiliza automaticamente cada página como Markdown. Adicione `.md` ao
+final da URL de uma página, por exemplo:
+
+```text
+/api-reference/renders/create.md
+```
+
+O menu contextual de cada página também oferece as ações **Copiar página** e **Ver como
+Markdown**.
+
+Para consumo automatizado, use:
+
+| Recurso | URL |
+|---|---|
+| Índice das páginas | [`/llms.txt`](/llms.txt) |
+| Documentação completa | [`/llms-full.txt`](/llms-full.txt) |
+| Contrato da API | [`/openapi.json`](/openapi.json) |
+
+## Atualização do contrato
+
+O arquivo é gerado a partir das páginas de referência existentes:
+
+```bash
+node scripts/generate-openapi.mjs > openapi.json
+```
+
+Sempre regenere e valide a especificação ao adicionar, remover ou alterar um endpoint.
