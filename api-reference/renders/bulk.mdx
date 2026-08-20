@@ -25,7 +25,7 @@ Este endpoint requer autenticação via Bearer Token.
 <Warning>
 **Para usar renderização em lote:**
 - Usuário deve ter um plano ativo
-- O limite é de 999999 cortes por hora para todos os planos
+- O limite é de 50 cortes por hora; no plano Business, as renderizações são ilimitadas
 - O pedido não é rejeitado com base no tamanho atual da fila de processamento
 - Usuários que nunca fizeram depósito terão **marca d'água** nos vídeos
 </Warning>
@@ -124,7 +124,7 @@ $data = json_decode($response, true);
 
 ```json 400 - Limite Horário Atingido
 {
-  "error": "Você já gerou 999999 cortes na última hora. Seu plano permite 999999 cortes por hora. Aguarde alguns minutos e tente novamente."
+  "error": "Você já gerou 50 cortes na última hora. Seu plano permite 50 cortes por hora. Aguarde alguns minutos e tente novamente."
 }
 ```
 

@@ -29,7 +29,7 @@ Este endpoint requer autenticação via Bearer Token.
 <Warning>
 **Limite de renderização por hora:**
 
-Todos os usuários e planos podem solicitar até **999999 cortes por hora**.
+Todos os planos podem solicitar até **50 cortes por hora**, exceto o plano **Business**, que possui renderizações ilimitadas.
 
 O endpoint não rejeita novos pedidos com base no tamanho atual da fila de processamento. As proteções contra render duplicado ou já em andamento continuam ativas.
 
@@ -154,7 +154,7 @@ $data = json_decode($response, true);
 
 ```json 400 - Rate Limit Atingido
 {
-  "error": "Você já gerou 999999 cortes na última hora. Seu plano permite 999999 cortes por hora. Aguarde alguns minutos e tente novamente."
+  "error": "Você já gerou 50 cortes na última hora. Seu plano permite 50 cortes por hora. Aguarde alguns minutos e tente novamente."
 }
 ```
 
@@ -211,7 +211,7 @@ curl -X POST "https://api.realoficial.com.br/api/v1/renders/bulk" \
 <Warning>
 **Requisitos para renderização em lote:**
 - Usuário deve ter um plano ativo
-- O limite de 999999 cortes por hora é o mesmo para todos os planos
+- O limite é de 50 cortes por hora; no plano Business, as renderizações são ilimitadas
 - O pedido não é rejeitado com base no tamanho atual da fila de processamento
 </Warning>
 
