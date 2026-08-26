@@ -8,9 +8,9 @@ import { fileURLToPath } from 'node:url';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const publicPort = parsePort(
-  process.env.DOCS_PUBLIC_PORT ?? process.env.PORT,
+  process.env.DOCS_PUBLIC_PORT,
   3000,
-  'DOCS_PUBLIC_PORT/PORT',
+  'DOCS_PUBLIC_PORT',
 );
 const mintlifyPort = parsePort(
   process.env.MINTLIFY_INTERNAL_PORT,

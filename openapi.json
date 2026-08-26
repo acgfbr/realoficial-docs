@@ -3669,7 +3669,7 @@
           "Lives"
         ],
         "summary": "Iniciar Monitoramento",
-        "description": "Inicia o monitoramento de uma live na Twitch, Kick ou YouTube",
+        "description": "Inicia o monitoramento de uma live na Twitch ou Kick",
         "operationId": "post_lives_monitor",
         "x-docs-source": "api-reference/lives/monitor.mdx",
         "parameters": [
@@ -3691,7 +3691,7 @@
                   },
                   "url": {
                     "type": "string",
-                    "description": "URL da live (Twitch, Kick ou YouTube)"
+                    "description": "URL da live (Twitch ou Kick)"
                   },
                   "prompt": {
                     "type": "string",
@@ -4027,7 +4027,7 @@
             "name": "platform",
             "in": "query",
             "required": false,
-            "description": "Filtrar por plataforma: twitch, kick ou youtube",
+            "description": "Filtrar por plataforma: twitch ou kick",
             "schema": {
               "type": "string"
             }

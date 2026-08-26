@@ -1,7 +1,7 @@
 ---
 title: 'Iniciar Monitoramento'
 api: 'POST /lives/monitor'
-description: 'Inicia o monitoramento de uma live na Twitch, Kick ou YouTube'
+description: 'Inicia o monitoramento de uma live na Twitch ou Kick'
 ---
 
 ## Endpoint
@@ -14,7 +14,7 @@ POST https://api.realoficial.com.br/api/v1/lives/monitor
 Este endpoint requer autenticação via Bearer Token.
 </Note>
 
-Inicia o monitoramento de uma live na Twitch, Kick ou YouTube. Se a live já estiver sendo monitorada por outro usuário, o sistema reutiliza o mesmo registro — não cria duplicata.
+Inicia o monitoramento de uma live na Twitch ou Kick. Se a live já estiver sendo monitorada por outro usuário, o sistema reutiliza o mesmo registro — não cria duplicata.
 
 ## Body Parameters
 
@@ -23,7 +23,7 @@ Inicia o monitoramento de uma live na Twitch, Kick ou YouTube. Se a live já est
 </ParamField>
 
 <ParamField body="url" type="string" required>
-  URL da live (Twitch, Kick ou YouTube)
+  URL da live (Twitch ou Kick)
 </ParamField>
 
 <ParamField body="prompt" type="string">
