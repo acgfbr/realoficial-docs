@@ -1,0 +1,61 @@
+---
+title: 'Planos e acesso à API'
+description: 'Entenda quem pode usar a API e quais limites continuam dependendo do plano ou do saldo de créditos'
+---
+
+## Disponibilidade
+
+A API da Real Oficial está disponível para todas as contas. O acesso não é mais
+exclusivo do plano Viral.
+
+| Conta | Pode autenticar e usar a API? |
+|---|---|
+| Gratuita, sem assinatura | Sim |
+| Com pacote de créditos | Sim |
+| Lite | Sim |
+| Criador | Sim |
+| Viral | Sim |
+| Business | Sim |
+
+O mesmo Bearer Token da conta é usado em todos os casos. Não existe um token diferente
+por plano nem é necessário enviar o nome do plano nas requisições.
+
+<Info>
+Lite, Criador, Viral e Business possuem acesso aos recursos classificados como recursos
+de plano pago. As diferenças entre eles ficam nas cotas, créditos e capacidades descritas
+em cada endpoint.
+</Info>
+
+## Acesso à API não elimina as regras da operação
+
+Uma conta conseguir autenticar na API não significa que toda operação seja gratuita ou
+esteja disponível sem assinatura. Cada endpoint pode aplicar requisitos próprios:
+
+- saldo suficiente para uma operação cobrada em créditos;
+- assinatura ativa para uma funcionalidade de plano pago;
+- limite específico do plano, como a quantidade de lives monitoradas;
+- permissão do usuário dentro do workspace;
+- rate limit do endpoint.
+
+Por exemplo, uma conta que possui somente um pacote de créditos pode usar a API e
+processar operações compatíveis com esse saldo. Já uma operação documentada como
+“assinatura ativa obrigatória” continuará retornando `403` se a conta não possuir uma
+assinatura ativa.
+
+## Workspaces
+
+Quando `X-Workspace-Id` é enviado, o plano, os créditos e os limites utilizados são os do
+dono do workspace. A ação também depende da permissão do membro autenticado.
+
+Consulte [Workspaces](/api-reference/workspaces) para os detalhes de isolamento e papéis.
+
+## Próximos passos
+
+<CardGroup cols={2}>
+  <Card title="Autenticação" icon="key" href="/authentication">
+    Obtenha e envie seu Bearer Token.
+  </Card>
+  <Card title="Criar projeto vazio" icon="folder-plus" href="/api-reference/projects/create-empty">
+    Crie um contêiner vazio para organizar conteúdo.
+  </Card>
+</CardGroup>

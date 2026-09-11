@@ -3,7 +3,7 @@
   "info": {
     "title": "Real Oficial API",
     "summary": "API para criar, editar, renderizar e publicar cortes de vídeo.",
-    "description": "Contrato público da API v1 da Real Oficial. Envie Accept: application/json em todas as requisições e use X-Workspace-Id para selecionar um workspace de equipe.",
+    "description": "Contrato público da API v1 da Real Oficial, disponível para todas as contas e planos. Envie Accept: application/json em todas as requisições e use X-Workspace-Id para selecionar um workspace de equipe. Créditos, assinatura, limites e permissões continuam sendo avaliados em cada operação.",
     "version": "1.0.0",
     "contact": {
       "name": "Suporte Real Oficial",
@@ -335,7 +335,7 @@
         "tags": [
           "Projetos"
         ],
-        "summary": "Criar Projeto",
+        "summary": "Criar Projeto com IA",
         "description": "Crie um novo projeto a partir de uma URL de vídeo e gere cortes automaticamente",
         "operationId": "post_createShorts",
         "x-docs-source": "api-reference/projects/create.mdx",
@@ -431,7 +431,7 @@
           }
         },
         "responses": {
-          "201": {
+          "200": {
             "description": "Operação concluída com sucesso.",
             "content": {
               "application/json": {
@@ -4240,6 +4240,60 @@
       }
     },
     "/projects": {
+      "post": {
+        "tags": [
+          "Projetos"
+        ],
+        "summary": "Criar Projeto Vazio",
+        "description": "Crie um projeto vazio sem enviar ou processar um vídeo",
+        "operationId": "post_projects",
+        "x-docs-source": "api-reference/projects/create-empty.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Corpo da requisição.",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Nome do projeto. O valor persistido possui no máximo 255 caracteres."
+                  }
+                },
+                "required": [
+                  "title"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
       "get": {
         "tags": [
           "Projetos"
@@ -4386,7 +4440,7 @@
                   },
                   "aspect_ratio": {
                     "type": "string",
-                    "description": "vertical ou horizontal. Herda do projeto original se omitido. O formato horizontal exige plano Criador ou Viral."
+                    "description": "vertical ou horizontal. Herda do projeto original se omitido. O formato horizontal exige assinatura ativa de qualquer plano pago, incluindo Lite."
                   },
                   "layout": {
                     "type": "string",

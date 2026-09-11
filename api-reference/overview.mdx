@@ -11,6 +11,12 @@ Todas as requisições devem ser feitas para:
 https://api.realoficial.com.br/api/v1
 ```
 
+<Info>
+A API pode ser usada por contas gratuitas, contas com pacote de créditos e por todos os
+planos. Os requisitos de saldo, assinatura e permissão continuam sendo avaliados em cada
+operação. Consulte [Planos e acesso à API](/plans).
+</Info>
+
 ## Headers Padrão
 
 Todas as requisições devem incluir os seguintes headers:
@@ -131,9 +137,9 @@ máximo e o valor padrão variam por recurso; confira a página do endpoint.
     - POST /workspace
   </Card>
   <Card title="Projetos" icon="folder" href="/api-reference/projects/list">
-    - POST /projects
+    - POST /projects — cria um projeto vazio
     - GET /projects
-    - POST /createShorts
+    - POST /createShorts — processa um vídeo com IA
   </Card>
   <Card title="Shorts" icon="scissors" href="/api-reference/shorts/list">
     - GET /shorts/{projectId}

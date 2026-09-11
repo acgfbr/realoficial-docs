@@ -1,5 +1,5 @@
 ---
-title: 'Criar Projeto'
+title: 'Criar Projeto com IA'
 api: 'POST /createShorts'
 description: 'Crie um novo projeto a partir de uma URL de vídeo e gere cortes automaticamente'
 ---
@@ -13,6 +13,11 @@ POST https://api.realoficial.com.br/api/v1/createShorts
 <Note>
 Este endpoint requer autenticação e consome créditos do usuário.
 </Note>
+
+<Tip>
+Para criar apenas um projeto vazio, sem vídeo, processamento ou consumo de créditos, use
+[`POST /projects`](/api-reference/projects/create-empty).
+</Tip>
 
 ## Body Parameters
 

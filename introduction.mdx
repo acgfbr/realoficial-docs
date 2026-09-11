@@ -11,6 +11,12 @@ description: 'Bem-vindo a API do Real Oficial - Crie cortes de vídeo automatica
 
 A API do Real Oficial permite que você integre nossas funcionalidades de criação automática de cortes de vídeo diretamente em sua aplicação.
 
+<Info>
+A API está liberada para todas as contas: gratuita, pacote de créditos, Lite, Criador,
+Viral e Business. Créditos, assinatura e limites de cada operação continuam sendo
+aplicados normalmente. Consulte [Planos e acesso à API](/plans).
+</Info>
+
 <CardGroup cols={2}>
   <Card
     title="Autenticação"
@@ -47,6 +53,10 @@ A API do Real Oficial permite que você integre nossas funcionalidades de criaç
 <AccordionGroup>
   <Accordion icon="video" title="Criar projetos a partir de vídeos">
     Envie uma URL do YouTube, Google Drive ou link direto (.mp4) e nosso sistema automaticamente identifica os melhores momentos para cortes.
+  </Accordion>
+  <Accordion icon="folder-plus" title="Criar projetos vazios">
+    Crie um projeto apenas com título usando `POST /projects`, sem processar vídeo ou
+    consumir créditos de processamento.
   </Accordion>
   <Accordion icon="scissors" title="Gerar cortes automaticamente">
     Utilizamos IA para identificar os melhores trechos do seu vídeo e gerar cortes otimizados para redes sociais.

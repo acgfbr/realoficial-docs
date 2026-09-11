@@ -585,6 +585,7 @@ function operationId(method, path) {
 
 function successfulStatus(method, path) {
   if (path === '/templates/{id}/use') return '204';
+  if (method === 'POST' && ['/projects', '/createShorts'].includes(path)) return '200';
   if (method === 'POST' && /(^\/login$|\/render$|\/retry|\/pause$|\/resume$|\/favorite$|\/publish$|\/unpublish$|\/copy$|\/duplicate$)/.test(path)) {
     return '200';
   }
@@ -794,7 +795,7 @@ const spec = {
     title: 'Real Oficial API',
     summary: 'API para criar, editar, renderizar e publicar cortes de vídeo.',
     description:
-      'Contrato público da API v1 da Real Oficial. Envie Accept: application/json em todas as requisições e use X-Workspace-Id para selecionar um workspace de equipe.',
+      'Contrato público da API v1 da Real Oficial, disponível para todas as contas e planos. Envie Accept: application/json em todas as requisições e use X-Workspace-Id para selecionar um workspace de equipe. Créditos, assinatura, limites e permissões continuam sendo avaliados em cada operação.',
     version: '1.0.0',
     contact: {
       name: 'Suporte Real Oficial',

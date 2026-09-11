@@ -37,6 +37,7 @@
         "pages": [
           "introduction",
           "authentication",
+          "plans",
           "api-reference/overview",
           "api-reference/workspaces"
         ]
@@ -53,6 +54,7 @@
         "group": "Projetos",
         "pages": [
           "api-reference/projects/video-metadata",
+          "api-reference/projects/create-empty",
           "api-reference/projects/create",
           "api-reference/projects/list",
           "api-reference/projects/reprompt"
