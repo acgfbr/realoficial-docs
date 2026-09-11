@@ -56,8 +56,7 @@
           "api-reference/projects/video-metadata",
           "api-reference/projects/create-empty",
           "api-reference/projects/create",
-          "api-reference/projects/list",
-          "api-reference/projects/reprompt"
+          "api-reference/projects/list"
         ]
       },
       {
