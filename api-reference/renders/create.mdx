@@ -29,7 +29,17 @@ Este endpoint requer autenticação via Bearer Token.
 <Warning>
 **Limite de renderização por hora:**
 
-Todos os planos podem solicitar até **50 cortes por hora**, exceto o plano **Business**, que possui renderizações ilimitadas.
+O limite de renderizações por hora depende do plano e vale por membro do workspace:
+
+| Plano | Cortes por hora |
+|---|---|
+| Sem assinatura | 3 |
+| Lite | 30 |
+| Criador | 60 |
+| Viral | 90 |
+| Business | 90 |
+
+A contagem é por hora civil (por exemplo, das 14:00 às 14:59). Ao ultrapassar o limite, a API responde **HTTP 429** com a mensagem abaixo. Renderizações em lote são tudo-ou-nada: se o lote não couber no que resta da hora, nenhum corte é enfileirado.
 
 O endpoint não rejeita novos pedidos com base no tamanho atual da fila de processamento. As proteções contra render duplicado ou já em andamento continuam ativas.
 
@@ -152,9 +162,9 @@ $data = json_decode($response, true);
 }
 ```
 
-```json 400 - Rate Limit Atingido
+```json 429 - Limite Horário Atingido
 {
-  "error": "Você já gerou 50 cortes na última hora. Seu plano permite 50 cortes por hora. Aguarde alguns minutos e tente novamente."
+  "error": "Você já gerou 30 cortes nesta hora. Seu plano permite 30 cortes por hora. Aguarde para fazer mais renderizações."
 }
 ```
 
@@ -211,7 +221,7 @@ curl -X POST "https://api.realoficial.com.br/api/v1/renders/bulk" \
 <Warning>
 **Requisitos para renderização em lote:**
 - Usuário deve ter um plano ativo
-- O limite é de 50 cortes por hora; no plano Business, as renderizações são ilimitadas
+- O limite por hora depende do plano (Lite 30, Criador 60, Viral 90, Business 90; sem assinatura 3) — veja [Rate Limits](#rate-limits)
 - O pedido não é rejeitado com base no tamanho atual da fila de processamento
 </Warning>
 

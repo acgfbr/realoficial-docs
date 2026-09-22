@@ -25,7 +25,7 @@ Este endpoint requer autenticação via Bearer Token.
 <Warning>
 **Para usar renderização em lote:**
 - Usuário deve ter um plano ativo
-- O limite é de 50 cortes por hora; no plano Business, as renderizações são ilimitadas
+- O limite por hora depende do plano: Lite 30, Criador 60, Viral 90, Business 90 (sem assinatura: 3). Vale por membro do workspace e por hora civil. O lote é tudo-ou-nada: se não couber no restante da hora, nenhum corte é enfileirado
 - O pedido não é rejeitado com base no tamanho atual da fila de processamento
 - Usuários que nunca fizeram depósito terão **marca d'água** nos vídeos
 </Warning>
@@ -122,9 +122,9 @@ $data = json_decode($response, true);
 }
 ```
 
-```json 400 - Limite Horário Atingido
+```json 429 - Limite Horário Atingido
 {
-  "error": "Você já gerou 50 cortes na última hora. Seu plano permite 50 cortes por hora. Aguarde alguns minutos e tente novamente."
+  "error": "Você já gerou 30 cortes nesta hora. Seu plano permite 30 cortes por hora. Aguarde para fazer mais renderizações."
 }
 ```
 
