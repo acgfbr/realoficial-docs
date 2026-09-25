@@ -6505,6 +6505,119 @@
           }
         ]
       }
+    },
+    "/shorts/{projectId}/{shortId}/transcript": {
+      "get": {
+        "tags": [
+          "Shorts"
+        ],
+        "summary": "Transcrição do short",
+        "description": "Texto falado do corte (o mesmo usado pela sugestão de descrição), com segmentos e palavras em ms relativos ao início do corte. Corte sem fala retorna 200 com text vazio.",
+        "operationId": "get_shorts_by_projectId_by_shortId_transcript",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transcrição do corte.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "project_id": {
+                      "type": "string"
+                    },
+                    "short_id": {
+                      "type": "string"
+                    },
+                    "duration_ms": {
+                      "type": "integer"
+                    },
+                    "source": {
+                      "type": "string",
+                      "nullable": true,
+                      "enum": [
+                        "transcription",
+                        "timeline_captions",
+                        null
+                      ]
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "segments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "text": {
+                            "type": "string"
+                          },
+                          "start_ms": {
+                            "type": "integer"
+                          },
+                          "end_ms": {
+                            "type": "integer"
+                          },
+                          "words": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "text": {
+                                  "type": "string"
+                                },
+                                "start_ms": {
+                                  "type": "integer"
+                                },
+                                "end_ms": {
+                                  "type": "integer"
+                                },
+                                "speaker": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
     }
   },
   "components": {

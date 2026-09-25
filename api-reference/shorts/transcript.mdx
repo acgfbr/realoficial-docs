@@ -1,0 +1,204 @@
+---
+title: 'Transcrição do Short'
+api: 'GET /shorts/{projectId}/{shortId}/transcript'
+description: 'Texto falado de um corte, com tempos por frase e por palavra'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/shorts/{projectId}/{shortId}/transcript
+```
+
+Retorna o que é falado **dentro de um corte**: o texto corrido e os mesmos trechos
+separados em frases e palavras, com tempos contados a partir do início do corte.
+
+O campo `text` é exatamente o texto que a Real Oficial usa para sugerir a descrição do
+corte. Use este endpoint para gerar a legenda, o título ou as hashtags com o seu próprio
+modelo, por exemplo quando o limite diário de sugestões for atingido.
+
+<Note>
+Este endpoint requer autenticação via Bearer token e opera no workspace ativo. É
+somente leitura: qualquer membro do workspace pode consultar.
+</Note>
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short (ULID), como retornado por [Listar Shorts](/api-reference/shorts/list).
+</ParamField>
+
+## Resposta
+
+<ResponseField name="project_id" type="string">
+  ID do projeto.
+</ResponseField>
+
+<ResponseField name="short_id" type="string">
+  ID do short.
+</ResponseField>
+
+<ResponseField name="duration_ms" type="integer">
+  Duração do corte em milissegundos.
+</ResponseField>
+
+<ResponseField name="source" type="string | null">
+  De onde veio o texto:
+
+  - `transcription`: transcrição do vídeo original. Traz `segments` com tempos.
+  - `timeline_captions`: legenda salva no editor, usada em vídeos importados que não têm
+    transcrição no servidor. Traz só `text`, e `segments` vem vazio.
+  - `null`: o corte não tem fala transcrita.
+</ResponseField>
+
+<ResponseField name="text" type="string">
+  Texto corrido do corte, em minúsculas e sem garantia de pontuação. Vazio quando não há
+  fala.
+</ResponseField>
+
+<ResponseField name="segments" type="array">
+  Frases do corte, em ordem, com até cerca de 35 caracteres cada.
+
+  <Expandable title="Campos de cada segmento">
+    <ResponseField name="text" type="string">Texto da frase.</ResponseField>
+    <ResponseField name="start_ms" type="integer">Início, em ms a partir do começo do corte.</ResponseField>
+    <ResponseField name="end_ms" type="integer">Fim, em ms a partir do começo do corte.</ResponseField>
+    <ResponseField name="words" type="array">
+      Palavras da frase, cada uma com `text`, `start_ms`, `end_ms` e, quando o vídeo tem
+      identificação de quem fala, `speaker`.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<Note>
+Corte sem fala não é erro: a resposta é `200` com `source: null`, `text` vazio e
+`segments` vazio. Trate esse caso antes de chamar o seu modelo.
+</Note>
+
+## Erros
+
+| Status | Quando |
+|---:|---|
+| `404` | O projeto não existe, não pertence ao workspace ativo ou o short não pertence ao projeto. |
+| `429` | Mais de 60 consultas por minuto. |
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/shorts/PROJECT_ID/SHORT_ID/transcript" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+
+```javascript JavaScript
+const response = await fetch(
+  `https://api.realoficial.com.br/api/v1/shorts/${projectId}/${shortId}/transcript`,
+  { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } }
+);
+const transcript = await response.json();
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+{
+  "project_id": "01k9xq3c7h0v2b8m4n6p1r5s7t",
+  "short_id": "01k9xq5d2f4g6h8j0k2m4n6p8q",
+  "duration_ms": 42000,
+  "source": "transcription",
+  "text": "você não vai acreditar no que aconteceu na final ...",
+  "segments": [
+    {
+      "text": "você não vai acreditar no que",
+      "start_ms": 120,
+      "end_ms": 1480,
+      "words": [
+        { "text": "você", "start_ms": 120, "end_ms": 310 },
+        { "text": "não", "start_ms": 310, "end_ms": 470 }
+      ]
+    }
+  ]
+}
+```
+
+```json 200 (sem fala)
+{
+  "project_id": "01k9xq3c7h0v2b8m4n6p1r5s7t",
+  "short_id": "01k9xq5d2f4g6h8j0k2m4n6p8q",
+  "duration_ms": 60000,
+  "source": null,
+  "text": "",
+  "segments": []
+}
+```
+</ResponseExample>
+
+## Gerar a descrição com o seu modelo quando o limite for atingido
+
+A sugestão de descrição da Real Oficial (`POST /shorts/{shortId}/suggest-description`) tem
+limite de **100 sugestões por dia** por usuário. Quando o limite é atingido, ela responde
+`429` com `code: "caption_suggestion_daily_limit"` e o header `Retry-After` (segundos até a
+virada do dia no horário de Brasília).
+
+Nesse caso, busque a transcrição e gere a descrição com o provedor que você preferir. O
+exemplo abaixo usa o OpenRouter com uma chave sua:
+
+```javascript JavaScript
+const API = 'https://api.realoficial.com.br/api/v1';
+const headers = { Authorization: `Bearer ${token}`, Accept: 'application/json' };
+
+async function describeShort(projectId, shortId) {
+  const suggestion = await fetch(`${API}/shorts/${shortId}/suggest-description`, {
+    method: 'POST',
+    headers: { ...headers, 'Content-Type': 'application/json' },
+    body: '{}',
+  });
+  if (suggestion.ok) return suggestion.json();
+
+  const error = await suggestion.json();
+  if (suggestion.status !== 429 || error.code !== 'caption_suggestion_daily_limit') {
+    throw new Error(error.error);
+  }
+
+  // Limite diário atingido: gera com o seu próprio modelo.
+  const { text } = await fetch(`${API}/shorts/${projectId}/${shortId}/transcript`, { headers })
+    .then((response) => response.json());
+  if (!text) return null; // corte sem fala
+
+  const completion = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'SEU_MODELO',
+      messages: [{
+        role: 'user',
+        content:
+          'Escreva uma legenda curta para este vídeo vertical, no mesmo idioma da ' +
+          'transcrição, com 1 a 3 emojis e de 6 a 10 hashtags. Responda só com JSON ' +
+          '{"description": "...", "hashtags": ["..."]}.\n\nTranscrição:\n' + text.slice(0, 8000),
+      }],
+    }),
+  }).then((response) => response.json());
+
+  return JSON.parse(completion.choices[0].message.content);
+}
+```
+
+<Tip>
+A sugestão da Real Oficial usa no máximo os primeiros 8.000 caracteres de `text`. Cortar no
+mesmo tamanho mantém as duas saídas comparáveis.
+</Tip>
+
+## Endpoints relacionados
+
+| Endpoint | O que retorna |
+|---|---|
+| `GET /shorts/{projectId}/{shortId}/transcript` | Fala do corte em JSON, pronta para LLM (esta página). |
+| `GET /projects/{projectId}/shorts/{shortId}/captions` | SRT da legenda **editada** que aparece no vídeo. |
+| `GET /projects/{projectId}/transcription` | SRT da transcrição do **vídeo inteiro**. |

@@ -64,7 +64,8 @@
         "pages": [
           "api-reference/shorts/list",
           "api-reference/shorts/preview",
-          "api-reference/shorts/timeline"
+          "api-reference/shorts/timeline",
+          "api-reference/shorts/transcript"
         ]
       },
       {
