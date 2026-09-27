@@ -77,6 +77,58 @@
         ]
       },
       {
+        "group": "IA - Dublagem",
+        "pages": [
+          "api-reference/dubbing/languages",
+          "api-reference/dubbing/create",
+          "api-reference/dubbing/show",
+          "api-reference/dubbing/list",
+          "api-reference/dubbing/timeline"
+        ]
+      },
+      {
+        "group": "IA - Tradução de Legendas",
+        "pages": [
+          "api-reference/translations/languages",
+          "api-reference/translations/short-create",
+          "api-reference/translations/short-list",
+          "api-reference/translations/timeline",
+          "api-reference/translations/source-timeline",
+          "api-reference/translations/project-create",
+          "api-reference/translations/project-list"
+        ]
+      },
+      {
+        "group": "IA - Imagens",
+        "pages": [
+          "api-reference/images/models",
+          "api-reference/images/pricing",
+          "api-reference/images/create",
+          "api-reference/images/show",
+          "api-reference/images/queue"
+        ]
+      },
+      {
+        "group": "IA - Thumbnails",
+        "pages": [
+          "api-reference/thumbnails/sessions-create",
+          "api-reference/thumbnails/sessions-list",
+          "api-reference/thumbnails/sessions-show",
+          "api-reference/thumbnails/generations-create",
+          "api-reference/thumbnails/generations-hide",
+          "api-reference/thumbnails/cover-set",
+          "api-reference/thumbnails/cover-remove"
+        ]
+      },
+      {
+        "group": "Uploads de Mídia",
+        "pages": [
+          "api-reference/uploads/create",
+          "api-reference/uploads/complete",
+          "api-reference/uploads/abort"
+        ]
+      },
+      {
         "group": "Lives - Monitoramento",
         "pages": [
           "api-reference/lives/monitor",
@@ -189,6 +241,10 @@
       {
         "group": "Guias de Recursos",
         "pages": [
+          "api-reference/dubbing",
+          "api-reference/translations",
+          "api-reference/images",
+          "api-reference/thumbnails",
           "api-reference/social-accounts",
           "api-reference/social-posts",
           "api-reference/launchers",
@@ -200,7 +256,9 @@
       },
       {
         "group": "Analytics",
-        "pages": ["api-reference/analytics"]
+        "pages": [
+          "api-reference/analytics"
+        ]
       },
       {
         "group": "Contrato da API",

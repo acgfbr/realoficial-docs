@@ -1,0 +1,76 @@
+---
+title: 'Concluir Upload de Mídia'
+api: 'POST /media-asset-uploads/{uploadId}/complete'
+description: 'Confirma o envio dos bytes e devolve o endereço permanente do arquivo'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/media-asset-uploads/{uploadId}/complete
+```
+
+Chame depois do `PUT` dos bytes em `upload.url`. O backend confere se o arquivo chegou
+com o tamanho e o tipo declarados. Envie o corpo exatamente como `{}`.
+
+## Path Parameters
+
+<ParamField path="uploadId" type="string" required>
+  `upload_id` devolvido por [Iniciar Upload de Mídia](/api-reference/uploads/create).
+</ParamField>
+
+## Resposta
+
+<ResponseField name="asset" type="object">
+  <Expandable title="Propriedades">
+    <ResponseField name="canonical_url" type="string">
+      Endereço permanente do arquivo. Use este valor como `imageUrl`, `reference_url` ou
+      em `references`.
+    </ResponseField>
+    <ResponseField name="read_url" type="string">URL temporária para baixar ou exibir o arquivo.</ResponseField>
+    <ResponseField name="expires_at" type="string">Expiração de `read_url`.</ResponseField>
+    <ResponseField name="file_key" type="string">Identificador interno do arquivo.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Erros
+
+| HTTP | `code` | Quando |
+|---|---|---|
+| 404 | `upload_not_found` | Upload inexistente ou de outro workspace |
+| 409 | `upload_not_found_in_storage` | Os bytes ainda não chegaram; confira o `PUT` |
+| 409 | `upload_closed` | O upload foi cancelado |
+| 410 | `upload_expired` | O upload expirou (24 horas) |
+| 422 | `upload_head_mismatch` | Tamanho ou tipo enviado diferente do declarado |
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/media-asset-uploads/UPLOAD_ID/complete" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{}'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Concluído
+{
+  "upload_id": "01k6upl0000000000000000001",
+  "status": "completed",
+  "asset": {
+    "file_key": "uploads/3f2b8c1e-9a4d-4e7f-b2c1-0d9e8f7a6b5c.png",
+    "canonical_url": "https://media.realoficial.com.br/_media/uploads/3f2b8c1e-9a4d-4e7f-b2c1-0d9e8f7a6b5c.png",
+    "read_url": "https://storage.example/uploads/arquivo.png?assinatura",
+    "expires_at": "2026-09-27T13:00:00+00:00"
+  }
+}
+```
+
+```json 409 - Bytes não enviados
+{
+  "code": "upload_not_found_in_storage",
+  "error": "O arquivo ainda não chegou ao storage."
+}
+```
+</ResponseExample>

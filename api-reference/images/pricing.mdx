@@ -1,0 +1,104 @@
+---
+title: 'Tabela Pública de Preços'
+api: 'GET /landing/image-pricing'
+description: 'Preços de geração de imagem e quantas imagens cada plano cobre, sem autenticação'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/landing/image-pricing
+```
+
+Endpoint público, **sem autenticação**, para exibir preços em páginas abertas. Traz o
+mesmo catálogo de [Modelos de Imagem](/api-reference/images/models) e, para cada plano
+atual, quantas imagens de cada modelo os créditos mensais cobrem.
+
+<Warning>
+A resposta tem cache de até 10 minutos. Para saber o valor exato que será cobrado, use
+[Modelos de Imagem](/api-reference/images/models), que é calculado na hora.
+</Warning>
+
+## Resposta
+
+Além dos campos de [Modelos de Imagem](/api-reference/images/models) (`models`,
+`default`, `max_images_per_request`, `promotion`, `thumbnail_workflows`):
+
+<ResponseField name="thumbnails" type="array">
+  Resumo dos modos de thumbnail: `mode`, `credits_per_image`,
+  `regular_credits_per_image`, `model_credits` e `default_model`.
+</ResponseField>
+
+<ResponseField name="plans" type="array">
+  Planos atuais em reais, do mais barato ao mais caro.
+  <Expandable title="Propriedades">
+    <ResponseField name="slug" type="string">Identificador do plano.</ResponseField>
+    <ResponseField name="name" type="string">Nome do plano.</ResponseField>
+    <ResponseField name="interval" type="string">`monthly` ou `yearly`.</ResponseField>
+    <ResponseField name="price_brl" type="number">Preço do ciclo.</ResponseField>
+    <ResponseField name="monthly_price_brl" type="number">Preço equivalente por mês.</ResponseField>
+    <ResponseField name="credits_per_month" type="integer">Créditos por mês.</ResponseField>
+    <ResponseField name="models" type="object">
+      Por modelo: `images_per_month` e `price_per_image_brl`.
+    </ResponseField>
+    <ResponseField name="thumbnails" type="object">Mesmo formato, por modo de thumbnail.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="generated_at" type="string">Quando a tabela foi calculada.</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/landing/image-pricing" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "models": [
+    {
+      "id": "gpt-image-2",
+      "label": "GPT Image 2",
+      "credits_per_image": 5,
+      "regular_credits_per_image": 5
+    }
+  ],
+  "default": "gpt-image-2",
+  "max_images_per_request": 4,
+  "promotion": null,
+  "thumbnail_workflows": [],
+  "thumbnails": [
+    {
+      "mode": "scene",
+      "credits_per_image": 5,
+      "regular_credits_per_image": 5,
+      "model_credits": { "gpt-image-2": 5 },
+      "default_model": "gpt-image-2"
+    }
+  ],
+  "plans": [
+    {
+      "slug": "lite-v6-monthly-brl",
+      "name": "Lite",
+      "interval": "monthly",
+      "price_brl": 59.9,
+      "monthly_price_brl": 59.9,
+      "credits_per_month": 1800,
+      "models": {
+        "gpt-image-2": { "images_per_month": 360, "price_per_image_brl": 0.17 }
+      },
+      "thumbnails": {
+        "scene": { "images_per_month": 360, "price_per_image_brl": 0.17 }
+      }
+    }
+  ],
+  "generated_at": "2026-09-27T12:00:00Z"
+}
+```
+</ResponseExample>
+
+<Note>
+O exemplo foi resumido. Preços e planos mudam: use sempre a resposta real.
+</Note>

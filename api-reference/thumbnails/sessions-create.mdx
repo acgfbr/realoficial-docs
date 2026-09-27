@@ -1,0 +1,107 @@
+---
+title: 'Criar Sessão de Thumbnail'
+api: 'POST /projects/{projectId}/shorts/{shortId}/ai-thumbnail-sessions'
+description: 'Cria uma sessão de thumbnail para um short, opcionalmente com uma imagem de referência'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/projects/{projectId}/shorts/{shortId}/ai-thumbnail-sessions
+```
+
+A sessão agrupa as opções de thumbnail geradas para um quadro do short. Crie uma sessão
+por quadro ou referência que quiser usar. Veja o [guia de Thumbnails](/api-reference/thumbnails).
+
+<Note>
+Rate limit: 60 requisições por minuto.
+</Note>
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short (ULID).
+</ParamField>
+
+## Body
+
+<ParamField body="frame" type="integer" required>
+  Número do quadro de origem no short, de 0 a 10.000.000.
+</ParamField>
+
+<ParamField body="fps" type="number" required>
+  Quadros por segundo do short, de 1 a 240.
+</ParamField>
+
+<ParamField body="width" type="integer" required>
+  Largura do quadro de origem, de 1 a 8192.
+</ParamField>
+
+<ParamField body="height" type="integer" required>
+  Altura do quadro de origem, de 1 a 8192.
+</ParamField>
+
+<ParamField body="reference_url" type="string">
+  `asset.canonical_url` de um [upload](/api-reference/uploads/create) do mesmo workspace,
+  normalmente a captura do quadro. Obrigatório para os modos `portrait`, `edit` e
+  `layers`.
+</ParamField>
+
+`frame`, `fps`, `width` e `height` identificam a origem da thumbnail; eles não mudam o
+tamanho da arte gerada.
+
+<RequestExample>
+```bash cURL
+curl -X POST \
+  "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID/shorts/SHORT_ID/ai-thumbnail-sessions" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "frame": 450,
+    "fps": 30,
+    "width": 1080,
+    "height": 1920,
+    "reference_url": "https://media.realoficial.com.br/_media/uploads/3f2b8c1e-9a4d-4e7f-b2c1-0d9e8f7a6b5c.png"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 201 - Sessão criada
+{
+  "id": "01k6ses0000000000000000001",
+  "project_id": "01k3ab12yqtsyrzjb0fveqy5zx",
+  "short_id": "01k4ef56yqtsyrzjb0gveqy7cd",
+  "source_project_id": "01k3ab12yqtsyrzjb0fveqy5zx",
+  "source_short_id": "01k4ef56yqtsyrzjb0gveqy7cd",
+  "frame": 450,
+  "fps": 30.0,
+  "width": 1080,
+  "height": 1920,
+  "reference_url": "https://media.realoficial.com.br/_media/uploads/3f2b8c1e-9a4d-4e7f-b2c1-0d9e8f7a6b5c.png",
+  "reference_asset": {
+    "remoteUrl": "https://media.realoficial.com.br/_media/uploads/3f2b8c1e-9a4d-4e7f-b2c1-0d9e8f7a6b5c.png",
+    "remoteFileKey": "uploads/3f2b8c1e-9a4d-4e7f-b2c1-0d9e8f7a6b5c.png",
+    "playbackUrl": "https://media.example/uploads/arquivo.png?assinatura",
+    "playbackUrlExpiresAt": "2026-09-27T16:04:05+00:00"
+  },
+  "reference_unavailable": false,
+  "generations": [],
+  "created_at": "2026-09-27T15:04:05+00:00"
+}
+```
+
+```json 422 - Referência fora do workspace
+{
+  "message": "Esta referência não está disponível neste espaço. Envie a imagem novamente.",
+  "errors": {
+    "imageUrl": ["Esta referência não está disponível neste espaço. Envie a imagem novamente."]
+  }
+}
+```
+</ResponseExample>

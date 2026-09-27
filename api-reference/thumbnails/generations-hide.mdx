@@ -1,0 +1,60 @@
+---
+title: 'Ocultar Opção de Thumbnail'
+api: 'DELETE /projects/{projectId}/shorts/{shortId}/ai-thumbnail-sessions/{sessionId}/generations/{generationId}'
+description: 'Remove uma opção de thumbnail da galeria da sessão'
+---
+
+## Endpoint
+
+```text
+DELETE https://api.realoficial.com.br/api/v1/projects/{projectId}/shorts/{shortId}/ai-thumbnail-sessions/{sessionId}/generations/{generationId}
+```
+
+Oculta a opção das listagens de sessão. O arquivo não é apagado: uma capa já aplicada e
+publicações agendadas com ela continuam funcionando, e o ID continua consultável em
+[Consultar Imagem](/api-reference/images/show).
+
+Só é possível ocultar opções que já terminaram (`completed` ou `failed`).
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short (ULID).
+</ParamField>
+
+<ParamField path="sessionId" type="string" required>
+  ID da sessão (ULID).
+</ParamField>
+
+<ParamField path="generationId" type="string" required>
+  ID da opção (ULID).
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X DELETE \
+  "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID/shorts/SHORT_ID/ai-thumbnail-sessions/SESSION_ID/generations/GENERATION_ID" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Ocultada
+{
+  "id": "01k6img0000000000000000001",
+  "hidden": true
+}
+```
+
+```json 409 - Ainda em andamento
+{
+  "error": "Aguarde a geração terminar antes de removê-la da galeria.",
+  "code": "thumbnail_generation_pending"
+}
+```
+</ResponseExample>

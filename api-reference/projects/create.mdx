@@ -106,6 +106,13 @@ Para criar apenas um projeto vazio, sem vídeo, processamento ou consumo de cré
   Se `true`, adiciona uma chamada para ação (CTA) nos primeiros 3 segundos do corte.
 </ParamField>
 
+<ParamField body="target_languages" type="array">
+  Até 3 códigos de [Idiomas de Tradução](/api-reference/translations/languages). Cada
+  short é traduzido automaticamente assim que fica pronto, sem custo. Ignorado quando
+  `ignoreCaptions` é `true`. Código inválido responde `422` com
+  `code: "invalid_target_languages"`. Veja [Tradução de Legendas](/api-reference/translations).
+</ParamField>
+
 ## Custo em Créditos
 
 <Warning>

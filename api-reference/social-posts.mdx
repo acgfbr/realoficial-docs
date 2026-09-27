@@ -72,6 +72,21 @@ POST /social/posts
   também aceita `comment_reply`, `keywords` e `match_mode` (`exact` ou `contains`).
 </ParamField>
 
+<ParamField body="dub_id" type="string">
+  Publica a versão [dublada](/api-reference/dubbing) do short. A dublagem precisa estar
+  concluída.
+</ParamField>
+
+<ParamField body="subtitle_translation_id" type="string">
+  Publica o short com a [legenda traduzida](/api-reference/translations). O título padrão
+  passa a ser o título traduzido.
+</ParamField>
+
+Com `dub_id` ou `subtitle_translation_id`, a versão escolhida é renderizada antes de
+publicar, se ainda não existir. Uma variante indisponível responde
+`422 variant_unavailable`. A publicação retorna `dub_id`, `dub_language` e
+`ai_disclosure`.
+
 Se `scheduled_at` for omitido, a publicação é iniciada imediatamente. Caso o short ainda
 não tenha render final, o fluxo cria ou aguarda a renderização antes de publicar.
 

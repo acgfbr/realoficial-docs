@@ -1,0 +1,73 @@
+---
+title: 'Fila de Imagens'
+api: 'GET /ai-usage/image/queue'
+description: 'Mostra o volume da fila de geração e o status de várias gerações numa chamada'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/ai-usage/image/queue
+```
+
+Útil para acompanhar várias gerações de uma vez e mostrar ao usuário quanto a fila está
+cheia. Não traz URLs de imagem, posição na fila nem previsão de término: para o
+resultado, use [Consultar Imagem](/api-reference/images/show).
+
+<Note>
+Rate limit: 60 requisições por minuto. Respeite `poll_after_ms` entre consultas.
+</Note>
+
+## Query Parameters
+
+<ParamField query="ids[]" type="array">
+  Até 50 IDs de geração, repetindo o parâmetro (`ids[]=A&ids[]=B`). IDs inexistentes ou
+  de outra conta são ignorados.
+</ParamField>
+
+## Resposta
+
+<ResponseField name="global" type="object">
+  Volume da fila de toda a plataforma: `queued`, `processing`, `total` e `sampled_at`.
+</ResponseField>
+<ResponseField name="own" type="object">
+  Suas gerações em andamento: `queued`, `processing`, `total` e `jobs` (com `id`,
+  `status`, `model`, `created_at`, `updated_at`).
+</ResponseField>
+<ResponseField name="poll_after_ms" type="integer">Intervalo recomendado até a próxima consulta.</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -G "https://api.realoficial.com.br/api/v1/ai-usage/image/queue" \
+  --data-urlencode "ids[]=01k6img0000000000000000001" \
+  --data-urlencode "ids[]=01k6img0000000000000000002" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "global": { "queued": 3, "processing": 5, "total": 8, "sampled_at": "2026-09-27T15:04:05+00:00" },
+  "own": {
+    "scope": "owner_pool",
+    "queued": 0,
+    "processing": 1,
+    "total": 1,
+    "jobs": [
+      {
+        "id": "01k6img0000000000000000001",
+        "status": "processing",
+        "model": "gpt-image-2",
+        "created_at": "2026-09-27T15:04:05+00:00",
+        "updated_at": "2026-09-27T15:04:09+00:00"
+      }
+    ]
+  },
+  "basis": "application_status",
+  "position_supported": false,
+  "poll_after_ms": 5000
+}
+```
+</ResponseExample>

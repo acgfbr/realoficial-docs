@@ -24,6 +24,38 @@ Este endpoint requer autenticação via Bearer Token.
   ID do short a ser renderizado (ULID)
 </ParamField>
 
+## Body Parameters
+
+O corpo é opcional. Sem ele, o short é renderizado com o áudio e a legenda originais.
+
+<ParamField body="dub_id" type="string">
+  ID de uma [dublagem](/api-reference/dubbing) concluída do mesmo short. O vídeo sai com
+  a voz dublada.
+</ParamField>
+
+<ParamField body="subtitle_translation_id" type="string">
+  ID de uma [tradução de legenda](/api-reference/translations) concluída do mesmo short.
+  O vídeo sai com a legenda traduzida.
+</ParamField>
+
+Os dois campos são independentes e podem ser combinados, inclusive em idiomas diferentes.
+Cada combinação é um render próprio: pedir de novo a mesma combinação já renderizada
+responde `208`.
+
+Se a dublagem ou a tradução não pertencer ao short, não estiver concluída ou tiver
+ficado desatualizada por uma edição no short, a resposta é:
+
+```json 422 - Variante indisponível
+{
+  "error": "A legenda ou a dublagem escolhida não está disponível para este corte. Atualize a página e tente de novo.",
+  "code": "variant_unavailable"
+}
+```
+
+<Note>
+A renderização em lote (`POST /renders/bulk`) não aceita `dub_id`.
+</Note>
+
 ## Rate Limits
 
 <Warning>

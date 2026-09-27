@@ -1,0 +1,153 @@
+---
+title: 'Gerar Imagem'
+api: 'POST /ai-usage/image'
+description: 'Gera de 1 a 4 imagens a partir de um prompt, com ou sem imagem de referência'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/ai-usage/image
+```
+
+Cria as gerações, debita os créditos e responde `202` com um ID por imagem. Acompanhe
+cada ID em [Consultar Imagem](/api-reference/images/show). Veja o
+[guia de Geração de Imagem](/api-reference/images) para modelos, tamanhos e cobrança.
+
+<Note>
+Exige papel `owner`, `admin` ou `editor` no workspace. O pedido não é idempotente:
+repetir cobra de novo.
+</Note>
+
+## Body
+
+<ParamField body="prompt" type="string" required>
+  Descrição da imagem ou da edição, com até 2000 caracteres.
+</ParamField>
+
+<ParamField body="model" type="string" default="gpt-image-2">
+  `id` de um modelo de [Modelos de Imagem](/api-reference/images/models).
+</ParamField>
+
+<ParamField body="count" type="integer" default="1">
+  Quantidade de imagens, de 1 a 4. É tudo ou nada: sem saldo para o lote inteiro, nada é
+  criado.
+</ParamField>
+
+<ParamField body="imageUrl" type="string">
+  Imagem de referência para edição. Envie a `asset.canonical_url` de um
+  [upload](/api-reference/uploads/create) feito no mesmo workspace, ou o
+  `asset.remoteUrl` de uma imagem gerada antes. Uma referência por pedido.
+</ParamField>
+
+<ParamField body="enhancePrompt" type="boolean" default="true">
+  Reescreve o prompt antes de gerar para descrever melhor a cena. O texto usado volta em
+  `enhanced_prompt`. Use `false` para gerar exatamente com o seu texto.
+</ParamField>
+
+## Resposta
+
+<ResponseField name="ids" type="array">Um ID por imagem, na ordem do lote.</ResponseField>
+<ResponseField name="count" type="integer">Quantidade de imagens criadas.</ResponseField>
+<ResponseField name="model" type="string">Modelo usado.</ResponseField>
+<ResponseField name="credits_per_image" type="integer">Preço cobrado por imagem.</ResponseField>
+<ResponseField name="credits_charged" type="integer">Total debitado.</ResponseField>
+<ResponseField name="credits_balance" type="integer">Saldo restante do dono do workspace.</ResponseField>
+<ResponseField name="status" type="string">Sempre `pending`.</ResponseField>
+
+## Erros
+
+| HTTP | Mensagem | Quando |
+|---|---|---|
+| 400 | Créditos insuficientes... (`code: insufficient_credits`) | Saldo não cobre o lote; traz `credits_required` e `credits_available` |
+| 400 | Não foi possível processar a imagem de referência. | A referência não pôde ser lida ou não é uma imagem |
+| 403 | Você não tem permissão para esta ação neste espaço de trabalho. | Papel `viewer` |
+| 422 | Este modelo exige uma imagem de referência. | Modelo de edição sem `imageUrl` |
+| 422 | Este modelo não aceita imagem de referência. ... | `krea-2-turbo` com `imageUrl` |
+| 422 | O GPT Image 2 aceita referências com proporção entre 1:3 e 3:1. | Referência muito estreita ou larga |
+| 422 | Esta referência não está disponível neste espaço. ... | Upload de outro workspace |
+| 422 | Este modelo não está disponível para uso comercial. | Modelo fora do catálogo atual |
+
+Erros de validação do corpo (por exemplo, `model` inexistente ou `count` acima de 4)
+respondem `422` no formato padrão, com `message` e `errors`.
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/ai-usage/image" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "prompt": "um cachorro caramelo de óculos escuros numa praia ensolarada",
+    "model": "gpt-image-2",
+    "count": 2
+  }'
+```
+
+```bash Edição com referência
+curl -X POST "https://api.realoficial.com.br/api/v1/ai-usage/image" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "prompt": "troque o fundo por um estúdio com luz neon roxa",
+    "model": "gpt-image-2",
+    "imageUrl": "https://media.realoficial.com.br/_media/uploads/3f2b8c1e-9a4d-4e7f-b2c1-0d9e8f7a6b5c.png"
+  }'
+```
+
+```javascript JavaScript
+const api = 'https://api.realoficial.com.br/api/v1';
+const headers = {
+  Authorization: `Bearer ${token}`,
+  'Content-Type': 'application/json',
+  Accept: 'application/json'
+};
+
+const created = await fetch(`${api}/ai-usage/image`, {
+  method: 'POST',
+  headers,
+  body: JSON.stringify({ prompt: 'um cachorro caramelo de óculos escuros na praia', count: 1 })
+}).then((response) => response.json());
+
+let generation;
+do {
+  await new Promise((resolve) => setTimeout(resolve, 2500));
+  generation = await fetch(`${api}/ai-usage/image/${created.ids[0]}`, { headers })
+    .then((response) => response.json());
+} while (generation.status === 'pending' || generation.status === 'processing');
+
+if (generation.status === 'failed') throw new Error(generation.error);
+console.log(generation.images[0]); // URL temporária
+```
+</RequestExample>
+
+<ResponseExample>
+```json 202 - Gerações criadas
+{
+  "ids": ["01k6img0000000000000000001", "01k6img0000000000000000002"],
+  "count": 2,
+  "model": "gpt-image-2",
+  "billing_mode": "credits",
+  "credits_per_image": 5,
+  "credits_charged": 10,
+  "credits_balance": 490,
+  "status": "pending"
+}
+```
+
+```json 400 - Créditos insuficientes
+{
+  "error": "Créditos insuficientes: este pedido custa 10 créditos e você tem 3. Compre mais créditos ou gere menos imagens.",
+  "code": "insufficient_credits",
+  "credits_required": 10,
+  "credits_available": 3
+}
+```
+
+```json 422 - Referência obrigatória
+{
+  "error": "Este modelo exige uma imagem de referência."
+}
+```
+</ResponseExample>

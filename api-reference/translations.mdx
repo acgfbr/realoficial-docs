@@ -1,0 +1,103 @@
+---
+title: 'Tradução de Legendas'
+description: 'Traduza a legenda e o título de um short ou de todos os shorts de um projeto'
+---
+
+A tradução de legenda gera uma versão da legenda e do título do short em outro idioma.
+Assim como a [dublagem](/api-reference/dubbing), ela é uma **variante**: a legenda salva
+no short não muda. Você escolhe a variante ao renderizar ou publicar, com o campo
+`subtitle_translation_id`.
+
+A tradução de legenda não consome créditos (`credits_charged` é sempre `0`) e não exige
+assinatura.
+
+## Endpoints
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `GET` | `/subtitle-translation-languages` | Idiomas disponíveis |
+| `GET` | `/projects/{projectId}/shorts/{shortId}/translations` | Traduções de um short |
+| `POST` | `/projects/{projectId}/shorts/{shortId}/translations` | Traduz um short |
+| `GET` | `/projects/{projectId}/shorts/{shortId}/translations/{translationId}/timeline` | Timeline com a legenda traduzida |
+| `GET` | `/projects/{projectId}/shorts/{shortId}/translations/source/timeline` | Timeline com a legenda original |
+| `GET` | `/projects/{projectId}/translations` | Traduções de todos os shorts do projeto |
+| `POST` | `/projects/{projectId}/translations` | Traduz todos os shorts do projeto |
+
+Pedir tradução exige um papel que possa gerenciar projetos (`owner`, `admin` ou
+`editor`).
+
+## Três formas de traduzir
+
+<CardGroup cols={3}>
+  <Card title="Na criação do projeto" icon="folder-plus" href="/api-reference/projects/create">
+    Envie `target_languages` em `/createShorts`. Cada short é traduzido assim que fica
+    pronto.
+  </Card>
+  <Card title="Um projeto inteiro" icon="layer-group" href="/api-reference/translations/project-create">
+    Traduz os shorts prontos e os que ficarem prontos depois.
+  </Card>
+  <Card title="Um short" icon="closed-captioning" href="/api-reference/translations/short-create">
+    Traduz só o short indicado, em até 3 idiomas por pedido.
+  </Card>
+</CardGroup>
+
+## Status
+
+| `status` | Significado |
+|---|---|
+| `dispatching` | Pedido registrado, enviando para processamento |
+| `processing` | Traduzindo |
+| `completed` | Concluída |
+| `failed` | Falhou |
+
+Use a tradução somente quando `preview_ready` for `true`. Não existe webhook: consulte a
+lista de traduções do short a cada 5 segundos.
+
+## O que é traduzido
+
+- a legenda visível do short, palavra por palavra, preservando o tempo de cada trecho;
+- o título: o texto da chamada para ação automática, quando existe, ou o título do short.
+
+A tradução é um **retrato da legenda no momento do pedido**. Editar a legenda depois não
+atualiza a tradução.
+
+<Warning>
+Não é possível refazer a tradução de um idioma que já foi traduzido ou está em
+andamento no mesmo short: o pedido responde `422` com "Este idioma já está traduzido ou
+em processamento.". Revise a legenda antes de traduzir.
+</Warning>
+
+## Usar a tradução
+
+| Onde | Campo |
+|---|---|
+| [Renderizar Short](/api-reference/renders/create) | `subtitle_translation_id` |
+| [Publicações](/api-reference/social-posts) | `subtitle_translation_id` |
+| [Launchers](/api-reference/launchers) | `subtitle_translation_id` |
+
+Ao publicar com tradução, o título padrão da publicação passa a ser o título traduzido.
+Para vídeo com voz e legenda no idioma de destino, combine `subtitle_translation_id` com
+o `dub_id` de uma [dublagem](/api-reference/dubbing).
+
+```bash
+curl -X POST "https://api.realoficial.com.br/api/v1/shorts/PROJECT_ID/SHORT_ID/render" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{ "subtitle_translation_id": "01k6trn0000000000000000001" }'
+```
+
+Se a tradução não pertencer ao short ou não estiver concluída, o render responde
+`422 variant_unavailable`.
+
+## Códigos de idioma
+
+Use os códigos de [Idiomas de Tradução](/api-reference/translations/languages). Também
+são aceitos, sem diferenciar maiúsculas: `pt-br`, `pt-pt`, `zh`, `zh-cn`, `zh-sg`,
+`zh-hans`, `zh-tw`, `zh-hk` e `zh-hant`.
+
+<Note>
+Os códigos de tradução e de dublagem não são idênticos em todos os idiomas. Por exemplo,
+árabe é `ar` na tradução e `arb` na dublagem; chinês simplificado é `zh-Hans` na
+tradução e `zh` na dublagem. Use sempre a lista do recurso que você está chamando.
+</Note>

@@ -1,0 +1,56 @@
+---
+title: 'Detalhar Sessão de Thumbnail'
+api: 'GET /projects/{projectId}/shorts/{shortId}/ai-thumbnail-sessions/{sessionId}'
+description: 'Retorna uma sessão de thumbnail com as opções geradas'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/projects/{projectId}/shorts/{shortId}/ai-thumbnail-sessions/{sessionId}
+```
+
+Retorna a sessão no mesmo formato de
+[Criar Sessão de Thumbnail](/api-reference/thumbnails/sessions-create), com as opções
+geradas em `generations`.
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short (ULID).
+</ParamField>
+
+<ParamField path="sessionId" type="string" required>
+  ID da sessão (ULID).
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID/shorts/SHORT_ID/ai-thumbnail-sessions/SESSION_ID" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "id": "01k6ses0000000000000000001",
+  "project_id": "01k3ab12yqtsyrzjb0fveqy5zx",
+  "short_id": "01k4ef56yqtsyrzjb0gveqy7cd",
+  "frame": 450,
+  "fps": 30.0,
+  "width": 1080,
+  "height": 1920,
+  "reference_url": null,
+  "reference_asset": null,
+  "reference_unavailable": false,
+  "generations": [],
+  "created_at": "2026-09-27T15:04:05+00:00"
+}
+```
+</ResponseExample>

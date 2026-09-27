@@ -1,0 +1,153 @@
+---
+title: 'Pedir Dublagem'
+api: 'POST /projects/{projectId}/shorts/{shortId}/dubs'
+description: 'Inicia a dublagem de um short em outro idioma'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/projects/{projectId}/shorts/{shortId}/dubs
+```
+
+Inicia a dublagem assíncrona do short. Acompanhe o resultado em
+[Consultar Dublagem](/api-reference/dubbing/show). Veja o
+[guia de Dublagem](/api-reference/dubbing) para requisitos, etapas e cota.
+
+<Note>
+Rate limit: 20 requisições por minuto. Exige papel que possa gerenciar projetos
+(`owner`, `admin` ou `editor`).
+</Note>
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short (ULID).
+</ParamField>
+
+## Body
+
+<ParamField body="language" type="string" required>
+  Idioma de destino, com um `code` de [Idiomas de Dublagem](/api-reference/dubbing/languages).
+</ParamField>
+
+<ParamField body="voice_consent" type="boolean" default="false">
+  Declara que o usuário tem autorização para usar as vozes do vídeo. Obrigatório na
+  primeira dublagem de cada usuário. Envie o booleano JSON `true`: `1` e `"1"` não contam
+  como aceite.
+</ParamField>
+
+<ParamField body="regenerate" type="boolean" default="false">
+  Gera uma nova dublagem mesmo que já exista uma concluída no mesmo idioma. Use depois de
+  editar o áudio ou a legenda do short.
+</ParamField>
+
+## Idempotência
+
+- Se já existe uma dublagem **em andamento** no mesmo idioma, ela é devolvida com
+  `200`, mesmo com `regenerate: true`.
+- Se já existe uma **concluída** e `regenerate` é `false`, ela é devolvida com `200`.
+- Uma dublagem que **falhou** não é reaproveitada: o novo pedido cria outra.
+
+## Erros
+
+| HTTP | `code` | Quando |
+|---|---|---|
+| 403 | `dubbing_unavailable` | Dublagem indisponível para a conta |
+| 403 | `no_permission` | Papel sem permissão para gerenciar projetos |
+| 403 | `voice_consent_required` | Primeiro pedido do usuário sem `voice_consent: true` |
+| 404 | `short_not_found` | Short inexistente ou de outro workspace |
+| 409 | `short_not_ready` | O short ainda está em processamento |
+| 422 | `unsupported_language` | Idioma de destino ou de origem não suportado |
+| 422 | `same_language` | O short já está no idioma pedido |
+| 422 | `invalid_dubbing_source` | Não foi possível ler o áudio da timeline |
+| 422 | `short_too_long` | Timeline com mais de 180 segundos (`max_seconds`) |
+| 422 | `no_speech` | O short não tem legenda visível |
+| 429 | `dubbing_free_limit_reached` | Cota mensal esgotada (`minutes_required`, `minutes_remaining`, `resets_at`) |
+| 429 | `try_again` | Outro pedido do mesmo dono está sendo registrado; tente de novo |
+
+Erros de validação do corpo respondem `422` no formato padrão, com `message` e `errors`
+por campo.
+
+<RequestExample>
+```bash cURL
+curl -X POST \
+  "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID/shorts/SHORT_ID/dubs" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{ "language": "en", "voice_consent": true }'
+```
+
+```javascript JavaScript
+const response = await fetch(
+  `https://api.realoficial.com.br/api/v1/projects/${projectId}/shorts/${shortId}/dubs`,
+  {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json'
+    },
+    body: JSON.stringify({ language: 'en', voice_consent: true })
+  }
+);
+const { dub } = await response.json();
+```
+</RequestExample>
+
+<ResponseExample>
+```json 202 - Dublagem criada
+{
+  "dub": {
+    "id": "01k6dub0000000000000000001",
+    "short_id": "01k4ef56yqtsyrzjb0gveqy7cd",
+    "language": "en",
+    "source_language": "pt",
+    "status": "pending",
+    "stage": null,
+    "progress": 0,
+    "duration_seconds": 52.2,
+    "speakers": [],
+    "single_voice": false,
+    "preview": null,
+    "error": null,
+    "error_code": null,
+    "minutes_charged": 1,
+    "credits_charged": 0,
+    "ai_disclosure": true,
+    "created_at": "2026-09-27T12:00:00Z",
+    "completed_at": null
+  }
+}
+```
+
+```json 403 - Consentimento pendente
+{
+  "error": "Confirme que você tem autorização para usar as vozes deste vídeo antes de dublar.",
+  "code": "voice_consent_required"
+}
+```
+
+```json 422 - Short longo demais
+{
+  "error": "Cortes com mais de 180 segundos ainda não podem ser dublados.",
+  "code": "short_too_long",
+  "max_seconds": 180
+}
+```
+
+```json 429 - Cota esgotada
+{
+  "error": "Você usou os 60 minutos de dublagem grátis deste mês. A cota renova no próximo mês.",
+  "code": "dubbing_free_limit_reached",
+  "minutes_required": 1,
+  "minutes_remaining": 0,
+  "resets_at": "2026-10-01T00:00:00Z"
+}
+```
+</ResponseExample>

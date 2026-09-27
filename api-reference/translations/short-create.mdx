@@ -1,0 +1,77 @@
+---
+title: 'Traduzir Short'
+api: 'POST /projects/{projectId}/shorts/{shortId}/translations'
+description: 'Traduz a legenda e o título de um short em até 3 idiomas'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/projects/{projectId}/shorts/{shortId}/translations
+```
+
+Cria uma tradução assíncrona por idioma. Acompanhe em
+[Listar Traduções do Short](/api-reference/translations/short-list) até
+`preview_ready: true`.
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short (ULID).
+</ParamField>
+
+## Body
+
+<ParamField body="languages" type="array" required>
+  De 1 a 3 códigos de [Idiomas de Tradução](/api-reference/translations/languages).
+</ParamField>
+
+## Erros
+
+| HTTP | Mensagem |
+|---|---|
+| 403 | Você não tem permissão para esta ação neste espaço de trabalho. |
+| 404 | Corte não encontrado. |
+| 422 | Idioma de tradução não suportado: `{codigo}` |
+| 422 | O idioma original deste projeto ainda não foi detectado. |
+| 422 | O idioma de destino é igual ao idioma original. |
+| 422 | Este idioma já está traduzido ou em processamento. |
+| 422 | Este corte não possui uma legenda válida para traduzir. |
+| 503 | Não foi possível armazenar a legenda para tradução. |
+
+Os erros vêm no formato `{"error": "..."}`. Erros de validação do corpo seguem o formato
+padrão, com `message` e `errors`.
+
+<RequestExample>
+```bash cURL
+curl -X POST \
+  "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID/shorts/SHORT_ID/translations" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{ "languages": ["en", "es"] }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 202 - Enfileirada
+{
+  "message": "Tradução enfileirada com sucesso.",
+  "translations": [
+    { "id": "01k6trn0000000000000000001", "language": "en", "status": "dispatching", "credits_charged": 0 },
+    { "id": "01k6trn0000000000000000002", "language": "es", "status": "dispatching", "credits_charged": 0 }
+  ],
+  "credits_charged": 0
+}
+```
+
+```json 422 - Idioma já traduzido
+{
+  "error": "Este idioma já está traduzido ou em processamento."
+}
+```
+</ResponseExample>

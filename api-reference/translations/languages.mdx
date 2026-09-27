@@ -1,0 +1,45 @@
+---
+title: 'Idiomas de Tradução'
+api: 'GET /subtitle-translation-languages'
+description: 'Lista os idiomas disponíveis para tradução de legendas'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/subtitle-translation-languages
+```
+
+Retorna os idiomas aceitos em `languages` e em `target_languages`, ordenados pelo nome
+em português.
+
+## Resposta
+
+<ResponseField name="languages" type="array">
+  <Expandable title="Propriedades">
+    <ResponseField name="code" type="string">Código a enviar nas requisições.</ResponseField>
+    <ResponseField name="label" type="string">Nome do idioma em português.</ResponseField>
+    <ResponseField name="native_label" type="string">Nome do idioma no próprio idioma.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/subtitle-translation-languages" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "languages": [
+    { "code": "af", "label": "Africâner", "native_label": "Afrikaans" },
+    { "code": "de", "label": "Alemão", "native_label": "Deutsch" },
+    { "code": "es", "label": "Espanhol", "native_label": "español" },
+    { "code": "en", "label": "Inglês", "native_label": "English" }
+  ]
+}
+```
+</ResponseExample>

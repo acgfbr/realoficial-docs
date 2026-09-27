@@ -1,0 +1,91 @@
+---
+title: 'Thumbnails com IA'
+description: 'Gere a capa de um short com IA, com texto sobreposto, e aplique-a na publicação'
+---
+
+O fluxo de thumbnail gera artes de capa para um short, no formato horizontal
+(1280×720) ou vertical (1080×1920), com um texto curto em destaque desenhado sobre a
+imagem. A capa escolhida é enviada às redes sociais quando o short é publicado.
+
+## Endpoints
+
+Todos os caminhos começam com `/projects/{projectId}/shorts/{shortId}`.
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `POST` | `/ai-thumbnail-sessions` | Cria uma sessão de thumbnail |
+| `GET` | `/ai-thumbnail-sessions` | Lista as sessões do short |
+| `GET` | `/ai-thumbnail-sessions/{sessionId}` | Detalha uma sessão |
+| `POST` | `/ai-thumbnail-sessions/{sessionId}/generations` | Gera opções de thumbnail |
+| `DELETE` | `/ai-thumbnail-sessions/{sessionId}/generations/{generationId}` | Oculta uma opção da galeria |
+| `PUT` | `/cover` | Define a capa do short |
+| `DELETE` | `/cover` | Remove a capa do short |
+
+Leitura é liberada para qualquer membro do workspace. Criar sessões, gerar e definir a
+capa exige papel `owner`, `admin` ou `editor`.
+
+## Fluxo
+
+<Steps>
+  <Step title="Envie uma imagem de referência (opcional)">
+    Para usar a pessoa ou a cena do vídeo, capture um quadro do short no seu lado e faça o
+    [upload](/api-reference/uploads/create). A API não extrai quadros do vídeo.
+  </Step>
+  <Step title="Crie a sessão">
+    `POST .../ai-thumbnail-sessions` com o quadro de origem e, se houver,
+    `reference_url` com a `canonical_url` do upload.
+  </Step>
+  <Step title="Gere as opções">
+    `POST .../generations` com `mode`, `title` e, se quiser, `headline`. A resposta traz um
+    ID por opção.
+  </Step>
+  <Step title="Acompanhe">
+    Consulte cada ID em [Consultar Imagem](/api-reference/images/show) até `completed`.
+  </Step>
+  <Step title="Aplique a capa">
+    `PUT .../cover` com o `generation_id` escolhido. A capa é enviada ao publicar.
+  </Step>
+</Steps>
+
+## Modos
+
+| `mode` | O que faz | Referência | Opções por pedido | Créditos por opção |
+|---|---|---|---|---|
+| `scene` (padrão) | Cria uma cena nova a partir do título | Não usa | 1 a 4 | Preço do `model` |
+| `portrait` | Coloca a pessoa da referência numa cena nova | 1 | 1 a 4 | Preço do `model` |
+| `edit` | Edita a imagem de referência | 1 (até 3 com `qwen-image-edit-2511`) | 1 | Preço do `editor` |
+| `layers` | Separa a imagem em camadas PNG com transparência | 1 | 1 | 24 |
+| `recompose` | Troca só o texto de uma thumbnail já pronta | Não usa | 1 | 1 |
+
+Modelos aceitos em cada modo e preços atuais estão em `thumbnail_workflows` de
+[Modelos de Imagem](/api-reference/images/models).
+
+## Texto da thumbnail
+
+`headline` é o texto em destaque desenhado sobre a arte: de 2 a 4 palavras, até 80
+caracteres, só letras, números e pontuação simples. Ele é convertido para caixa alta. Sem
+`headline`, a arte sai sem texto sobreposto.
+
+Para trocar o texto depois, use `mode: "recompose"` com `source_generation_id` e a nova
+`headline`: custa 1 crédito e mantém a arte.
+
+## Capa na publicação
+
+A capa definida com `PUT .../cover` aparece em `cover_image_url` no short e é enviada
+como capa ao publicar no Instagram, Facebook, YouTube, Pinterest, Reddit e, conforme a
+forma de conexão da conta, TikTok. A capa **não altera** o vídeo renderizado.
+
+## Créditos
+
+A cobrança segue as mesmas regras da [geração de imagem](/api-reference/images):
+antecipada, tudo ou nada por pedido e com devolução automática das opções que falham.
+Em workspace de equipe, o pedido também respeita o limite de gasto do membro
+(`403 workspace_spend_limit_reached`).
+
+Uma thumbnail que não fica pronta em 30 minutos é encerrada como `failed`, com os
+créditos devolvidos.
+
+## Shorts de lives públicas
+
+Ao criar uma sessão num short público de live, a Real Oficial cria uma cópia privada no
+seu workspace. Use `project_id` e `short_id` da resposta nas chamadas seguintes.

@@ -21,6 +21,11 @@ const tagNames = {
   library: 'Biblioteca',
   workspaces: 'Workspaces',
   analytics: 'Analytics',
+  dubbing: 'Dublagem',
+  translations: 'Tradução de legendas',
+  images: 'Geração de imagem',
+  thumbnails: 'Thumbnails',
+  uploads: 'Uploads de mídia',
 };
 
 const workspaceTags = new Set([
@@ -36,7 +41,16 @@ const workspaceTags = new Set([
   'Biblioteca',
   'Workspaces',
   'Analytics',
+  'Dublagem',
+  'Tradução de legendas',
+  'Geração de imagem',
+  'Thumbnails',
+  'Uploads de mídia',
 ]);
+
+// Endpoints públicos: sem Bearer e sem contexto de workspace.
+const publicPaths = new Set(['/login', '/landing/image-pricing']);
+
 
 function filesUnder(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -146,6 +160,11 @@ const object = (description, properties = {}, required = [], options = {}) => ({
 });
 const ref = (name) => ({ $ref: `#/components/schemas/${name}` });
 
+const variantFields = {
+  dub_id: string('ID de uma dublagem concluída do short. Publica a versão dublada.'),
+  subtitle_translation_id: string('ID de uma tradução de legenda concluída do short.'),
+};
+
 const schemas = {
   LoginRequest: object(
     'Credenciais do usuário.',
@@ -195,6 +214,7 @@ const schemas = {
       auto_reply_config: object('Configuração opcional de resposta automática.', {}, [], {
         additionalProperties: true,
       }),
+      ...variantFields,
     },
     ['short_id', 'social_accounts', 'title'],
   ),
@@ -260,6 +280,7 @@ const schemas = {
       auto_reply_config: object('Configuração opcional de resposta automática.', {}, [], {
         additionalProperties: true,
       }),
+      ...variantFields,
     },
     ['short_id'],
   ),
@@ -437,7 +458,7 @@ const bodySchemas = new Map([
   ['PUT /dashboard/analytics/goals/{id}', ref('AnalyticsGoalInput')],
 ]);
 
-const optionalRequestBodies = new Set(['POST /templates/{id}/copy']);
+const optionalRequestBodies = new Set(['POST /templates/{id}/copy', 'POST /shorts/{projectId}/{shortId}/render']);
 
 const query = (name, description, schema = { type: 'string' }, required = false) => ({
   name,
@@ -589,6 +610,11 @@ function successfulStatus(method, path) {
   if (method === 'POST' && /(^\/login$|\/render$|\/retry|\/pause$|\/resume$|\/favorite$|\/publish$|\/unpublish$|\/copy$|\/duplicate$)/.test(path)) {
     return '200';
   }
+  // Operações assíncronas: respondem 202 e são acompanhadas por polling.
+  if (method === 'POST' && /(\/dubs$|\/translations$|^\/ai-usage\/image$|\/generations$)/.test(path)) {
+    return '202';
+  }
+  if (method === 'POST' && /\/media-asset-uploads\/\{uploadId\}\/(complete|abort)$/.test(path)) return '200';
   if (method === 'POST') return '201';
   return '200';
 }
@@ -646,7 +672,7 @@ function addOperation({ method, path, summary, description, tag, params = [], so
     }
   }
 
-  if (workspaceTags.has(tag)) {
+  if (workspaceTags.has(tag) && !publicPaths.has(path)) {
     explicit.unshift({ $ref: '#/components/parameters/WorkspaceId' });
   }
 
@@ -683,7 +709,7 @@ function addOperation({ method, path, summary, description, tag, params = [], so
         }
       : {}),
     responses: responseFor(method, path),
-    security: path === '/login' ? [] : [{ bearerAuth: [] }],
+    security: publicPaths.has(path) ? [] : [{ bearerAuth: [] }],
   };
 }
 

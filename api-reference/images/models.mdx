@@ -1,0 +1,98 @@
+---
+title: 'Modelos de Imagem'
+api: 'GET /ai-usage/image/models'
+description: 'Lista os modelos de geração de imagem disponíveis e o preço atual em créditos'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/ai-usage/image/models
+```
+
+Retorna os modelos disponíveis agora e o preço que será cobrado na próxima geração, já
+com descontos ativos. O valor é calculado a cada chamada, sem cache.
+
+## Resposta
+
+<ResponseField name="models" type="array">
+  <Expandable title="Propriedades">
+    <ResponseField name="id" type="string">Valor a enviar em `model`.</ResponseField>
+    <ResponseField name="label" type="string">Nome para exibir.</ResponseField>
+    <ResponseField name="credits_per_image" type="integer">Preço atual por imagem, com desconto quando houver.</ResponseField>
+    <ResponseField name="regular_credits_per_image" type="integer">Preço sem desconto.</ResponseField>
+    <ResponseField name="accepts_reference_image" type="boolean">Se aceita imagem de referência.</ResponseField>
+    <ResponseField name="requires_reference_image" type="boolean">Se só funciona com imagem de referência.</ResponseField>
+    <ResponseField name="max_reference_images" type="integer">Capacidade do modelo. `POST /ai-usage/image` aceita uma referência por pedido.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="default" type="string">Modelo usado quando `model` é omitido.</ResponseField>
+<ResponseField name="max_images_per_request" type="integer">Máximo de `count` por pedido.</ResponseField>
+<ResponseField name="promotion" type="object | null">
+  Campanha de desconto ativa, com `discount_percent` e `ends_at`. `null` quando não há.
+</ResponseField>
+<ResponseField name="thumbnail_workflows" type="array">
+  Modos de [thumbnail](/api-reference/thumbnails), com preço, modelos aceitos
+  (`model_ids`, `model_credits`) e quantidade de opções por pedido (`min_count`,
+  `max_count`).
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/ai-usage/image/models" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "models": [
+    {
+      "id": "gpt-image-2",
+      "label": "GPT Image 2",
+      "name": "GPT Image 2",
+      "credits_per_image": 5,
+      "regular_credits_per_image": 5,
+      "max_reference_images": 16,
+      "accepts_reference_image": true,
+      "requires_reference_image": false,
+      "accepts_dimensions": true
+    },
+    {
+      "id": "qwen-image-edit-2511",
+      "label": "Qwen Image Edit",
+      "name": "Qwen Image Edit",
+      "credits_per_image": 16,
+      "regular_credits_per_image": 16,
+      "max_reference_images": 3,
+      "accepts_reference_image": true,
+      "requires_reference_image": true,
+      "accepts_dimensions": true
+    }
+  ],
+  "default": "gpt-image-2",
+  "max_images_per_request": 4,
+  "promotion": null,
+  "thumbnail_workflows": [
+    {
+      "id": "scene",
+      "credits_per_image": 5,
+      "regular_credits_per_image": 5,
+      "model_credits": { "gpt-image-2": 5, "nano-banana-2": 26 },
+      "min_count": 1,
+      "max_count": 4,
+      "model_ids": ["gpt-image-2", "nano-banana-2"],
+      "default_model": "gpt-image-2"
+    }
+  ]
+}
+```
+</ResponseExample>
+
+<Note>
+`accepts_dimensions` é informativo: nenhum endpoint público aceita largura, altura ou
+proporção. Veja [Tamanho da imagem](/api-reference/images#tamanho-da-imagem).
+</Note>

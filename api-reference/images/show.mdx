@@ -1,0 +1,111 @@
+---
+title: 'Consultar Imagem'
+api: 'GET /ai-usage/image/{id}'
+description: 'Retorna status e resultado de uma geração de imagem'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/ai-usage/image/{id}
+```
+
+Consulte a cada 2 a 3 segundos até `status` ser `completed` ou `failed`. Também
+funciona para IDs de [thumbnail](/api-reference/thumbnails).
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  Um dos `ids` devolvidos por [Gerar Imagem](/api-reference/images/create).
+</ParamField>
+
+## Status
+
+| `status` | Significado |
+|---|---|
+| `pending` | Na fila |
+| `processing` | Gerando |
+| `completed` | Pronta: `images` e `asset` preenchidos |
+| `failed` | Falhou: `error` e `credits_refunded` preenchidos |
+
+Uma geração pode voltar de `processing` para `pending` quando é tentada de novo. Trate os
+dois como "em andamento". Uma geração sem avanço por 15 minutos é encerrada como
+`failed`, com os créditos devolvidos.
+
+## Resposta
+
+<ResponseField name="id" type="string">ID da geração.</ResponseField>
+<ResponseField name="status" type="string">`pending`, `processing`, `completed` ou `failed`.</ResponseField>
+<ResponseField name="model" type="string">Modelo usado.</ResponseField>
+<ResponseField name="prompt" type="string">Prompt enviado.</ResponseField>
+<ResponseField name="enhanced_prompt" type="string | null">Prompt efetivamente usado quando `enhancePrompt` estava ligado.</ResponseField>
+<ResponseField name="width" type="integer">Largura da imagem.</ResponseField>
+<ResponseField name="height" type="integer">Altura da imagem.</ResponseField>
+<ResponseField name="created_at" type="string">Criação.</ResponseField>
+<ResponseField name="images" type="array">Só em `completed`. Uma URL temporária da imagem.</ResponseField>
+<ResponseField name="asset" type="object">
+  Só em `completed`.
+  <Expandable title="Propriedades">
+    <ResponseField name="remoteUrl" type="string">Endereço permanente da imagem. Use como `imageUrl` numa nova geração.</ResponseField>
+    <ResponseField name="playbackUrl" type="string">URL temporária para exibir ou baixar.</ResponseField>
+    <ResponseField name="playbackUrlExpiresAt" type="string">Expiração de `playbackUrl` e de `images[0]`.</ResponseField>
+    <ResponseField name="remoteFileKey" type="string">Identificador interno do arquivo.</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="error" type="string">Só em `failed`. Mensagem para o usuário final.</ResponseField>
+<ResponseField name="credits_refunded" type="boolean">
+  Só em `failed`. Se os créditos já foram devolvidos. Pode vir `false` por alguns
+  instantes logo após a falha; consulte de novo.
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/ai-usage/image/GENERATION_ID" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Concluída
+{
+  "id": "01k6img0000000000000000001",
+  "status": "completed",
+  "model": "gpt-image-2",
+  "prompt": "um cachorro caramelo de óculos escuros na praia",
+  "enhanced_prompt": "A fluffy caramel-colored mixed-breed dog wearing dark sunglasses on a sunny beach...",
+  "width": 1024,
+  "height": 1024,
+  "created_at": "2026-09-27T15:04:05.000000Z",
+  "seed": null,
+  "images": ["https://media.example/imagem.png?assinatura"],
+  "asset": {
+    "remoteUrl": "https://media.realoficial.com.br/_media/image-generations/ID/01k6img0000000000000000001.png",
+    "remoteFileKey": "image-generations/ID/01k6img0000000000000000001.png",
+    "playbackUrl": "https://media.example/imagem.png?assinatura",
+    "playbackUrlExpiresAt": "2026-09-27T16:05:10+00:00"
+  }
+}
+```
+
+```json 200 - Falhou
+{
+  "id": "01k6img0000000000000000001",
+  "status": "failed",
+  "model": "gpt-image-2",
+  "prompt": "...",
+  "enhanced_prompt": null,
+  "width": 1024,
+  "height": 1024,
+  "created_at": "2026-09-27T15:04:05.000000Z",
+  "error": "O pedido foi recusado pelo filtro de conteúdo do modelo. Reformule a descrição (evite copiar marcas, logos ou posts de terceiros) e tente de novo. Seus créditos foram devolvidos.",
+  "credits_refunded": true
+}
+```
+
+```json 404 - Não encontrada
+{
+  "error": "Geração não encontrada."
+}
+```
+</ResponseExample>

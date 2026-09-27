@@ -1,0 +1,66 @@
+---
+title: 'Definir Capa do Short'
+api: 'PUT /projects/{projectId}/shorts/{shortId}/cover'
+description: 'Define uma thumbnail gerada como capa do short na publicação'
+---
+
+## Endpoint
+
+```text
+PUT https://api.realoficial.com.br/api/v1/projects/{projectId}/shorts/{shortId}/cover
+```
+
+Define a capa usada quando o short é publicado nas redes sociais. A capa aparece em
+`cover_image_url` no short e não altera o vídeo renderizado.
+
+Aceita apenas opções geradas numa [sessão de thumbnail](/api-reference/thumbnails),
+concluídas. Opções do modo `layers` não podem ser usadas diretamente.
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short (ULID).
+</ParamField>
+
+## Body
+
+<ParamField body="generation_id" type="string" required>
+  ID da opção de thumbnail escolhida.
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X PUT "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID/shorts/SHORT_ID/cover" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{ "generation_id": "01k6img0000000000000000001" }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Capa definida
+{
+  "project_id": "01k3ab12yqtsyrzjb0fveqy5zx",
+  "short_id": "01k4ef56yqtsyrzjb0gveqy7cd",
+  "cover_image_generation_id": "01k6img0000000000000000001",
+  "cover_image_url": "https://media.example/capa.jpg?assinatura"
+}
+```
+
+```json 422 - Opção não concluída
+{
+  "message": "A geração ainda não está pronta para ser usada como capa."
+}
+```
+
+```json 422 - Camadas
+{
+  "message": "As camadas precisam ser compostas antes de aplicar a capa."
+}
+```
+</ResponseExample>

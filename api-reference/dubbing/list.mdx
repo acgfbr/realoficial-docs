@@ -1,0 +1,85 @@
+---
+title: 'Listar Dublagens'
+api: 'GET /projects/{projectId}/shorts/{shortId}/dubs'
+description: 'Lista as dublagens de um short, das mais recentes para as mais antigas'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/projects/{projectId}/shorts/{shortId}/dubs
+```
+
+Retorna até 30 dublagens do short, das mais recentes para as mais antigas, no mesmo
+formato de [Consultar Dublagem](/api-reference/dubbing/show).
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short (ULID).
+</ParamField>
+
+## Resposta
+
+<ResponseField name="project_id" type="string">ID do projeto.</ResponseField>
+<ResponseField name="short_id" type="string">ID do short.</ResponseField>
+<ResponseField name="source_language" type="string | null">
+  Idioma original do short, no formato dos códigos de dublagem. `null` quando ainda não
+  foi detectado.
+</ResponseField>
+<ResponseField name="dubs" type="array">Lista de objetos `dub`.</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID/shorts/SHORT_ID/dubs" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "project_id": "01k3ab12yqtsyrzjb0fveqy5zx",
+  "short_id": "01k4ef56yqtsyrzjb0gveqy7cd",
+  "source_language": "pt",
+  "dubs": [
+    {
+      "id": "01k6dub0000000000000000001",
+      "short_id": "01k4ef56yqtsyrzjb0gveqy7cd",
+      "language": "en",
+      "source_language": "pt",
+      "status": "completed",
+      "stage": null,
+      "progress": 100,
+      "duration_seconds": 52.2,
+      "speakers": [{ "id": "1", "cloned": true }],
+      "single_voice": false,
+      "preview": {
+        "audio_url": "https://media.example/dub/mix.m4a?assinatura",
+        "voice_url": "https://media.example/dub/voice.wav?assinatura",
+        "background_url": "https://media.example/dub/background.wav?assinatura"
+      },
+      "error": null,
+      "error_code": null,
+      "minutes_charged": 1,
+      "credits_charged": 0,
+      "ai_disclosure": true,
+      "created_at": "2026-09-27T12:00:00Z",
+      "completed_at": "2026-09-27T12:00:41Z"
+    }
+  ]
+}
+```
+
+```json 404 - Short não encontrado
+{
+  "error": "Corte não encontrado.",
+  "code": "short_not_found"
+}
+```
+</ResponseExample>

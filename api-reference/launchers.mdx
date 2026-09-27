@@ -107,6 +107,14 @@ plataforma. Elas não são uma previsão baseada no histórico individual da con
   Mesma configuração opcional aceita pela API de publicações.
 </ParamField>
 
+<ParamField body="dub_id" type="string">
+  Publica a versão [dublada](/api-reference/dubbing) do short.
+</ParamField>
+
+<ParamField body="subtitle_translation_id" type="string">
+  Publica o short com a [legenda traduzida](/api-reference/translations).
+</ParamField>
+
 ```bash
 curl -X POST "https://api.realoficial.com.br/api/v1/launchers/LAUNCHER_ID/items" \
   -H "Authorization: Bearer seu_token_aqui" \
@@ -118,7 +126,9 @@ curl -X POST "https://api.realoficial.com.br/api/v1/launchers/LAUNCHER_ID/items"
   }'
 ```
 
-O mesmo short não pode aparecer duas vezes na fila pendente do Launcher.
+A mesma combinação de short, dublagem e tradução não pode aparecer duas vezes na fila
+pendente do Launcher. O mesmo short pode entrar mais de uma vez em versões diferentes,
+por exemplo original e dublado em inglês.
 
 ## Reordenar e reagendar
 

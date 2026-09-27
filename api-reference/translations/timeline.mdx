@@ -1,0 +1,66 @@
+---
+title: 'Timeline Traduzida'
+api: 'GET /projects/{projectId}/shorts/{shortId}/translations/{translationId}/timeline'
+description: 'Retorna a timeline do short com a legenda traduzida, para pré-visualização'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/projects/{projectId}/shorts/{shortId}/translations/{translationId}/timeline
+```
+
+Retorna a timeline do short com a legenda traduzida e o título traduzido. Use para
+pré-visualizar no seu próprio player. Para voltar à legenda original, use
+[Timeline Original](/api-reference/translations/source-timeline).
+
+<Warning>
+Não salve esta timeline com `updateTimeline`: a legenda do short deve continuar a
+original. Escolha a tradução com `subtitle_translation_id` ao renderizar ou publicar.
+</Warning>
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short (ULID).
+</ParamField>
+
+<ParamField path="translationId" type="string" required>
+  ID de uma tradução concluída (ULID).
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID/shorts/SHORT_ID/translations/TRANSLATION_ID/timeline" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "translation_id": "01k6trn0000000000000000001",
+  "language": "en",
+  "title": "The moment everything changed",
+  "timeline": {
+    "fps": 30,
+    "compositionWidth": 1080,
+    "compositionHeight": 1920,
+    "tracks": [],
+    "items": {},
+    "assets": {}
+  }
+}
+```
+
+```json 404 - Tradução indisponível
+{
+  "error": "Tradução indisponível para este idioma."
+}
+```
+</ResponseExample>

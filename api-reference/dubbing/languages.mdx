@@ -1,0 +1,86 @@
+---
+title: 'Idiomas de Dublagem'
+api: 'GET /dubbing/languages'
+description: 'Lista os idiomas de destino, a cota mensal de dublagem e o consentimento de voz do usuário'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/dubbing/languages
+```
+
+Retorna os idiomas aceitos em `language` ao
+[pedir uma dublagem](/api-reference/dubbing/create), a cota de minutos do mês e se o
+usuário autenticado já aceitou o termo de consentimento de voz.
+
+Os idiomas mais usados vêm primeiro (`en`, `es`, `pt`, `fr`, `de`, `it`, `ja`, `ko`,
+`zh`...), seguidos dos demais em ordem alfabética do nome em inglês. `name` vem sempre em
+inglês.
+
+<Note>
+Use o `code` exatamente como retornado. Códigos com região, como `pt-BR` ou `en-US`, são
+recusados. Alguns idiomas usam códigos específicos: árabe padrão é `arb`, árabe egípcio
+é `arz` e filipino é `fil`.
+</Note>
+
+## Resposta
+
+<ResponseField name="languages" type="array">
+  Idiomas de destino disponíveis.
+  <Expandable title="Propriedades">
+    <ResponseField name="code" type="string">Código a enviar em `language`.</ResponseField>
+    <ResponseField name="name" type="string">Nome do idioma, em inglês.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="free" type="object">
+  Cota mensal de dublagem do dono do workspace.
+  <Expandable title="Propriedades">
+    <ResponseField name="enabled" type="boolean">Se a dublagem está liberada para a conta.</ResponseField>
+    <ResponseField name="minutes_per_month" type="integer">Teto mensal em minutos. `0` significa sem teto.</ResponseField>
+    <ResponseField name="minutes_used" type="integer">Minutos usados no mês corrente.</ResponseField>
+    <ResponseField name="minutes_remaining" type="integer">Minutos restantes. Sem teto, vem um número alto.</ResponseField>
+    <ResponseField name="resets_at" type="string">Quando a cota renova (primeiro dia do mês seguinte, UTC).</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="voice_consent_accepted" type="boolean">
+  Se o usuário autenticado já aceitou o consentimento de voz.
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/dubbing/languages" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "languages": [
+    { "code": "en", "name": "English" },
+    { "code": "es", "name": "Spanish" },
+    { "code": "pt", "name": "Portuguese" },
+    { "code": "fr", "name": "French" }
+  ],
+  "free": {
+    "enabled": true,
+    "minutes_per_month": 60,
+    "minutes_used": 3,
+    "minutes_remaining": 57,
+    "resets_at": "2026-10-01T00:00:00Z"
+  },
+  "voice_consent_accepted": false
+}
+```
+
+```json 403 - Indisponível
+{
+  "error": "A dublagem ainda não está disponível para a sua conta.",
+  "code": "dubbing_unavailable"
+}
+```
+</ResponseExample>

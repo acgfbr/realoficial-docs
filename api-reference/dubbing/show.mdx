@@ -1,0 +1,136 @@
+---
+title: 'Consultar Dublagem'
+api: 'GET /projects/{projectId}/shorts/{shortId}/dubs/{dubId}'
+description: 'Retorna status, etapa e resultado de uma dublagem'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/projects/{projectId}/shorts/{shortId}/dubs/{dubId}
+```
+
+Use para acompanhar a dublagem até `status` ser `completed` ou `failed`. Recomendamos
+consultar a cada 3 segundos. As etapas e os códigos de falha estão no
+[guia de Dublagem](/api-reference/dubbing#status-e-etapas).
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short (ULID).
+</ParamField>
+
+<ParamField path="dubId" type="string" required>
+  ID da dublagem (ULID).
+</ParamField>
+
+## Objeto `dub`
+
+<ResponseField name="id" type="string">ID da dublagem. É o valor de `dub_id` no render e na publicação.</ResponseField>
+<ResponseField name="short_id" type="string">Short dublado.</ResponseField>
+<ResponseField name="language" type="string">Idioma de destino.</ResponseField>
+<ResponseField name="source_language" type="string">Idioma original do short.</ResponseField>
+<ResponseField name="status" type="string">`pending`, `processing`, `completed` ou `failed`.</ResponseField>
+<ResponseField name="stage" type="string | null">Etapa atual, só em `processing`: `separating`, `translating`, `synthesizing` ou `mixing`.</ResponseField>
+<ResponseField name="progress" type="integer">Progresso aproximado, de 0 a 100.</ResponseField>
+<ResponseField name="duration_seconds" type="number">Duração do trecho dublado.</ResponseField>
+<ResponseField name="speakers" type="array">Pessoas identificadas: `id` (`"1"`, `"2"`...) e `cloned` (se a pessoa tem voz própria na dublagem).</ResponseField>
+<ResponseField name="single_voice" type="boolean">`true` quando todas as falas saem com uma única voz.</ResponseField>
+<ResponseField name="preview" type="object | null">
+  Só em `completed`. URLs temporárias, válidas por 1 hora; consulte a dublagem de novo
+  para obter URLs novas.
+  <Expandable title="Propriedades">
+    <ResponseField name="audio_url" type="string">Áudio final (voz dublada com o fundo original), em M4A.</ResponseField>
+    <ResponseField name="voice_url" type="string">Só a voz dublada, em WAV.</ResponseField>
+    <ResponseField name="background_url" type="string">Só o fundo (música e efeitos), em WAV.</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="error" type="string | null">Mensagem para o usuário final, só em `failed`.</ResponseField>
+<ResponseField name="error_code" type="string | null">Código da falha, só em `failed`.</ResponseField>
+<ResponseField name="minutes_charged" type="integer">Minutos descontados da cota mensal.</ResponseField>
+<ResponseField name="credits_charged" type="integer">Créditos cobrados. Hoje é sempre `0`.</ResponseField>
+<ResponseField name="ai_disclosure" type="boolean">Sempre `true`: o áudio é gerado por IA.</ResponseField>
+<ResponseField name="created_at" type="string">Criação, ISO 8601 UTC.</ResponseField>
+<ResponseField name="completed_at" type="string | null">Conclusão, ISO 8601 UTC.</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID/shorts/SHORT_ID/dubs/DUB_ID" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Concluída
+{
+  "dub": {
+    "id": "01k6dub0000000000000000001",
+    "short_id": "01k4ef56yqtsyrzjb0gveqy7cd",
+    "language": "en",
+    "source_language": "pt",
+    "status": "completed",
+    "stage": null,
+    "progress": 100,
+    "duration_seconds": 52.2,
+    "speakers": [
+      { "id": "1", "cloned": true },
+      { "id": "2", "cloned": true }
+    ],
+    "single_voice": false,
+    "preview": {
+      "audio_url": "https://media.example/dub/mix.m4a?assinatura",
+      "voice_url": "https://media.example/dub/voice.wav?assinatura",
+      "background_url": "https://media.example/dub/background.wav?assinatura"
+    },
+    "error": null,
+    "error_code": null,
+    "minutes_charged": 1,
+    "credits_charged": 0,
+    "ai_disclosure": true,
+    "created_at": "2026-09-27T12:00:00Z",
+    "completed_at": "2026-09-27T12:00:41Z"
+  }
+}
+```
+
+```json 200 - Em processamento
+{
+  "dub": {
+    "id": "01k6dub0000000000000000001",
+    "status": "processing",
+    "stage": "synthesizing",
+    "progress": 50,
+    "preview": null
+  }
+}
+```
+
+```json 200 - Falhou
+{
+  "dub": {
+    "id": "01k6dub0000000000000000001",
+    "status": "failed",
+    "stage": null,
+    "error": "A tradução ficou longa demais para o tempo disponível. Revise as falas e pausas do corte antes de gerar novamente.",
+    "error_code": "timing_overflow"
+  }
+}
+```
+
+```json 404 - Não encontrada
+{
+  "error": "Dublagem não encontrada.",
+  "code": "dub_not_found"
+}
+```
+</ResponseExample>
+
+<Note>
+Os exemplos "Em processamento" e "Falhou" mostram só os campos relevantes; a resposta real
+traz o objeto completo.
+</Note>

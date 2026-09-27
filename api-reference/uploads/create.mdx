@@ -1,0 +1,161 @@
+---
+title: 'Iniciar Upload de Mídia'
+api: 'POST /media-asset-uploads'
+description: 'Envia uma imagem ou mídia própria para usar como referência na geração de imagem e de thumbnail'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/media-asset-uploads
+```
+
+O upload acontece em três passos: você pede uma URL de envio, envia os bytes direto para
+o armazenamento e confirma. O arquivo enviado pode ser usado como imagem de referência em
+[Gerar Imagem](/api-reference/images/create) e nas
+[sessões de thumbnail](/api-reference/thumbnails).
+
+<Steps>
+  <Step title="Inicie o upload">
+    `POST /media-asset-uploads` com o tipo e o tamanho exato do arquivo. A resposta traz
+    `upload.url`.
+  </Step>
+  <Step title="Envie os bytes">
+    `PUT` em `upload.url` com os headers de `upload.headers` e o `Content-Length` exato.
+    A URL vale 15 minutos.
+  </Step>
+  <Step title="Confirme">
+    [Concluir Upload](/api-reference/uploads/complete) devolve `asset.canonical_url`, o
+    endereço permanente que você passa nas outras operações.
+  </Step>
+</Steps>
+
+<Note>
+Rate limit: 60 requisições por minuto. Use o mesmo `X-Workspace-Id` no upload e na
+operação que vai usar o arquivo: uploads de outro workspace são recusados.
+</Note>
+
+## Headers
+
+<ParamField header="Idempotency-Key" type="string" required>
+  Chave única do upload: `media-upload-` seguido de um UUID, por exemplo
+  `media-upload-3f2b8c1e-9a4d-4e7f-b2c1-0d9e8f7a6b5c`. Repetir a mesma chave com o mesmo
+  corpo devolve o mesmo upload, então é seguro tentar de novo após uma falha de rede.
+</ParamField>
+
+## Body
+
+O corpo aceita **somente** os campos abaixo; campos extras respondem `422`.
+
+<ParamField body="purpose" type="string" required>
+  Use `editor`.
+</ParamField>
+
+<ParamField body="content_type" type="string" required>
+  Tipo MIME do arquivo. Para referência de imagem: `image/png`, `image/jpeg`,
+  `image/webp` ou `image/gif`.
+</ParamField>
+
+<ParamField body="size_bytes" type="integer" required>
+  Tamanho exato do arquivo em bytes, até 200 MiB. Precisa bater com o arquivo enviado no
+  `PUT`.
+</ParamField>
+
+## Erros
+
+| HTTP | `code` | Quando |
+|---|---|---|
+| 413 | `file_too_large` | Arquivo maior que o permitido |
+| 415 | `unsupported_format` | Tipo de arquivo não aceito |
+| 409 | `idempotency_conflict` | A chave já pertence a outro upload |
+| 410 | `upload_url_expired` | A URL de envio expirou; confirme ou inicie outro upload |
+| 422 | `invalid_upload_request` | Corpo inválido ou com campos extras |
+| 422 | `invalid_idempotency_key` | `Idempotency-Key` ausente ou fora do formato |
+
+<RequestExample>
+```bash cURL
+# 1. Inicia
+curl -X POST "https://api.realoficial.com.br/api/v1/media-asset-uploads" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -H "Idempotency-Key: media-upload-3f2b8c1e-9a4d-4e7f-b2c1-0d9e8f7a6b5c" \
+  -d '{ "purpose": "editor", "content_type": "image/png", "size_bytes": 482133 }'
+
+# 2. Envia os bytes para upload.url com os headers devolvidos
+curl -X PUT "UPLOAD_URL" \
+  -H "Content-Type: image/png" \
+  -H "If-None-Match: *" \
+  --data-binary @referencia.png
+
+# 3. Confirma
+curl -X POST "https://api.realoficial.com.br/api/v1/media-asset-uploads/UPLOAD_ID/complete" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{}'
+```
+
+```javascript JavaScript
+import { randomUUID } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+
+const api = 'https://api.realoficial.com.br/api/v1';
+const file = await readFile('referencia.png');
+
+const started = await fetch(`${api}/media-asset-uploads`, {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    'Idempotency-Key': `media-upload-${randomUUID()}`
+  },
+  body: JSON.stringify({ purpose: 'editor', content_type: 'image/png', size_bytes: file.length })
+}).then((response) => response.json());
+
+await fetch(started.upload.url, {
+  method: started.upload.method,
+  headers: started.upload.headers,
+  body: file
+});
+
+const completed = await fetch(`${api}/media-asset-uploads/${started.upload_id}/complete`, {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+    Accept: 'application/json'
+  },
+  body: '{}'
+}).then((response) => response.json());
+
+const referenceUrl = completed.asset.canonical_url;
+```
+</RequestExample>
+
+<ResponseExample>
+```json 201 - Upload iniciado
+{
+  "upload_id": "01k6upl0000000000000000001",
+  "status": "uploading",
+  "expires_at": "2026-09-28T12:00:00+00:00",
+  "upload": {
+    "method": "PUT",
+    "url": "https://storage.example/uploads/arquivo.png?assinatura",
+    "headers": {
+      "Content-Type": "image/png",
+      "If-None-Match": "*"
+    },
+    "expires_at": "2026-09-27T12:15:00+00:00"
+  }
+}
+```
+
+```json 415 - Formato não suportado
+{
+  "code": "unsupported_format",
+  "error": "Formato de mídia não suportado."
+}
+```
+</ResponseExample>

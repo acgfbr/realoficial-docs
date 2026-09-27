@@ -1,0 +1,42 @@
+---
+title: 'Remover Capa do Short'
+api: 'DELETE /projects/{projectId}/shorts/{shortId}/cover'
+description: 'Remove a capa personalizada do short'
+---
+
+## Endpoint
+
+```text
+DELETE https://api.realoficial.com.br/api/v1/projects/{projectId}/shorts/{shortId}/cover
+```
+
+Remove a capa definida. As próximas publicações usam a capa padrão de cada plataforma.
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short (ULID).
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X DELETE "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID/shorts/SHORT_ID/cover" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Capa removida
+{
+  "project_id": "01k3ab12yqtsyrzjb0fveqy5zx",
+  "short_id": "01k4ef56yqtsyrzjb0gveqy7cd",
+  "cover_image_generation_id": null,
+  "cover_image_url": null
+}
+```
+</ResponseExample>

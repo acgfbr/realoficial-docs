@@ -1,0 +1,212 @@
+---
+title: 'Dublagem de Shorts'
+description: 'Duble um short em outro idioma mantendo a voz de cada pessoa, e renderize ou publique a versão dublada'
+---
+
+A dublagem traduz as falas de um short e gera o áudio no idioma de destino com a voz de
+cada pessoa que fala no vídeo. A música e os sons de fundo continuam os originais.
+
+A versão dublada **não substitui** o short: ela é uma variante. O short original continua
+intacto, e você escolhe a variante na hora de renderizar ou publicar, com o campo
+`dub_id`.
+
+## Endpoints
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `GET` | `/dubbing/languages` | Idiomas disponíveis, cota do mês e consentimento |
+| `GET` | `/projects/{projectId}/shorts/{shortId}/dubs` | Lista as dublagens de um short |
+| `POST` | `/projects/{projectId}/shorts/{shortId}/dubs` | Pede uma dublagem |
+| `GET` | `/projects/{projectId}/shorts/{shortId}/dubs/{dubId}` | Consulta status e resultado |
+| `GET` | `/projects/{projectId}/shorts/{shortId}/dubs/{dubId}/timeline` | Timeline da versão dublada |
+
+Todas aceitam `X-Workspace-Id`. A cota e os projetos usados são os do dono do workspace.
+Pedir uma dublagem exige um papel que possa gerenciar projetos (`owner`, `admin` ou
+`editor`); qualquer membro pode consultar.
+
+## Fluxo completo
+
+<Steps>
+  <Step title="Escolha o idioma">
+    Chame `GET /dubbing/languages` e use um `code` da lista, exatamente como vem
+    (minúsculas, sem região: `en`, `es`, `fr`...).
+  </Step>
+  <Step title="Peça a dublagem">
+    `POST /projects/{projectId}/shorts/{shortId}/dubs` com `language` e, na primeira vez
+    do usuário, `voice_consent: true`. A resposta traz o objeto `dub` com
+    `status: "pending"`.
+  </Step>
+  <Step title="Acompanhe o processamento">
+    Consulte `GET .../dubs/{dubId}` a cada 3 segundos até `status` ser `completed` ou
+    `failed`. Não existe webhook.
+  </Step>
+  <Step title="Ouça o resultado (opcional)">
+    Com `completed`, o campo `preview` traz URLs temporárias do áudio final e das faixas
+    de voz e de fundo.
+  </Step>
+  <Step title="Renderize ou publique">
+    Envie `dub_id` em [Renderizar Short](/api-reference/renders/create),
+    [Publicações](/api-reference/social-posts) ou [Launchers](/api-reference/launchers).
+  </Step>
+</Steps>
+
+## Requisitos do short
+
+A dublagem usa a **timeline salva** do short: todas as faixas de áudio e vídeo audíveis
+e as palavras da legenda visível, que dão o texto e o tempo de cada fala.
+
+| Requisito | Erro quando não é atendido |
+|---|---|
+| Short com processamento concluído | `409 short_not_ready` |
+| Legenda visível na timeline | `422 no_speech` |
+| Timeline de até 180 segundos | `422 short_too_long` |
+| Áudio audível e legível na timeline | `422 invalid_dubbing_source` |
+| Idioma de origem detectado e suportado | `422 unsupported_language` |
+| Idioma de destino diferente do original | `422 same_language` |
+
+<Warning>
+Se o áudio, a duração ou o trecho do short mudarem depois da dublagem, a variante deixa
+de valer: renderizar ou publicar com aquele `dub_id` responde `422 variant_unavailable`.
+Peça uma nova dublagem com `regenerate: true`.
+</Warning>
+
+## Consentimento de voz
+
+A dublagem reproduz a voz das pessoas do vídeo. Antes da primeira dublagem, o usuário
+precisa declarar que tem autorização para usar essas vozes, enviando
+`voice_consent: true` (booleano JSON). O aceite vale uma vez por usuário, para todos os
+workspaces.
+
+`GET /dubbing/languages` informa em `voice_consent_accepted` se o usuário já aceitou.
+Sem o aceite, o pedido responde `403 voice_consent_required`.
+
+## Status e etapas
+
+| `status` | `stage` | `progress` | O que acontece |
+|---|---|---|---|
+| `pending` | `null` | 0 | Na fila |
+| `processing` | `separating` | 10 | Separa voz e fundo |
+| `processing` | `translating` | 35 | Traduz as falas |
+| `processing` | `synthesizing` | 50 | Gera as vozes |
+| `processing` | `mixing` | 85 | Monta o áudio final |
+| `completed` | `null` | 100 | Pronto |
+| `failed` | `null` | — | Falhou; veja `error_code` |
+
+`progress` é aproximado e não indica tempo restante. Um short de cerca de 50 segundos
+costuma ficar pronto em menos de um minuto; o primeiro pedido depois de um período
+parado pode levar alguns minutos. Uma dublagem sem avanço por 15 minutos é encerrada como
+`failed` com `error_code: "timed_out"`.
+
+### Códigos de falha
+
+| `error_code` | Significado |
+|---|---|
+| `no_speech` | O short não tem legenda para dublar |
+| `timed_out` | O processamento demorou demais e foi cancelado |
+| `translation_invalid` | A tradução saiu com repetições mesmo após nova tentativa |
+| `timing_overflow` | A tradução não coube no tempo das falas originais |
+| `dubbing_failed` | Falha genérica; tente novamente |
+
+`error` traz a mensagem pronta para exibir ao usuário final.
+
+## Quem fala
+
+`speakers` lista as pessoas identificadas no áudio, numeradas (`"1"`, `"2"`...). Cada uma
+recebe a própria voz no idioma de destino. `cloned: false` indica uma pessoa com fala
+curta demais para reproduzir a voz: as falas dela usam a voz de outra pessoa do vídeo.
+
+`single_voice: true` indica que não foi possível separar quem fala; todas as falas saem
+com uma única voz.
+
+## Cota e custo
+
+A dublagem não consome créditos (`credits_charged` é sempre `0`). O uso é contado em
+minutos por mês, no workspace do dono, e aparece em `GET /dubbing/languages`:
+
+```json
+"free": {
+  "enabled": true,
+  "minutes_per_month": 60,
+  "minutes_used": 3,
+  "minutes_remaining": 57,
+  "resets_at": "2026-10-01T00:00:00Z"
+}
+```
+
+- `minutes_per_month: 0` significa que não há teto mensal;
+- a cota renova no primeiro dia de cada mês, 00:00 UTC;
+- dublagens que falham não contam;
+- ao passar do limite, o pedido responde `429 dubbing_free_limit_reached`.
+
+## Divulgação de conteúdo gerado por IA
+
+Toda dublagem é conteúdo gerado por IA (`ai_disclosure: true`). Ao publicar a versão
+dublada fora da Real Oficial, siga as regras de cada plataforma para sinalizar conteúdo
+sintético.
+
+## Legenda traduzida junto com a voz
+
+Áudio e legenda são escolhas independentes. Só `dub_id` gera a voz dublada com a
+**legenda original**. Para a legenda também sair no idioma de destino, faça uma
+[tradução de legenda](/api-reference/translations) e envie `subtitle_translation_id`
+junto com `dub_id`. É possível combinar idiomas diferentes, por exemplo áudio em inglês e
+legenda em francês.
+
+```bash
+curl -X POST "https://api.realoficial.com.br/api/v1/shorts/PROJECT_ID/SHORT_ID/render" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "dub_id": "01k6dub0000000000000000001",
+    "subtitle_translation_id": "01k6trn0000000000000000001"
+  }'
+```
+
+## Exemplo ponta a ponta
+
+```javascript JavaScript
+const api = 'https://api.realoficial.com.br/api/v1';
+const headers = {
+  Authorization: `Bearer ${token}`,
+  'Content-Type': 'application/json',
+  Accept: 'application/json'
+};
+
+// 1. Pede a dublagem em inglês
+const created = await fetch(`${api}/projects/${projectId}/shorts/${shortId}/dubs`, {
+  method: 'POST',
+  headers,
+  body: JSON.stringify({ language: 'en', voice_consent: true })
+}).then((response) => response.json());
+
+// 2. Aguarda terminar
+let dub = created.dub;
+while (dub.status === 'pending' || dub.status === 'processing') {
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  dub = (
+    await fetch(`${api}/projects/${projectId}/shorts/${shortId}/dubs/${dub.id}`, { headers })
+      .then((response) => response.json())
+  ).dub;
+}
+if (dub.status === 'failed') throw new Error(dub.error);
+
+// 3. Renderiza a versão dublada
+const render = await fetch(`${api}/shorts/${projectId}/${shortId}/render`, {
+  method: 'POST',
+  headers,
+  body: JSON.stringify({ dub_id: dub.id })
+}).then((response) => response.json());
+```
+
+## Acompanhar o render dublado
+
+`GET /shorts/{projectId}/{shortId}` traz `renders[]` com `dub_id`, `language` e
+`subtitle_translation_id` de cada render. Em `available_renders`, a chave
+`<idioma>:dub` aponta para o render dublado mais recente naquele idioma.
+
+Para baixar, use `GET /shorts/{projectId}/{shortId}/download?kind=render&render_id={id}`.
+
+<Note>
+`POST /renders/bulk` não aceita `dub_id`. Renderize versões dubladas uma a uma.
+</Note>

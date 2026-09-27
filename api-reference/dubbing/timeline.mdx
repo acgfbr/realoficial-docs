@@ -1,0 +1,81 @@
+---
+title: 'Timeline Dublada'
+api: 'GET /projects/{projectId}/shorts/{shortId}/dubs/{dubId}/timeline'
+description: 'Retorna a timeline do short com o áudio dublado, pronta para reproduzir'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/projects/{projectId}/shorts/{shortId}/dubs/{dubId}/timeline
+```
+
+Retorna a timeline da versão dublada, útil para pré-visualizar no seu próprio player. Ela
+é derivada da timeline salva do short:
+
+- os áudios e vídeos originais continuam na timeline, mas mudos;
+- entram duas faixas novas, uma com a voz dublada e outra com o fundo original;
+- se existir uma [tradução de legenda](/api-reference/translations) concluída no mesmo
+  idioma, a legenda já vem traduzida.
+
+<Warning>
+Esta timeline é só para leitura. Não a envie para `updateTimeline`: o short deve
+continuar com a timeline original, e a variante dublada é escolhida com `dub_id` no
+render e na publicação.
+</Warning>
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short (ULID).
+</ParamField>
+
+<ParamField path="dubId" type="string" required>
+  ID de uma dublagem concluída (ULID).
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID/shorts/SHORT_ID/dubs/DUB_ID/timeline" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "dub_id": "01k6dub0000000000000000001",
+  "language": "en",
+  "timeline": {
+    "fps": 30,
+    "compositionWidth": 1080,
+    "compositionHeight": 1920,
+    "tracks": [],
+    "items": {},
+    "assets": {}
+  }
+}
+```
+
+```json 404 - Dublagem não concluída ou inexistente
+{
+  "error": "Dublagem não encontrada.",
+  "code": "dub_not_found"
+}
+```
+
+```json 422 - Short alterado depois da dublagem
+{
+  "error": "Dublagem não encontrada.",
+  "code": "dub_not_available"
+}
+```
+</ResponseExample>
+
+`422 dub_not_available` indica que o áudio, a duração ou o trecho do short mudou depois
+da dublagem. Peça uma nova dublagem com `regenerate: true`.

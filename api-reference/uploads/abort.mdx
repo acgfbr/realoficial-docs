@@ -1,0 +1,50 @@
+---
+title: 'Cancelar Upload de Mídia'
+api: 'POST /media-asset-uploads/{uploadId}/abort'
+description: 'Cancela um upload que não será concluído'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/media-asset-uploads/{uploadId}/abort
+```
+
+Cancela um upload iniciado que não será concluído. Envie o corpo exatamente como `{}`.
+Depois de cancelado, o upload não pode ser concluído; inicie outro com uma nova
+`Idempotency-Key`.
+
+## Path Parameters
+
+<ParamField path="uploadId" type="string" required>
+  `upload_id` devolvido por [Iniciar Upload de Mídia](/api-reference/uploads/create).
+</ParamField>
+
+Um upload já concluído não pode ser cancelado: a resposta é
+`409 upload_already_completed`.
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/media-asset-uploads/UPLOAD_ID/abort" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{}'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Cancelado
+{
+  "upload_id": "01k6upl0000000000000000001",
+  "status": "aborted"
+}
+```
+
+```json 409 - Já concluído
+{
+  "code": "upload_already_completed",
+  "error": "Upload já concluído; não foi excluído."
+}
+```
+</ResponseExample>

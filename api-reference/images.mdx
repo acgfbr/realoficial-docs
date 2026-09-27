@@ -1,0 +1,121 @@
+---
+title: 'Geração de Imagem'
+description: 'Gere e edite imagens com IA a partir de um prompt, com ou sem imagem de referência'
+---
+
+A API gera imagens a partir de um texto (`prompt`) e também edita uma imagem sua quando
+você envia uma referência. A geração é assíncrona e cobrada em créditos por imagem.
+
+Para capas de short com título sobreposto, use o fluxo de
+[Thumbnails](/api-reference/thumbnails), que monta a arte no formato certo e pode aplicá-la
+como capa na publicação.
+
+## Endpoints
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `GET` | `/ai-usage/image/models` | Modelos disponíveis e preço atual |
+| `GET` | `/landing/image-pricing` | Tabela pública de preços, sem autenticação |
+| `POST` | `/ai-usage/image` | Gera ou edita imagens |
+| `GET` | `/ai-usage/image/{id}` | Status e resultado de uma geração |
+| `GET` | `/ai-usage/image/queue` | Situação da fila e das suas gerações |
+
+Gerar exige papel `owner`, `admin` ou `editor` no workspace. Qualquer membro pode
+consultar status, fila e catálogo. Não é preciso ter assinatura: basta saldo de créditos,
+inclusive de pacotes avulsos.
+
+## Fluxo
+
+<Steps>
+  <Step title="Escolha o modelo">
+    `GET /ai-usage/image/models` devolve os modelos disponíveis, o preço atual e o que cada
+    um aceita.
+  </Step>
+  <Step title="Envie a referência (opcional)">
+    Para editar uma imagem sua, faça o [upload](/api-reference/uploads/create) e guarde
+    `asset.canonical_url`.
+  </Step>
+  <Step title="Peça a geração">
+    `POST /ai-usage/image` com `prompt`, `model`, `count` e, se houver, `imageUrl`. Os
+    créditos são debitados na hora e a resposta traz um ID por imagem.
+  </Step>
+  <Step title="Acompanhe">
+    Consulte `GET /ai-usage/image/{id}` a cada 2 a 3 segundos até `completed` ou
+    `failed`. Não existe webhook.
+  </Step>
+  <Step title="Baixe a imagem">
+    `images[0]` é uma URL temporária. Baixe o arquivo ou consulte o status de novo para
+    receber uma URL nova.
+  </Step>
+</Steps>
+
+## Modelos
+
+Catálogo atual. Os modelos e preços podem mudar: consulte sempre
+[Modelos de Imagem](/api-reference/images/models) antes de cobrar seu usuário.
+
+| `model` | Créditos por imagem | Imagem de referência | Formato de saída |
+|---|---:|---|---|
+| `gpt-image-2` (padrão) | 5 | Opcional | PNG |
+| `nano-banana-2` | 26 | Opcional | PNG |
+| `krea-2-turbo` | 10 | Não aceita | WebP |
+| `z-image-turbo` | 8 | Opcional | WebP |
+| `flux-2-klein-4b` | 8 | Opcional | WebP |
+| `qwen-image-edit-2511` | 16 | Obrigatória | WebP |
+| `longcat-image-edit-turbo` | 16 | Obrigatória | WebP |
+
+## Tamanho da imagem
+
+As imagens saem em resolução de até 1K (lado maior por volta de 1024 px). A API não
+aceita largura, altura, proporção ou qualidade:
+
+- **sem referência**, a imagem sai quadrada (1024×1024);
+- **com referência**, a imagem acompanha a proporção da referência, dentro dos limites de
+  cada modelo. `gpt-image-2` aceita referências com proporção entre 1:3 e 3:1;
+  `nano-banana-2` usa a proporção suportada mais próxima (1:1, 3:2, 2:3, 3:4, 4:3, 4:5,
+  5:4, 9:16, 16:9 ou 21:9).
+
+O tamanho final vem em `width` e `height` no status. Para um formato específico, envie
+uma referência nessa proporção ou redimensione a imagem depois.
+
+## Créditos
+
+- A cobrança é antecipada: `count × créditos do modelo`, debitada no pedido.
+- Se o saldo não cobre o lote inteiro, nada é criado e a resposta é
+  `400 insufficient_credits`.
+- Cada imagem que falha tem seus créditos devolvidos, inclusive em recusa pelo filtro de
+  conteúdo e em tempo esgotado. O status informa `credits_refunded`.
+- Em workspace de equipe, os créditos debitados são os do dono.
+- Quando há uma campanha de desconto ativa, o catálogo informa em `promotion`, e
+  `credits_per_image` já vem com o desconto aplicado.
+
+<Warning>
+O pedido de geração não é idempotente. Repetir o `POST` cobra de novo. Guarde os `ids`
+da resposta: não existe endpoint para listar gerações avulsas depois.
+</Warning>
+
+## Prompt
+
+`enhancePrompt` (padrão `true`) reescreve o seu texto antes de gerar, para descrever
+melhor a cena. O texto efetivamente usado volta em `enhanced_prompt`. Desligue com
+`enhancePrompt: false` quando precisar que o prompt seja usado exatamente como enviado.
+
+Pedidos que o filtro de conteúdo do modelo recusa terminam em `failed`, com os créditos
+devolvidos. Evite reproduzir marcas, logos ou posts de terceiros.
+
+## Armazenamento
+
+As imagens ficam em armazenamento privado. A API entrega URLs temporárias (cerca de 1
+hora; a expiração exata vem em `asset.playbackUrlExpiresAt`). Consulte o status de novo
+sempre que precisar de uma URL válida.
+
+`asset.remoteUrl` é o endereço permanente da imagem dentro da Real Oficial. Use-o como
+`imageUrl` para editar a imagem numa nova geração.
+
+## Limitações
+
+- uma imagem de referência por geração;
+- sem escolha de proporção, tamanho, qualidade ou seed;
+- sem webhook de conclusão;
+- sem listagem nem exclusão de gerações avulsas;
+- a imagem gerada não entra automaticamente na biblioteca nem na timeline de um short.

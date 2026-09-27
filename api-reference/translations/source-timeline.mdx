@@ -1,0 +1,51 @@
+---
+title: 'Timeline Original'
+api: 'GET /projects/{projectId}/shorts/{shortId}/translations/source/timeline'
+description: 'Retorna a timeline do short com a legenda original'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/projects/{projectId}/shorts/{shortId}/translations/source/timeline
+```
+
+Retorna a timeline do short com a legenda no idioma original, no mesmo formato de
+[Timeline Traduzida](/api-reference/translations/timeline). É útil para alternar entre
+original e traduções num seletor de idioma.
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short (ULID).
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID/shorts/SHORT_ID/translations/source/timeline" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "translation_id": null,
+  "language": "pt",
+  "title": "O momento em que tudo mudou",
+  "timeline": {
+    "fps": 30,
+    "compositionWidth": 1080,
+    "compositionHeight": 1920,
+    "tracks": [],
+    "items": {},
+    "assets": {}
+  }
+}
+```
+</ResponseExample>

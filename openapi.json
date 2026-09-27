@@ -24,6 +24,9 @@
   ],
   "tags": [
     {
+      "name": "Geração de imagem"
+    },
+    {
       "name": "Brand Kits"
     },
     {
@@ -31,6 +34,9 @@
     },
     {
       "name": "Analytics"
+    },
+    {
+      "name": "Dublagem"
     },
     {
       "name": "Launchers"
@@ -43,6 +49,15 @@
     },
     {
       "name": "Autenticação"
+    },
+    {
+      "name": "Uploads de mídia"
+    },
+    {
+      "name": "Thumbnails"
+    },
+    {
+      "name": "Tradução de legendas"
     },
     {
       "name": "Shorts"
@@ -64,6 +79,210 @@
     }
   ],
   "paths": {
+    "/ai-usage/image": {
+      "post": {
+        "tags": [
+          "Geração de imagem"
+        ],
+        "summary": "Gerar Imagem",
+        "description": "Gera de 1 a 4 imagens a partir de um prompt, com ou sem imagem de referência",
+        "operationId": "post_ai_usage_image",
+        "x-docs-source": "api-reference/images/create.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Corpo da requisição.",
+                "properties": {
+                  "prompt": {
+                    "type": "string",
+                    "description": "Descrição da imagem ou da edição, com até 2000 caracteres."
+                  },
+                  "model": {
+                    "type": "string",
+                    "default": "gpt-image-2",
+                    "description": "id de um modelo de Modelos de Imagem."
+                  },
+                  "count": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Quantidade de imagens, de 1 a 4. É tudo ou nada: sem saldo para o lote inteiro, nada é criado."
+                  },
+                  "imageUrl": {
+                    "type": "string",
+                    "description": "Imagem de referência para edição. Envie a asset.canonicalurl de um upload feito no mesmo workspace, ou o asset.remoteUrl de uma imagem gerada antes. Uma referência por pedido."
+                  },
+                  "enhancePrompt": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Reescreve o prompt antes de gerar para descrever melhor a cena. O texto usado volta em enhancedprompt. Use false para gerar exatamente com o seu texto."
+                  }
+                },
+                "required": [
+                  "prompt"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/ai-usage/image/{id}": {
+      "get": {
+        "tags": [
+          "Geração de imagem"
+        ],
+        "summary": "Consultar Imagem",
+        "description": "Retorna status e resultado de uma geração de imagem",
+        "operationId": "get_ai_usage_image_by_id",
+        "x-docs-source": "api-reference/images/show.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Um dos ids devolvidos por Gerar Imagem.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/ai-usage/image/models": {
+      "get": {
+        "tags": [
+          "Geração de imagem"
+        ],
+        "summary": "Modelos de Imagem",
+        "description": "Lista os modelos de geração de imagem disponíveis e o preço atual em créditos",
+        "operationId": "get_ai_usage_image_models",
+        "x-docs-source": "api-reference/images/models.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/ai-usage/image/queue": {
+      "get": {
+        "tags": [
+          "Geração de imagem"
+        ],
+        "summary": "Fila de Imagens",
+        "description": "Mostra o volume da fila de geração e o status de várias gerações numa chamada",
+        "operationId": "get_ai_usage_image_queue",
+        "x-docs-source": "api-reference/images/queue.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "ids[]",
+            "in": "query",
+            "required": false,
+            "description": "Até 50 IDs de geração, repetindo o parâmetro (ids[]=A&ids[]=B). IDs inexistentes ou de outra conta são ignorados.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/brand-kits": {
       "post": {
         "tags": [
@@ -416,6 +635,13 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Se true, adiciona uma chamada para ação (CTA) nos primeiros 3 segundos do corte."
+                  },
+                  "target_languages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Até 3 códigos de Idiomas de Tradução. Cada short é traduzido automaticamente assim que fica pronto, sem custo. Ignorado quando ignoreCaptions é true. Código inválido responde 422 com code: \"invalidtargetlanguages\". Veja Tradução de Legendas."
                   }
                 },
                 "required": [
@@ -1995,6 +2221,69 @@
             "bearerAuth": []
           }
         ]
+      }
+    },
+    "/dubbing/languages": {
+      "get": {
+        "tags": [
+          "Dublagem"
+        ],
+        "summary": "Idiomas de Dublagem",
+        "description": "Lista os idiomas de destino, a cota mensal de dublagem e o consentimento de voz do usuário",
+        "operationId": "get_dubbing_languages",
+        "x-docs-source": "api-reference/dubbing/languages.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/landing/image-pricing": {
+      "get": {
+        "tags": [
+          "Geração de imagem"
+        ],
+        "summary": "Tabela Pública de Preços",
+        "description": "Preços de geração de imagem e quantas imagens cada plano cobre, sem autenticação",
+        "operationId": "get_landing_image_pricing",
+        "x-docs-source": "api-reference/images/pricing.mdx",
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": []
       }
     },
     "/launchers": {
@@ -4163,6 +4452,171 @@
         "security": []
       }
     },
+    "/media-asset-uploads": {
+      "post": {
+        "tags": [
+          "Uploads de mídia"
+        ],
+        "summary": "Iniciar Upload de Mídia",
+        "description": "Envia uma imagem ou mídia própria para usar como referência na geração de imagem e de thumbnail",
+        "operationId": "post_media_asset_uploads",
+        "x-docs-source": "api-reference/uploads/create.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "Chave única do upload: media-upload- seguido de um UUID, por exemplo media-upload-3f2b8c1e-9a4d-4e7f-b2c1-0d9e8f7a6b5c. Repetir a mesma chave com o mesmo corpo devolve o mesmo upload, então é seguro tentar de novo após uma falha de rede.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Corpo da requisição.",
+                "properties": {
+                  "purpose": {
+                    "type": "string",
+                    "description": "Use editor."
+                  },
+                  "content_type": {
+                    "type": "string",
+                    "description": "Tipo MIME do arquivo. Para referência de imagem: image/png, image/jpeg, image/webp ou image/gif."
+                  },
+                  "size_bytes": {
+                    "type": "integer",
+                    "description": "Tamanho exato do arquivo em bytes, até 200 MiB. Precisa bater com o arquivo enviado no PUT."
+                  }
+                },
+                "required": [
+                  "purpose",
+                  "content_type",
+                  "size_bytes"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/media-asset-uploads/{uploadId}/abort": {
+      "post": {
+        "tags": [
+          "Uploads de mídia"
+        ],
+        "summary": "Cancelar Upload de Mídia",
+        "description": "Cancela um upload que não será concluído",
+        "operationId": "post_media_asset_uploads_by_uploadId_abort",
+        "x-docs-source": "api-reference/uploads/abort.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "uploadId",
+            "in": "path",
+            "required": true,
+            "description": "uploadid devolvido por Iniciar Upload de Mídia.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/media-asset-uploads/{uploadId}/complete": {
+      "post": {
+        "tags": [
+          "Uploads de mídia"
+        ],
+        "summary": "Concluir Upload de Mídia",
+        "description": "Confirma o envio dos bytes e devolve o endereço permanente do arquivo",
+        "operationId": "post_media_asset_uploads_by_uploadId_complete",
+        "x-docs-source": "api-reference/uploads/complete.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "uploadId",
+            "in": "path",
+            "required": true,
+            "description": "uploadid devolvido por Iniciar Upload de Mídia.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/profile": {
       "post": {
         "tags": [
@@ -4364,6 +4818,1155 @@
             "in": "path",
             "required": true,
             "description": "Identificador projectId.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/projects/{projectId}/shorts/{shortId}/ai-thumbnail-sessions": {
+      "post": {
+        "tags": [
+          "Thumbnails"
+        ],
+        "summary": "Criar Sessão de Thumbnail",
+        "description": "Cria uma sessão de thumbnail para um short, opcionalmente com uma imagem de referência",
+        "operationId": "post_projects_by_projectId_shorts_by_shortId_ai_thumbnail_sessions",
+        "x-docs-source": "api-reference/thumbnails/sessions-create.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Corpo da requisição.",
+                "properties": {
+                  "frame": {
+                    "type": "integer",
+                    "description": "Número do quadro de origem no short, de 0 a 10.000.000."
+                  },
+                  "fps": {
+                    "type": "number",
+                    "description": "Quadros por segundo do short, de 1 a 240."
+                  },
+                  "width": {
+                    "type": "integer",
+                    "description": "Largura do quadro de origem, de 1 a 8192."
+                  },
+                  "height": {
+                    "type": "integer",
+                    "description": "Altura do quadro de origem, de 1 a 8192."
+                  },
+                  "reference_url": {
+                    "type": "string",
+                    "description": "asset.canonicalurl de um upload do mesmo workspace, normalmente a captura do quadro. Obrigatório para os modos portrait, edit e layers."
+                  }
+                },
+                "required": [
+                  "frame",
+                  "fps",
+                  "width",
+                  "height"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Thumbnails"
+        ],
+        "summary": "Listar Sessões de Thumbnail",
+        "description": "Lista as sessões de thumbnail de um short com as opções geradas",
+        "operationId": "get_projects_by_projectId_shorts_by_shortId_ai_thumbnail_sessions",
+        "x-docs-source": "api-reference/thumbnails/sessions-list.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/projects/{projectId}/shorts/{shortId}/ai-thumbnail-sessions/{sessionId}": {
+      "get": {
+        "tags": [
+          "Thumbnails"
+        ],
+        "summary": "Detalhar Sessão de Thumbnail",
+        "description": "Retorna uma sessão de thumbnail com as opções geradas",
+        "operationId": "get_projects_by_projectId_shorts_by_shortId_ai_thumbnail_sessions_by_sessionId",
+        "x-docs-source": "api-reference/thumbnails/sessions-show.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "description": "ID da sessão (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/projects/{projectId}/shorts/{shortId}/ai-thumbnail-sessions/{sessionId}/generations": {
+      "post": {
+        "tags": [
+          "Thumbnails"
+        ],
+        "summary": "Gerar Thumbnail",
+        "description": "Gera opções de thumbnail numa sessão, com texto em destaque opcional",
+        "operationId": "post_projects_by_projectId_shorts_by_shortId_ai_thumbnail_sessions_by_sessionId_generations",
+        "x-docs-source": "api-reference/thumbnails/generations-create.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "description": "ID da sessão (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Corpo da requisição.",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "default": "scene",
+                    "description": "scene, portrait, edit, layers ou recompose."
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Título do vídeo ou instrução de edição, até 2000 caracteres. Obrigatório, exceto em layers e recompose. prompt é aceito como sinônimo."
+                  },
+                  "headline": {
+                    "type": "string",
+                    "description": "Texto em destaque sobre a arte: de 2 a 4 palavras, até 80 caracteres, só letras, números e pontuação simples. Sai em caixa alta. Obrigatório em recompose."
+                  },
+                  "format": {
+                    "type": "string",
+                    "default": "landscape",
+                    "description": "landscape (1280×720) ou shorts (1080×1920). Em recompose, usa o formato da thumbnail de origem."
+                  },
+                  "model": {
+                    "type": "string",
+                    "description": "Só em scene e portrait: modelo que gera a arte. Em scene: gpt-image-2, nano-banana-2, z-image-turbo, krea-2-turbo ou flux-2-klein-4b. Em portrait: os mesmos, exceto krea-2-turbo. Padrão: gpt-image-2."
+                  },
+                  "editor": {
+                    "type": "string",
+                    "default": "gpt-image-2",
+                    "description": "Só em edit: gpt-image-2, nano-banana-2, qwen-image-edit-2511 ou longcat-image-edit-turbo."
+                  },
+                  "count": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "De 1 a 4 em scene e portrait; exatamente 1 nos demais modos."
+                  },
+                  "references": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "URLs de uploads do workspace. portrait, layers e edit usam exatamente 1 (de 1 a 3 com editor: \"qwen-image-edit-2511\"); scene e recompose não aceitam. Padrão: o referenceurl da sessão."
+                  },
+                  "layers": {
+                    "type": "integer",
+                    "default": 4,
+                    "description": "Só em layers: quantidade de camadas, de 2 a 8."
+                  },
+                  "source_generation_id": {
+                    "type": "string",
+                    "description": "Só em recompose: ID da thumbnail pronta cujo texto será trocado."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/projects/{projectId}/shorts/{shortId}/ai-thumbnail-sessions/{sessionId}/generations/{generationId}": {
+      "delete": {
+        "tags": [
+          "Thumbnails"
+        ],
+        "summary": "Ocultar Opção de Thumbnail",
+        "description": "Remove uma opção de thumbnail da galeria da sessão",
+        "operationId": "delete_projects_by_projectId_shorts_by_shortId_ai_thumbnail_sessions_by_sessionId_generations_by_generationId",
+        "x-docs-source": "api-reference/thumbnails/generations-hide.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "description": "ID da sessão (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "generationId",
+            "in": "path",
+            "required": true,
+            "description": "ID da opção (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/projects/{projectId}/shorts/{shortId}/cover": {
+      "delete": {
+        "tags": [
+          "Thumbnails"
+        ],
+        "summary": "Remover Capa do Short",
+        "description": "Remove a capa personalizada do short",
+        "operationId": "delete_projects_by_projectId_shorts_by_shortId_cover",
+        "x-docs-source": "api-reference/thumbnails/cover-remove.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Thumbnails"
+        ],
+        "summary": "Definir Capa do Short",
+        "description": "Define uma thumbnail gerada como capa do short na publicação",
+        "operationId": "put_projects_by_projectId_shorts_by_shortId_cover",
+        "x-docs-source": "api-reference/thumbnails/cover-set.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Corpo da requisição.",
+                "properties": {
+                  "generation_id": {
+                    "type": "string",
+                    "description": "ID da opção de thumbnail escolhida."
+                  }
+                },
+                "required": [
+                  "generation_id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/projects/{projectId}/shorts/{shortId}/dubs": {
+      "post": {
+        "tags": [
+          "Dublagem"
+        ],
+        "summary": "Pedir Dublagem",
+        "description": "Inicia a dublagem de um short em outro idioma",
+        "operationId": "post_projects_by_projectId_shorts_by_shortId_dubs",
+        "x-docs-source": "api-reference/dubbing/create.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Corpo da requisição.",
+                "properties": {
+                  "language": {
+                    "type": "string",
+                    "description": "Idioma de destino, com um code de Idiomas de Dublagem."
+                  },
+                  "voice_consent": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Declara que o usuário tem autorização para usar as vozes do vídeo. Obrigatório na primeira dublagem de cada usuário. Envie o booleano JSON true: 1 e \"1\" não contam como aceite."
+                  },
+                  "regenerate": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Gera uma nova dublagem mesmo que já exista uma concluída no mesmo idioma. Use depois de editar o áudio ou a legenda do short."
+                  }
+                },
+                "required": [
+                  "language"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Dublagem"
+        ],
+        "summary": "Listar Dublagens",
+        "description": "Lista as dublagens de um short, das mais recentes para as mais antigas",
+        "operationId": "get_projects_by_projectId_shorts_by_shortId_dubs",
+        "x-docs-source": "api-reference/dubbing/list.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/projects/{projectId}/shorts/{shortId}/dubs/{dubId}": {
+      "get": {
+        "tags": [
+          "Dublagem"
+        ],
+        "summary": "Consultar Dublagem",
+        "description": "Retorna status, etapa e resultado de uma dublagem",
+        "operationId": "get_projects_by_projectId_shorts_by_shortId_dubs_by_dubId",
+        "x-docs-source": "api-reference/dubbing/show.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dubId",
+            "in": "path",
+            "required": true,
+            "description": "ID da dublagem (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/projects/{projectId}/shorts/{shortId}/dubs/{dubId}/timeline": {
+      "get": {
+        "tags": [
+          "Dublagem"
+        ],
+        "summary": "Timeline Dublada",
+        "description": "Retorna a timeline do short com o áudio dublado, pronta para reproduzir",
+        "operationId": "get_projects_by_projectId_shorts_by_shortId_dubs_by_dubId_timeline",
+        "x-docs-source": "api-reference/dubbing/timeline.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dubId",
+            "in": "path",
+            "required": true,
+            "description": "ID de uma dublagem concluída (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/projects/{projectId}/shorts/{shortId}/translations": {
+      "post": {
+        "tags": [
+          "Tradução de legendas"
+        ],
+        "summary": "Traduzir Short",
+        "description": "Traduz a legenda e o título de um short em até 3 idiomas",
+        "operationId": "post_projects_by_projectId_shorts_by_shortId_translations",
+        "x-docs-source": "api-reference/translations/short-create.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Corpo da requisição.",
+                "properties": {
+                  "languages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "De 1 a 3 códigos de Idiomas de Tradução."
+                  }
+                },
+                "required": [
+                  "languages"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Tradução de legendas"
+        ],
+        "summary": "Listar Traduções do Short",
+        "description": "Lista as traduções de legenda de um short e seus status",
+        "operationId": "get_projects_by_projectId_shorts_by_shortId_translations",
+        "x-docs-source": "api-reference/translations/short-list.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/projects/{projectId}/shorts/{shortId}/translations/{translationId}/timeline": {
+      "get": {
+        "tags": [
+          "Tradução de legendas"
+        ],
+        "summary": "Timeline Traduzida",
+        "description": "Retorna a timeline do short com a legenda traduzida, para pré-visualização",
+        "operationId": "get_projects_by_projectId_shorts_by_shortId_translations_by_translationId_timeline",
+        "x-docs-source": "api-reference/translations/timeline.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "translationId",
+            "in": "path",
+            "required": true,
+            "description": "ID de uma tradução concluída (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/projects/{projectId}/shorts/{shortId}/translations/source/timeline": {
+      "get": {
+        "tags": [
+          "Tradução de legendas"
+        ],
+        "summary": "Timeline Original",
+        "description": "Retorna a timeline do short com a legenda original",
+        "operationId": "get_projects_by_projectId_shorts_by_shortId_translations_source_timeline",
+        "x-docs-source": "api-reference/translations/source-timeline.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/projects/{projectId}/translations": {
+      "post": {
+        "tags": [
+          "Tradução de legendas"
+        ],
+        "summary": "Traduzir Projeto",
+        "description": "Traduz a legenda de todos os shorts de um projeto, inclusive dos que ficarem prontos depois",
+        "operationId": "post_projects_by_projectId_translations",
+        "x-docs-source": "api-reference/translations/project-create.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Corpo da requisição.",
+                "properties": {
+                  "languages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "De 1 a 3 códigos de Idiomas de Tradução."
+                  }
+                },
+                "required": [
+                  "languages"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Tradução de legendas"
+        ],
+        "summary": "Listar Traduções do Projeto",
+        "description": "Lista as traduções de legenda de todos os shorts de um projeto",
+        "operationId": "get_projects_by_projectId_translations",
+        "x-docs-source": "api-reference/translations/project-list.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
             "schema": {
               "type": "string"
             }
@@ -4736,6 +6339,81 @@
             "in": "path",
             "required": true,
             "description": "ID do short a ser renderizado (ULID)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Corpo da requisição.",
+                "properties": {
+                  "dub_id": {
+                    "type": "string",
+                    "description": "ID de uma dublagem concluída do mesmo short. O vídeo sai com a voz dublada."
+                  },
+                  "subtitle_translation_id": {
+                    "type": "string",
+                    "description": "ID de uma tradução de legenda concluída do mesmo short. O vídeo sai com a legenda traduzida."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/shorts/{projectId}/{shortId}/transcript": {
+      "get": {
+        "tags": [
+          "Shorts"
+        ],
+        "summary": "Transcrição do Short",
+        "description": "Texto falado de um corte, com tempos por frase e por palavra",
+        "operationId": "get_shorts_by_projectId_by_shortId_transcript",
+        "x-docs-source": "api-reference/shorts/transcript.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "description": "ID do projeto (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do short (ULID), como retornado por Listar Shorts.",
             "schema": {
               "type": "string"
             }
@@ -5326,6 +7004,42 @@
             "schema": {
               "type": "string"
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/subtitle-translation-languages": {
+      "get": {
+        "tags": [
+          "Tradução de legendas"
+        ],
+        "summary": "Idiomas de Tradução",
+        "description": "Lista os idiomas disponíveis para tradução de legendas",
+        "operationId": "get_subtitle_translation_languages",
+        "x-docs-source": "api-reference/translations/languages.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
           }
         ],
         "responses": {
@@ -6505,119 +8219,6 @@
           }
         ]
       }
-    },
-    "/shorts/{projectId}/{shortId}/transcript": {
-      "get": {
-        "tags": [
-          "Shorts"
-        ],
-        "summary": "Transcrição do short",
-        "description": "Texto falado do corte (o mesmo usado pela sugestão de descrição), com segmentos e palavras em ms relativos ao início do corte. Corte sem fala retorna 200 com text vazio.",
-        "operationId": "get_shorts_by_projectId_by_shortId_transcript",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/WorkspaceId"
-          },
-          {
-            "name": "projectId",
-            "in": "path",
-            "required": true,
-            "description": "ID do projeto (ULID).",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "shortId",
-            "in": "path",
-            "required": true,
-            "description": "ID do short (ULID).",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Transcrição do corte.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "project_id": {
-                      "type": "string"
-                    },
-                    "short_id": {
-                      "type": "string"
-                    },
-                    "duration_ms": {
-                      "type": "integer"
-                    },
-                    "source": {
-                      "type": "string",
-                      "nullable": true,
-                      "enum": [
-                        "transcription",
-                        "timeline_captions",
-                        null
-                      ]
-                    },
-                    "text": {
-                      "type": "string"
-                    },
-                    "segments": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "text": {
-                            "type": "string"
-                          },
-                          "start_ms": {
-                            "type": "integer"
-                          },
-                          "end_ms": {
-                            "type": "integer"
-                          },
-                          "words": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "properties": {
-                                "text": {
-                                  "type": "string"
-                                },
-                                "start_ms": {
-                                  "type": "integer"
-                                },
-                                "end_ms": {
-                                  "type": "integer"
-                                },
-                                "speaker": {
-                                  "type": "string"
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "default": {
-            "$ref": "#/components/responses/Error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
     }
   },
   "components": {
@@ -6788,6 +8389,14 @@
             "description": "Configuração opcional de resposta automática.",
             "properties": {},
             "additionalProperties": true
+          },
+          "dub_id": {
+            "type": "string",
+            "description": "ID de uma dublagem concluída do short. Publica a versão dublada."
+          },
+          "subtitle_translation_id": {
+            "type": "string",
+            "description": "ID de uma tradução de legenda concluída do short."
           }
         },
         "required": [
@@ -6986,6 +8595,14 @@
             "description": "Configuração opcional de resposta automática.",
             "properties": {},
             "additionalProperties": true
+          },
+          "dub_id": {
+            "type": "string",
+            "description": "ID de uma dublagem concluída do short. Publica a versão dublada."
+          },
+          "subtitle_translation_id": {
+            "type": "string",
+            "description": "ID de uma tradução de legenda concluída do short."
           }
         },
         "required": [

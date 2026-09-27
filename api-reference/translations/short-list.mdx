@@ -1,0 +1,81 @@
+---
+title: 'Listar Traduções do Short'
+api: 'GET /projects/{projectId}/shorts/{shortId}/translations'
+description: 'Lista as traduções de legenda de um short e seus status'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/projects/{projectId}/shorts/{shortId}/translations
+```
+
+Use para acompanhar as traduções pedidas. Uma tradução está pronta para render,
+publicação e pré-visualização quando `preview_ready` é `true`.
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short (ULID).
+</ParamField>
+
+## Objeto de tradução
+
+<ResponseField name="id" type="string">ID da tradução. É o valor de `subtitle_translation_id`.</ResponseField>
+<ResponseField name="scope" type="string">`short`.</ResponseField>
+<ResponseField name="source_language" type="string | null">Idioma original.</ResponseField>
+<ResponseField name="language" type="string">Idioma da tradução.</ResponseField>
+<ResponseField name="status" type="string">`dispatching`, `processing`, `completed` ou `failed`.</ResponseField>
+<ResponseField name="preview_ready" type="boolean">Se a tradução já pode ser usada.</ResponseField>
+<ResponseField name="credits_charged" type="integer">Sempre `0`.</ResponseField>
+<ResponseField name="error" type="string | null">Mensagem de falha, só em `failed`.</ResponseField>
+<ResponseField name="parts_count" type="integer | null">Partes em que a legenda foi dividida.</ResponseField>
+<ResponseField name="completed_parts_count" type="integer | null">Partes já traduzidas.</ResponseField>
+<ResponseField name="completed_at" type="string | null">Conclusão.</ResponseField>
+<ResponseField name="created_at" type="string">Criação.</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID/shorts/SHORT_ID/translations" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "project_id": "01k3ab12yqtsyrzjb0fveqy5zx",
+  "short_id": "01k4ef56yqtsyrzjb0gveqy7cd",
+  "source_language": "pt",
+  "translations": [
+    {
+      "id": "01k6trn0000000000000000001",
+      "project_id": "01k3ab12yqtsyrzjb0fveqy5zx",
+      "short_id": "01k4ef56yqtsyrzjb0gveqy7cd",
+      "scope": "short",
+      "source_language": "pt",
+      "language": "en",
+      "status": "completed",
+      "preview_ready": true,
+      "credits_charged": 0,
+      "error": null,
+      "parts_count": 1,
+      "completed_parts_count": 1,
+      "completed_at": "2026-09-27T12:01:10.000000Z",
+      "created_at": "2026-09-27T12:00:55.000000Z"
+    }
+  ]
+}
+```
+
+```json 404 - Short não encontrado
+{
+  "error": "Corte não encontrado."
+}
+```
+</ResponseExample>

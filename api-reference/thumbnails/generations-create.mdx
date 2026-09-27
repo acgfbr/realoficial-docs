@@ -1,0 +1,168 @@
+---
+title: 'Gerar Thumbnail'
+api: 'POST /projects/{projectId}/shorts/{shortId}/ai-thumbnail-sessions/{sessionId}/generations'
+description: 'Gera opções de thumbnail numa sessão, com texto em destaque opcional'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/projects/{projectId}/shorts/{shortId}/ai-thumbnail-sessions/{sessionId}/generations
+```
+
+Debita os créditos e responde `202` com um ID por opção. Acompanhe cada ID em
+[Consultar Imagem](/api-reference/images/show). Os modos estão explicados no
+[guia de Thumbnails](/api-reference/thumbnails#modos).
+
+<Note>
+Rate limit: 30 requisições por minuto. O pedido não é idempotente: repetir cobra de novo.
+</Note>
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+<ParamField path="shortId" type="string" required>
+  ID do short (ULID).
+</ParamField>
+
+<ParamField path="sessionId" type="string" required>
+  ID da sessão (ULID).
+</ParamField>
+
+## Body
+
+<ParamField body="mode" type="string" default="scene">
+  `scene`, `portrait`, `edit`, `layers` ou `recompose`.
+</ParamField>
+
+<ParamField body="title" type="string">
+  Título do vídeo ou instrução de edição, até 2000 caracteres. Obrigatório, exceto em
+  `layers` e `recompose`. `prompt` é aceito como sinônimo.
+</ParamField>
+
+<ParamField body="headline" type="string">
+  Texto em destaque sobre a arte: de 2 a 4 palavras, até 80 caracteres, só letras,
+  números e pontuação simples. Sai em caixa alta. Obrigatório em `recompose`.
+</ParamField>
+
+<ParamField body="format" type="string" default="landscape">
+  `landscape` (1280×720) ou `shorts` (1080×1920). Em `recompose`, usa o formato da
+  thumbnail de origem.
+</ParamField>
+
+<ParamField body="model" type="string">
+  Só em `scene` e `portrait`: modelo que gera a arte. Em `scene`: `gpt-image-2`,
+  `nano-banana-2`, `z-image-turbo`, `krea-2-turbo` ou `flux-2-klein-4b`. Em `portrait`:
+  os mesmos, exceto `krea-2-turbo`. Padrão: `gpt-image-2`.
+</ParamField>
+
+<ParamField body="editor" type="string" default="gpt-image-2">
+  Só em `edit`: `gpt-image-2`, `nano-banana-2`, `qwen-image-edit-2511` ou
+  `longcat-image-edit-turbo`.
+</ParamField>
+
+<ParamField body="count" type="integer" default="1">
+  De 1 a 4 em `scene` e `portrait`; exatamente 1 nos demais modos.
+</ParamField>
+
+<ParamField body="references" type="array">
+  URLs de [uploads](/api-reference/uploads/create) do workspace. `portrait`, `layers` e
+  `edit` usam exatamente 1 (de 1 a 3 com `editor: "qwen-image-edit-2511"`); `scene` e
+  `recompose` não aceitam. Padrão: o `reference_url` da sessão.
+</ParamField>
+
+<ParamField body="layers" type="integer" default="4">
+  Só em `layers`: quantidade de camadas, de 2 a 8.
+</ParamField>
+
+<ParamField body="source_generation_id" type="string">
+  Só em `recompose`: ID da thumbnail pronta cujo texto será trocado.
+</ParamField>
+
+## Erros
+
+| HTTP | Quando |
+|---|---|
+| 400 | Créditos insuficientes (`code: insufficient_credits`, com `credits_required` e `credits_available`) |
+| 403 | Limite de gasto do membro no workspace atingido (`code: workspace_spend_limit_reached`) |
+| 403 | Papel sem permissão para gerar |
+| 404 | Sessão ou geração de origem inexistente |
+| 422 | Combinação inválida de modo, modelo, referências, `count` ou `headline` (mensagem por campo em `errors`) |
+
+<RequestExample>
+```bash Cena com texto
+curl -X POST \
+  "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID/shorts/SHORT_ID/ai-thumbnail-sessions/SESSION_ID/generations" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "mode": "scene",
+    "title": "O gol mais bonito do campeonato",
+    "headline": "Gol inacreditável",
+    "format": "shorts",
+    "count": 2
+  }'
+```
+
+```bash Trocar o texto
+curl -X POST \
+  "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID/shorts/SHORT_ID/ai-thumbnail-sessions/SESSION_ID/generations" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "mode": "recompose",
+    "source_generation_id": "01k6img0000000000000000001",
+    "headline": "Que golaço"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 202 - Opções criadas
+{
+  "ids": ["01k6img0000000000000000001", "01k6img0000000000000000002"],
+  "count": 2,
+  "model": "gpt-image-2",
+  "mode": "scene",
+  "billing_mode": "credits",
+  "credits_per_image": 5,
+  "credits_charged": 10,
+  "credits_balance": 480,
+  "status": "pending"
+}
+```
+
+```json 422 - Texto inválido
+{
+  "message": "O texto da thumbnail deve ter de 2 a 4 palavras e até 80 caracteres.",
+  "errors": {
+    "headline": ["O texto da thumbnail deve ter de 2 a 4 palavras e até 80 caracteres."]
+  }
+}
+```
+</ResponseExample>
+
+## Resultado
+
+Ao consultar o ID em [Consultar Imagem](/api-reference/images/show), uma geração de
+thumbnail traz também:
+
+```json
+{
+  "thumbnail_session": { "id": "01k6ses0000000000000000001", "project_id": "...", "short_id": "..." },
+  "thumbnail": {
+    "mode": "scene",
+    "headline": "GOL INACREDITÁVEL",
+    "format": "shorts",
+    "can_recompose": true
+  }
+}
+```
+
+`can_recompose: true` indica que o texto pode ser trocado com `mode: "recompose"`. No
+modo `layers`, `thumbnail.layers` lista cada camada com `width`, `height` e `asset`.

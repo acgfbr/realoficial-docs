@@ -62,3 +62,16 @@ eles não representam a galeria oficial de templates.
 A API v1 preserva envelopes históricos diferentes entre recursos. Consulte sempre a
 página do endpoint e não dependa de um envelope global único. Da mesma forma, regras de
 negócio antigas podem responder 400 enquanto validações estruturadas respondem 422.
+
+## Recursos de IA
+
+[Dublagem](/api-reference/dubbing), [tradução de legendas](/api-reference/translations),
+[geração de imagem](/api-reference/images) e [thumbnails](/api-reference/thumbnails) são
+assíncronos e não possuem webhook. Acompanhe cada pedido por polling no endpoint de
+status indicado em cada guia.
+
+- não existe endpoint para apagar uma dublagem ou uma tradução;
+- não é possível refazer a tradução de um idioma já traduzido no mesmo short;
+- `POST /renders/bulk` não aceita `dub_id` nem `subtitle_translation_id`;
+- gerações de imagem avulsas não podem ser listadas depois: guarde os `ids` da resposta;
+- a geração de imagem não aceita largura, altura, proporção nem mais de uma referência.

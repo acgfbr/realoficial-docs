@@ -1,0 +1,70 @@
+---
+title: 'Traduzir Projeto'
+api: 'POST /projects/{projectId}/translations'
+description: 'Traduz a legenda de todos os shorts de um projeto, inclusive dos que ficarem prontos depois'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/projects/{projectId}/translations
+```
+
+Define os idiomas de tradução do projeto e enfileira a tradução de cada short já pronto.
+Shorts que terminarem de processar depois disso são traduzidos automaticamente nos
+mesmos idiomas.
+
+<Warning>
+`languages` **substitui** os idiomas configurados no projeto (inclusive os enviados em
+`target_languages` na criação). Envie sempre a lista completa desejada.
+</Warning>
+
+Idiomas iguais ao original do short, ou que o short já tem traduzidos, são ignorados sem
+erro.
+
+## Path Parameters
+
+<ParamField path="projectId" type="string" required>
+  ID do projeto (ULID).
+</ParamField>
+
+## Body
+
+<ParamField body="languages" type="array" required>
+  De 1 a 3 códigos de [Idiomas de Tradução](/api-reference/translations/languages).
+</ParamField>
+
+## Resposta
+
+<ResponseField name="languages" type="array">Idiomas configurados no projeto.</ResponseField>
+<ResponseField name="translations_queued" type="integer">Quantidade de traduções enfileiradas agora.</ResponseField>
+<ResponseField name="shorts_failed" type="array">Shorts que não puderam ser enfileirados, com `short_id` e o motivo em `error`.</ResponseField>
+<ResponseField name="credits_charged" type="integer">Sempre `0`.</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/projects/PROJECT_ID/translations" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{ "languages": ["en", "es"] }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 202 - Enfileirada
+{
+  "message": "Tradução enfileirada com sucesso.",
+  "languages": ["en", "es"],
+  "translations_queued": 8,
+  "shorts_failed": [],
+  "credits_charged": 0
+}
+```
+
+```json 404 - Projeto não encontrado
+{
+  "error": "Projeto não encontrado ou você não tem permissão para acessar."
+}
+```
+</ResponseExample>
