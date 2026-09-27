@@ -77,6 +77,14 @@
         ]
       },
       {
+        "group": "IA - Auto Edit",
+        "pages": [
+          "api-reference/auto-edit/generate",
+          "api-reference/auto-edit/status",
+          "api-reference/auto-edit/apply"
+        ]
+      },
+      {
         "group": "IA - Dublagem",
         "pages": [
           "api-reference/dubbing/languages",
@@ -247,6 +255,7 @@
       {
         "group": "Guias de Recursos",
         "pages": [
+          "api-reference/auto-edit",
           "api-reference/dubbing",
           "api-reference/translations",
           "api-reference/images",

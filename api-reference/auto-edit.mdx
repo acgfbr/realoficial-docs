@@ -1,0 +1,156 @@
+---
+title: 'Auto Edit com IA'
+description: 'A IA assiste ao corte e monta uma edição completa: legenda animada, zooms, imagens de apoio, sons, trilha e efeitos por trás da pessoa'
+---
+
+O Auto Edit assiste ao corte (imagem e fala) e monta uma edição pronta para publicar, no
+estilo que combina com o conteúdo. O resultado é um **plano de edição**, que o editor da
+Real Oficial transforma em itens comuns da timeline: tudo continua editável depois.
+
+## O que entra na edição
+
+- legenda animada palavra por palavra, com a palavra-chave destacada e emoji quando o
+  estilo usa;
+- título-gancho no início do corte;
+- zooms e movimentos de câmera nos momentos de ênfase;
+- imagens de apoio (B-roll) ilustrando o que está sendo dito;
+- efeitos sonoros e trilha de fundo no clima do vídeo;
+- tratamento de cor do estilo escolhido;
+- cenas que aparecem **por trás da pessoa** (anéis, formas, palavras): a pessoa é recortada
+  do fundo e o efeito passa entre ela e o cenário.
+
+## Estilos
+
+Sem `preset`, a IA escolhe o estilo pelo conteúdo do corte. Depois de pronto, o estilo pode
+ser trocado no editor sem gerar de novo.
+
+| `preset` | Estilo | Indicado para |
+|---|---|---|
+| `viral` | Legenda em caixa alta com contorno grosso, palavra-chave colorida com emoji, zoom com mola, trilha energética | Humor, games, esporte, hype |
+| `clean` | Legenda em negrito com uma cor de destaque, sem emoji, cortes secos de enquadramento, som discreto | Negócios, educação, podcast sério |
+| `cinematic` | Visual de filme (grão, vinheta, menos saturação), legenda discreta, movimentos lentos de câmera, B-roll em preto e branco | Histórias pessoais, superação, temas sérios |
+| `pop` | Fonte display larga, palavra-chave em caixa rosa inclinada, cores saturadas, trilha pop | Lifestyle, entretenimento, reação |
+| `editorial` | Legenda em minúsculas com desfoque, palavra-chave em etiqueta vermelha, visual limpo | Opinião, comentário, cultura |
+| `meme` | Tela dividida: vídeo em cima e gameplay embaixo, legenda grande na divisa, trilha phonk | Humor, polêmica, react, público jovem |
+| `brainrot` | A pessoa recortada na frente de um gameplay, no vídeo todo | Só quando pedido |
+| `neon` | Fundo em preto e branco escuro e a pessoa colorida com contorno neon, no vídeo todo | Só quando pedido |
+
+`brainrot` e `neon` recortam a pessoa no corte inteiro: a IA nunca os escolhe sozinha, só
+quando o `preset` é enviado.
+
+## Fluxo
+
+<Steps>
+  <Step title="Peça o plano">
+    `POST /auto-edit/vision-plan` com o `short_id` e, se quiser, o `preset`. A resposta é
+    `202` e o plano é gerado em segundo plano.
+  </Step>
+  <Step title="Acompanhe">
+    Consulte `GET /auto-edit/vision-plan/{shortId}` a cada 3 segundos até `status` ser
+    `ready` (ou `failed`). Não existe webhook. O plano costuma ficar pronto em menos de um
+    minuto.
+  </Step>
+  <Step title="Aplique">
+    Pela API: `POST /auto-edit/vision-plan/{shortId}/apply` aplica o plano **no servidor**
+    e o corte já sai editado (veja [Aplicar pelo backend](#aplicar-pelo-backend)).
+    Ou abra o corte no editor da Real Oficial, painel **Auto Edit**: o plano aparece pronto
+    para aplicar, com a opção de trocar o estilo. Aplicar não gasta outra geração.
+  </Step>
+  <Step title="Renderize ou publique">
+    Com `status` em `applied`, o corte renderiza e publica normalmente com
+    [Renderizar Short](/api-reference/renders/create) e
+    [Publicações](/api-reference/social-posts).
+  </Step>
+</Steps>
+
+<Warning>
+Gerar o plano **não edita o corte**: a edição entra na timeline quando o plano é aplicado,
+pela API ([Aplicar Plano](/api-reference/auto-edit/apply)) ou no editor. Renderizar um
+corte com plano `ready` e ainda não aplicado gera o vídeo sem o Auto Edit.
+</Warning>
+
+## Aplicar pelo backend
+
+Desde 27/09/2026 o plano pode ser aplicado sem abrir o editor: o backend transforma a
+timeline do corte com o mesmo motor do editor e grava o resultado. A edição fica salva no
+corte e aparece na listagem, no render e na publicação. Há dois jeitos:
+
+<Tabs>
+  <Tab title="Automático, na criação do projeto">
+    Envie `autoEdit: true` em [Criar Projeto](/api-reference/projects/create). Quando o
+    projeto fica pronto, a IA gera e aplica o plano nos **3 cortes de maior `score`**
+    (estilo escolhido pelo conteúdo, nunca `brainrot` ou `neon`). Os outros cortes ficam
+    como estão. Só para assinantes; sem assinatura ativa o campo é ignorado. Não consome a
+    cota diária de planos.
+
+    Na [listagem de cortes](/api-reference/shorts/list), `ai_edit_status` mostra
+    `applied` nesses cortes; em [Consultar Plano](/api-reference/auto-edit/status),
+    `source` é `auto` e `applied_by` é `server`.
+  </Tab>
+  <Tab title="Sob demanda, para um corte">
+    Com um plano `ready` (ou `reverted`), chame
+    [Aplicar Plano de Auto Edit](/api-reference/auto-edit/apply). A resposta é `202` e a
+    aplicação leva alguns segundos: consulte o `GET` até `status` ser `applied` e então
+    renderize. Aceita `preset` para aplicar com outro estilo sem gerar de novo.
+  </Tab>
+</Tabs>
+
+<Note>
+A aplicação no servidor nunca troca o layout do corte: um plano com estilo `meme` (tela
+dividida) é aplicado como `viral`. No editor, o usuário continua podendo trocar o estilo
+ou voltar ao original.
+</Note>
+
+Um uso comum é criar o projeto com `autoEdit: true` e, para os demais cortes, pedir o
+plano e aplicar pela API só nos que forem publicar.
+
+## Requisitos e limites
+
+| Regra | Detalhe |
+|---|---|
+| Assinatura | O dono do workspace precisa de assinatura ativa. Sem ela: `402 requires_plan` |
+| Permissão | Pedir o plano exige papel que gerencia projetos (`owner`, `admin` ou `editor`) |
+| Legenda | O corte precisa de legenda por palavra. Sem ela: `422 no_captions` |
+| Cota | 100 planos por membro por dia, renovada à 00:00 UTC. Acima disso: `429 limit_exceeded` com `Retry-After` |
+| Um por vez | Pedir de novo enquanto um plano do mesmo corte está sendo gerado devolve o que está em andamento, sem gastar cota |
+
+## Estilos de vídeo todo
+
+Para aplicar `brainrot` ou `neon` sobre um plano que já existe, sem gerar tudo de novo,
+envie `matte_only: true` com o `preset`. Só o recorte da pessoa no corte inteiro é feito,
+e não consome a cota diária.
+
+```bash
+curl -X POST "https://api.realoficial.com.br/api/v1/auto-edit/vision-plan" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{ "short_id": "01k4ef56yqtsyrzjb0gveqy7cd", "preset": "neon", "matte_only": true }'
+```
+
+Cortes que não têm nenhum trecho em tela cheia (por exemplo, divididos em painéis do
+começo ao fim) não têm o que recortar: o plano volta como está.
+
+## Status
+
+| `status` | Significado |
+|---|---|
+| `none` | O corte ainda não tem plano |
+| `processing` | Gerando; `stage` indica a etapa (`queued`, `frames`, `model`, `broll` ou `matte`) |
+| `ready` | Plano pronto, ainda não aplicado |
+| `applied` | Plano aplicado na timeline; `applied_preset` é o estilo que está no corte e `applied_by` diz se foi o `server` (API ou automático) ou o editor |
+| `reverted` | O editor voltou o corte ao original; o plano continua disponível para reaplicar (pela API ou no editor) |
+| `failed` | A geração falhou; peça de novo |
+
+`source` indica quem pediu o plano: `manual` (API ou botão do editor) ou `auto`
+(`autoEdit: true` na criação do projeto).
+
+Um plano parado na mesma etapa por mais de 5 minutos (ou na fila por mais de 20) é
+encerrado como `failed`.
+
+## O plano
+
+O campo `plan` descreve a edição (estilo, título-gancho, palavras da legenda, zooms,
+imagens de apoio, sons, trilha e recortes da pessoa). Ele é o formato interno que o editor
+usa para montar a timeline e pode mudar sem aviso: use `status`, `preset` e
+`applied_preset` na sua integração e deixe a aplicação para o editor.

@@ -1,0 +1,138 @@
+---
+title: 'Gerar Plano de Auto Edit'
+api: 'POST /auto-edit/vision-plan'
+description: 'Pede à IA o plano de edição completo de um corte'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/auto-edit/vision-plan
+```
+
+Enfileira a geração do plano de edição do corte e responde `202`. Acompanhe em
+[Consultar Plano de Auto Edit](/api-reference/auto-edit/status). O plano é aplicado no
+editor: veja o [guia de Auto Edit](/api-reference/auto-edit).
+
+<Note>
+Rate limit: 10 requisições por minuto. Exige assinatura ativa do dono do workspace e papel
+`owner`, `admin` ou `editor`.
+</Note>
+
+## Body
+
+<ParamField body="short_id" type="string" required>
+  ID do corte (ULID).
+</ParamField>
+
+<ParamField body="preset" type="string">
+  Estilo da edição: `viral`, `clean`, `cinematic`, `pop`, `editorial`, `meme`, `brainrot`
+  ou `neon`. Sem ele, a IA escolhe pelo conteúdo (nunca `brainrot` ou `neon`).
+</ParamField>
+
+<ParamField body="matte_only" type="boolean" default="false">
+  Com `true`, não gera um plano novo: só completa o recorte da pessoa no corte inteiro
+  para aplicar `brainrot` ou `neon` sobre o plano que já existe. Não consome a cota
+  diária. Exige um plano pronto ou aplicado.
+</ParamField>
+
+## Resposta
+
+<ResponseField name="type" type="string">`success` ou `error`.</ResponseField>
+<ResponseField name="data" type="object">
+  `status` (`processing` ou o status atual) e, quando em andamento, `stage`.
+</ResponseField>
+<ResponseField name="rateLimit" type="object">
+  `remaining`: planos que o membro ainda pode pedir hoje.
+</ResponseField>
+
+## Erros
+
+| HTTP | `code` | Quando |
+|---|---|---|
+| 402 | `requires_plan` | O dono do workspace não tem assinatura ativa |
+| 403 | `unauthenticated` | Papel sem permissão para gerenciar projetos |
+| 403 | `not_allowed` | Recurso ainda não liberado para a conta |
+| 404 | `invalid_payload` | Corte inexistente ou de outro workspace |
+| 409 | `invalid_payload` | `matte_only` sem um plano pronto |
+| 422 | `invalid_payload` | Corpo inválido (detalhes em `errors`) |
+| 422 | `no_captions` | O corte não tem legenda por palavra |
+| 429 | `limit_exceeded` | Cota diária esgotada; veja o header `Retry-After` |
+| 500 | `llm_error` | Serviço temporariamente indisponível; tente de novo |
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/auto-edit/vision-plan" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{ "short_id": "01k4ef56yqtsyrzjb0gveqy7cd", "preset": "viral" }'
+```
+
+```javascript JavaScript
+const api = 'https://api.realoficial.com.br/api/v1';
+const headers = {
+  Authorization: `Bearer ${token}`,
+  'Content-Type': 'application/json',
+  Accept: 'application/json'
+};
+
+await fetch(`${api}/auto-edit/vision-plan`, {
+  method: 'POST',
+  headers,
+  body: JSON.stringify({ short_id: shortId })
+});
+
+let current;
+do {
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  current = (
+    await fetch(`${api}/auto-edit/vision-plan/${shortId}`, { headers }).then((r) => r.json())
+  ).data;
+} while (current.status === 'processing');
+
+if (current.status !== 'ready') throw new Error('O plano não foi gerado.');
+// Pronto: o plano aparece no painel Auto Edit do editor para aplicar.
+```
+</RequestExample>
+
+<ResponseExample>
+```json 202 - Gerando
+{
+  "type": "success",
+  "data": { "status": "processing" },
+  "rateLimit": { "remaining": 99 }
+}
+```
+
+```json 202 - Já em andamento
+{
+  "type": "success",
+  "data": { "status": "processing", "stage": "model" }
+}
+```
+
+```json 402 - Sem assinatura
+{
+  "type": "error",
+  "code": "requires_plan",
+  "message": "O Auto Edit está disponível apenas para assinantes. Assine um plano para usar este recurso."
+}
+```
+
+```json 422 - Sem legenda
+{
+  "type": "error",
+  "code": "no_captions",
+  "message": "Este clipe ainda não tem legenda por palavra. Gere a legenda e tente de novo."
+}
+```
+
+```json 429 - Cota diária
+{
+  "type": "error",
+  "code": "limit_exceeded",
+  "message": "Você atingiu o limite de 100 edições automáticas por dia. Tente novamente amanhã."
+}
+```
+</ResponseExample>

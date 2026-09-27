@@ -76,6 +76,14 @@ Este endpoint requer autenticação via Bearer Token.
     <ResponseField name="status" type="string">
       Status do processamento
     </ResponseField>
+    <ResponseField name="ai_edit_status" type="string | null">
+      `applied` quando o corte já tem o [Auto Edit](/api-reference/auto-edit) na timeline
+      (aplicado pelo backend com `autoEdit: true`, pela API ou no editor); `ready` quando o
+      plano automático está pronto e ainda não foi aplicado; `null` sem plano.
+    </ResponseField>
+    <ResponseField name="auto_edited_by_ai" type="boolean">
+      `true` em `ready` e `applied` (compatibilidade). Prefira `ai_edit_status`.
+    </ResponseField>
     <ResponseField name="has_render" type="boolean">
       Se já foi renderizado
     </ResponseField>

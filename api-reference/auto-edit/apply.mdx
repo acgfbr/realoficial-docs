@@ -1,0 +1,122 @@
+---
+title: 'Aplicar Plano de Auto Edit'
+api: 'POST /auto-edit/vision-plan/{shortId}/apply'
+description: 'Aplica no servidor um plano pronto: o corte sai editado sem abrir o editor'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/auto-edit/vision-plan/{shortId}/apply
+```
+
+Enfileira a aplicação do plano na timeline do corte e responde `202`. O backend usa o
+mesmo motor do editor: pausas cortadas, legenda animada, zooms, B-roll, sons, trilha e
+efeitos entram na timeline salva, e o corte já renderiza e publica editado. Leva alguns
+segundos: acompanhe em [Consultar Plano de Auto Edit](/api-reference/auto-edit/status)
+até `status` ser `applied`.
+
+<Note>
+Exige um plano `ready` ou `reverted` (peça antes com
+[Gerar Plano de Auto Edit](/api-reference/auto-edit/generate)), assinatura ativa do dono
+do workspace e papel `owner`, `admin` ou `editor`. Não consome a cota diária de planos.
+</Note>
+
+## Path Parameters
+
+<ParamField path="shortId" type="string" required>
+  ID do corte (ULID).
+</ParamField>
+
+## Body
+
+<ParamField body="preset" type="string">
+  Estilo para aplicar no lugar do que veio no plano: `viral`, `clean`, `cinematic`, `pop`,
+  `editorial`, `meme`, `brainrot` ou `neon`. O layout do corte não muda: `meme` é aplicado
+  como `viral`.
+</ParamField>
+
+## Resposta
+
+<ResponseField name="type" type="string">`success` ou `error`.</ResponseField>
+<ResponseField name="data" type="object">
+  `status` atual (`ready` ou `reverted`) e `applying: true` enquanto a aplicação está na
+  fila. Se o plano já estava aplicado, responde `200` com `status: applied` e
+  `applied_preset`.
+</ResponseField>
+
+## Erros
+
+| HTTP | `code` | Quando |
+|---|---|---|
+| 402 | `requires_plan` | O dono do workspace não tem assinatura ativa |
+| 403 | `unauthenticated` | Papel sem permissão para gerenciar projetos |
+| 404 | `invalid_payload` | Corte inexistente ou de outro workspace |
+| 409 | `plan_not_ready` | O corte não tem plano `ready` ou `reverted` (ainda gerando, falhou ou nunca foi pedido) |
+
+<Warning>
+A aplicação substitui a timeline salva do corte. Edições manuais feitas no editor depois
+do plano ficar pronto são preservadas apenas no que o plano não toca; a timeline anterior
+fica guardada no backend para suporte, mas não há desfazer pela API.
+</Warning>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/auto-edit/vision-plan/SHORT_ID/apply" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{ "preset": "clean" }'
+```
+
+```javascript JavaScript
+const api = 'https://api.realoficial.com.br/api/v1';
+const headers = {
+  Authorization: `Bearer ${token}`,
+  'Content-Type': 'application/json',
+  Accept: 'application/json'
+};
+
+await fetch(`${api}/auto-edit/vision-plan/${shortId}/apply`, {
+  method: 'POST',
+  headers,
+  body: JSON.stringify({})
+});
+
+let current;
+for (let i = 0; i < 20; i++) {
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  current = (
+    await fetch(`${api}/auto-edit/vision-plan/${shortId}`, { headers }).then((r) => r.json())
+  ).data;
+  if (current.status === 'applied') break;
+}
+
+if (current?.status !== 'applied') throw new Error('A aplicação não concluiu; tente de novo.');
+// Pronto: renderize com POST /shorts/{projectId}/{shortId}/render.
+```
+</RequestExample>
+
+<ResponseExample>
+```json 202 - Aplicando
+{
+  "type": "success",
+  "data": { "status": "ready", "applying": true }
+}
+```
+
+```json 200 - Já aplicado
+{
+  "type": "success",
+  "data": { "status": "applied", "applied_preset": "viral" }
+}
+```
+
+```json 409 - Sem plano pronto
+{
+  "type": "error",
+  "code": "plan_not_ready",
+  "message": "Este corte não tem um plano de Auto Edit pronto para aplicar. Gere o plano primeiro."
+}
+```
+</ResponseExample>

@@ -27,6 +27,9 @@
       "name": "Geração de imagem"
     },
     {
+      "name": "Auto Edit"
+    },
+    {
       "name": "Brand Kits"
     },
     {
@@ -263,6 +266,178 @@
         ],
         "responses": {
           "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/auto-edit/vision-plan": {
+      "post": {
+        "tags": [
+          "Auto Edit"
+        ],
+        "summary": "Gerar Plano de Auto Edit",
+        "description": "Pede à IA o plano de edição completo de um corte",
+        "operationId": "post_auto_edit_vision_plan",
+        "x-docs-source": "api-reference/auto-edit/generate.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Corpo da requisição.",
+                "properties": {
+                  "short_id": {
+                    "type": "string",
+                    "description": "ID do corte (ULID)."
+                  },
+                  "preset": {
+                    "type": "string",
+                    "description": "Estilo da edição: viral, clean, cinematic, pop, editorial, meme, brainrot ou neon. Sem ele, a IA escolhe pelo conteúdo (nunca brainrot ou neon)."
+                  },
+                  "matte_only": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Com true, não gera um plano novo: só completa o recorte da pessoa no corte inteiro para aplicar brainrot ou neon sobre o plano que já existe. Não consome a cota diária. Exige um plano pronto ou aplicado."
+                  }
+                },
+                "required": [
+                  "short_id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/auto-edit/vision-plan/{shortId}": {
+      "get": {
+        "tags": [
+          "Auto Edit"
+        ],
+        "summary": "Consultar Plano de Auto Edit",
+        "description": "Retorna o status e, quando pronto, o plano de edição de um corte",
+        "operationId": "get_auto_edit_vision_plan_by_shortId",
+        "x-docs-source": "api-reference/auto-edit/status.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do corte (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/auto-edit/vision-plan/{shortId}/apply": {
+      "post": {
+        "tags": [
+          "Auto Edit"
+        ],
+        "summary": "Aplicar Plano de Auto Edit",
+        "description": "Aplica no servidor um plano pronto: o corte sai editado sem abrir o editor",
+        "operationId": "post_auto_edit_vision_plan_by_shortId_apply",
+        "x-docs-source": "api-reference/auto-edit/apply.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "shortId",
+            "in": "path",
+            "required": true,
+            "description": "ID do corte (ULID).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Corpo da requisição.",
+                "properties": {
+                  "preset": {
+                    "type": "string",
+                    "description": "Estilo para aplicar no lugar do que veio no plano: viral, clean, cinematic, pop, editorial, meme, brainrot ou neon. O layout do corte não muda: meme é aplicado como viral."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
             "description": "Operação concluída com sucesso.",
             "content": {
               "application/json": {
@@ -635,6 +810,11 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Se true, adiciona uma chamada para ação (CTA) nos primeiros 3 segundos do corte."
+                  },
+                  "autoEdit": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Se true, quando o projeto fica pronto a IA gera e aplica no servidor o Auto Edit nos 3 cortes de maior score: eles já saem editados na listagem, no render e na publicação, sem abrir o editor. Só para assinantes; sem assinatura ativa o campo é ignorado. Os outros cortes continuam como estão. Veja Aplicar pelo backend."
                   },
                   "target_languages": {
                     "type": "array",

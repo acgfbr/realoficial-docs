@@ -106,6 +106,14 @@ Para criar apenas um projeto vazio, sem vídeo, processamento ou consumo de cré
   Se `true`, adiciona uma chamada para ação (CTA) nos primeiros 3 segundos do corte.
 </ParamField>
 
+<ParamField body="autoEdit" type="boolean" default="false">
+  Se `true`, quando o projeto fica pronto a IA gera e **aplica no servidor** o
+  [Auto Edit](/api-reference/auto-edit) nos 3 cortes de maior `score`: eles já saem
+  editados na listagem, no render e na publicação, sem abrir o editor. Só para assinantes;
+  sem assinatura ativa o campo é ignorado. Os outros cortes continuam como estão. Veja
+  [Aplicar pelo backend](/api-reference/auto-edit#aplicar-pelo-backend).
+</ParamField>
+
 <ParamField body="target_languages" type="array">
   Até 3 códigos de [Idiomas de Tradução](/api-reference/translations/languages). Cada
   short é traduzido automaticamente assim que fica pronto, sem custo. Ignorado quando

@@ -1,0 +1,107 @@
+---
+title: 'Consultar Plano de Auto Edit'
+api: 'GET /auto-edit/vision-plan/{shortId}'
+description: 'Retorna o status e, quando pronto, o plano de edição de um corte'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/auto-edit/vision-plan/{shortId}
+```
+
+Use para acompanhar a geração depois de [Gerar Plano de Auto Edit](/api-reference/auto-edit/generate).
+Consulte a cada 3 segundos até `status` sair de `processing`.
+
+## Path Parameters
+
+<ParamField path="shortId" type="string" required>
+  ID do corte (ULID).
+</ParamField>
+
+## Resposta
+
+<ResponseField name="data" type="object">
+  <Expandable title="Propriedades">
+    <ResponseField name="status" type="string">
+      `none`, `processing`, `ready`, `applied`, `reverted` ou `failed`. Veja
+      [Status](/api-reference/auto-edit#status).
+    </ResponseField>
+    <ResponseField name="stage" type="string | null">
+      Etapa enquanto `processing`: `queued`, `frames`, `model`, `broll` ou `matte`.
+    </ResponseField>
+    <ResponseField name="source" type="string | null">
+      `manual` quando o plano foi pedido (pela API ou pelo editor); `auto` quando veio de
+      `autoEdit: true` na criação do projeto.
+    </ResponseField>
+    <ResponseField name="applied_preset" type="string | null">
+      Estilo que está na timeline, quando o plano já foi aplicado.
+    </ResponseField>
+    <ResponseField name="applied_by" type="string | null">
+      `server` quando a aplicação foi feita pelo backend ([Aplicar Plano](/api-reference/auto-edit/apply)
+      ou automático); ausente quando foi aplicado no editor.
+    </ResponseField>
+    <ResponseField name="plan" type="object">
+      Só em `ready`, `applied` e `reverted`. Plano de edição no formato interno do
+      editor: pode mudar sem aviso. `plan.preset` é o estilo escolhido.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/auto-edit/vision-plan/SHORT_ID" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Gerando
+{
+  "type": "success",
+  "data": { "status": "processing", "source": "manual", "stage": "model" }
+}
+```
+
+```json 200 - Pronto
+{
+  "type": "success",
+  "data": {
+    "status": "ready",
+    "source": "manual",
+    "applied_preset": null,
+    "plan": {
+      "short_id": "01k4ef56yqtsyrzjb0gveqy7cd",
+      "preset": "viral",
+      "duration": 38.4,
+      "hook_title": "Ele não esperava por isso",
+      "words": [],
+      "zooms": [],
+      "broll": [],
+      "scenes": []
+    }
+  }
+}
+```
+
+```json 200 - Sem plano
+{
+  "type": "success",
+  "data": { "status": "none", "source": null, "stage": null }
+}
+```
+
+```json 404 - Corte não encontrado
+{
+  "type": "error",
+  "code": "invalid_payload",
+  "message": "Não foi possível processar os dados da linha do tempo."
+}
+```
+</ResponseExample>
+
+<Note>
+O exemplo "Pronto" mostra só alguns campos do plano; a resposta real traz a edição
+completa.
+</Note>

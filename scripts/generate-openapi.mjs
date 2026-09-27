@@ -26,6 +26,7 @@ const tagNames = {
   images: 'Geração de imagem',
   thumbnails: 'Thumbnails',
   uploads: 'Uploads de mídia',
+  'auto-edit': 'Auto Edit',
 };
 
 const workspaceTags = new Set([
@@ -46,6 +47,7 @@ const workspaceTags = new Set([
   'Geração de imagem',
   'Thumbnails',
   'Uploads de mídia',
+  'Auto Edit',
 ]);
 
 // Endpoints públicos: sem Bearer e sem contexto de workspace.
@@ -611,7 +613,7 @@ function successfulStatus(method, path) {
     return '200';
   }
   // Operações assíncronas: respondem 202 e são acompanhadas por polling.
-  if (method === 'POST' && /(\/dubs$|\/translations$|^\/ai-usage\/image$|\/generations$)/.test(path)) {
+  if (method === 'POST' && /(\/dubs$|\/translations$|^\/ai-usage\/image$|\/generations$|^\/auto-edit\/vision-plan$)/.test(path)) {
     return '202';
   }
   if (method === 'POST' && /\/media-asset-uploads\/\{uploadId\}\/(complete|abort)$/.test(path)) return '200';
