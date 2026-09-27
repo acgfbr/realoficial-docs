@@ -319,30 +319,17 @@ Após criar o projeto, ele passará pelos seguintes status:
 Após o projeto ser processado, você pode visualizar os cortes gerados através de uma página de preview:
 
 ```
-https://app.realoficial.com.br/share/{projectId}?token={seu_token}
+https://app.realoficial.com.br/share/{projectId}?token={token_de_compartilhamento}
 ```
 
 <Frame>
   <img src="/images/preview_share.jpeg" alt="Página de preview dos cortes" />
 </Frame>
 
-<ParamField path="projectId" type="string" required>
-  ID do projeto retornado na criação
-</ParamField>
-
-<ParamField query="token" type="string" required>
-  Seu token de autenticação (o mesmo usado nas requisições da API)
-</ParamField>
-
-### Exemplo de URL
-
-```
-https://app.realoficial.com.br/share/01k3ab12yqtsyrzjb0fveqy5zx?token=seu_token_aqui
-```
-
-<Tip>
-Use essa URL para compartilhar a prévia dos cortes com sua equipe ou integrar em sua aplicação via iframe. Nenhuma menção ao real oficial é feita nela
-</Tip>
+O `token` dessa página é o **token de compartilhamento** da conta (`read_only_token`),
+não o Bearer Token da API. Ele dá acesso a todos os projetos da conta e permite editar os
+cortes. Veja [Embed do Editor e do Player](/api-reference/embed) para obter o token,
+incorporar a página via iframe e entender os cuidados de segurança.
 
 ## URLs Suportadas
 

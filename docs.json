@@ -129,6 +129,12 @@
         ]
       },
       {
+        "group": "Embed",
+        "pages": [
+          "api-reference/embed"
+        ]
+      },
+      {
         "group": "Lives - Monitoramento",
         "pages": [
           "api-reference/lives/monitor",

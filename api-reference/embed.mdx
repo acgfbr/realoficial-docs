@@ -1,0 +1,152 @@
+---
+title: 'Embed do Editor e do Player'
+description: 'Incorpore a lista de cortes, o player e o editor da Real Oficial na sua aplicação via iframe'
+---
+
+As páginas de compartilhamento da Real Oficial podem ser incorporadas em qualquer site
+com um `<iframe>`. Elas não exibem a marca nem o menu do produto e funcionam sem login:
+o acesso vem do **token de compartilhamento** da conta, enviado na URL.
+
+| Página | URL |
+|---|---|
+| Projetos da conta | `https://app.realoficial.com.br/share/projects?token={token}` |
+| Cortes de um projeto | `https://app.realoficial.com.br/share/{projectId}?token={token}` |
+| Player de um corte | `https://app.realoficial.com.br/share/{projectId}/{shortId}?token={token}` |
+| Editor de um corte | `https://app.realoficial.com.br/share/{projectId}/{shortId}/editor?token={token}` |
+
+## Token de compartilhamento
+
+O `token` dessas páginas é o **token de compartilhamento** (`read_only_token`), diferente
+do Bearer Token usado na API. O token da API não funciona nas páginas de
+compartilhamento.
+
+Para obter o token de compartilhamento:
+
+- chame `GET /user` com o Bearer Token da conta e leia `user.read_only_token`; ou
+- no dashboard, abra **Configurações** e copie o **Token de Somente Leitura**.
+
+<Warning>
+O token de compartilhamento é da **conta inteira**, não de um projeto ou corte:
+
+- dá acesso a todos os projetos da conta, inclusive os dos workspaces de que ela é dona;
+- permite editar a timeline dos cortes, enviar mídia e gerar legendas no editor;
+- não expira e ainda não pode ser trocado.
+
+Qualquer pessoa que veja a URL do iframe pode reutilizar o token. Incorpore essas páginas
+apenas em áreas da sua aplicação acessíveis a quem pode ter esse acesso, como a área
+logada do próprio dono da conta. Não use em páginas públicas.
+</Warning>
+
+## Incorporando
+
+```html
+<iframe
+  src="https://app.realoficial.com.br/share/01k3ab12yqtsyrzjb0fveqy5zx/01k4ef56yqtsyrzjb0gveqy7cd?token=TOKEN_DE_COMPARTILHAMENTO&lang=en"
+  width="400"
+  height="720"
+  allow="autoplay; fullscreen; clipboard-write"
+  style="border: 0"
+></iframe>
+```
+
+- qualquer domínio pode incorporar as páginas; não é preciso cadastrar o seu;
+- as páginas não usam cookies de sessão, então o bloqueio de cookies de terceiros do
+  navegador não as afeta;
+- se o iframe usar `sandbox`, inclua `allow-scripts allow-same-origin allow-downloads`;
+- as páginas usam tema escuro e não aceitam personalização de cores ou layout.
+
+## Parâmetros de URL
+
+<ParamField query="token" type="string" required>
+  Token de compartilhamento da conta.
+</ParamField>
+
+<ParamField query="lang" type="string">
+  Idioma da interface: `pt`, `en` ou `es`. Sem ele, a página usa o idioma salvo no
+  navegador ou o padrão do domínio.
+</ParamField>
+
+<ParamField query="page" type="integer" default="1">
+  Página da lista, em `/share/projects` e `/share/{projectId}`.
+</ParamField>
+
+<ParamField query="sort" type="string" default="score">
+  Só em `/share/{projectId}`: ordenação dos cortes, `score`, `time`, `duration` ou
+  `title`.
+</ParamField>
+
+<ParamField query="render" type="string" default="all">
+  Só em `/share/{projectId}`: filtro dos cortes, `all`, `rendered`, `not_rendered` ou
+  `liked`.
+</ParamField>
+
+## O que cada página permite
+
+### Lista de projetos e de cortes
+
+Navegação pelos projetos e cortes da conta, com pré-visualização e acesso ao player e ao
+editor de cada corte.
+
+### Player
+
+Reprodução do corte com a legenda e o botão **Download**, que gera o vídeo no próprio
+navegador.
+
+### Editor
+
+O editor completo da timeline, com as funções de edição manual:
+
+- textos, legendas, estilos de legenda e mídias da timeline;
+- envio de arquivos e geração de legenda para um vídeo ou áudio adicionado;
+- brand kits da conta;
+- desfazer e refazer;
+- salvamento manual e automático a cada 60 segundos quando há alterações.
+
+Recursos que dependem de IA, créditos ou publicação ficam ocultos no editor
+compartilhado: dublagem, tradução, thumbnails, edição automática, renderização no
+servidor e publicação. Use a API para esses recursos, com o Bearer Token da conta.
+
+<Note>
+Dentro de um iframe, a exportação pelo editor ainda não está disponível. Para obter o
+vídeo final, use o botão **Download** do player ou
+[Renderizar Short](/api-reference/renders/create) pela API.
+</Note>
+
+## Integração com a sua aplicação
+
+As páginas não enviam eventos para a página que as incorpora: não há aviso de
+carregamento, salvamento ou exportação via `postMessage`. Para saber o estado de um corte
+depois de uma edição, consulte a API, por exemplo
+`GET /shorts/{projectId}/{shortId}`.
+
+As alterações feitas no editor são gravadas na timeline do corte, a mesma que a API lê e
+que [Atualizar Timeline](/api-reference/shorts/timeline) substitui.
+
+### Cortes de lives públicas
+
+Ao salvar a edição de um corte público de live, a Real Oficial cria uma cópia privada na
+conta, e o editor passa a apontar para a URL da cópia. Nas chamadas seguintes da API, use
+os novos `project_id` e `short_id`, que [Atualizar Timeline](/api-reference/shorts/timeline)
+também devolve com `materialized: true`.
+
+## API de compartilhamento
+
+As páginas usam rotas da API que aceitam o token de compartilhamento como Bearer Token.
+Elas podem ser usadas para montar uma visualização própria:
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `GET` | `/readonly/projects` | Lista os projetos da conta |
+| `GET` | `/readonly/shorts/{projectId}` | Lista os cortes de um projeto |
+| `GET` | `/readonly/shorts/{projectId}/{shortId}` | Retorna o corte com a timeline |
+| `POST` | `/readonly/shorts/{projectId}/{shortId}/updateTimeline` | Salva a timeline |
+| `GET` | `/readonly/shorts/{projectId}/{shortId}/download` | URL temporária para baixar o vídeo original (`kind=original`) ou um render (`kind=render&render_id=`) |
+
+```bash
+curl "https://api.realoficial.com.br/api/v1/readonly/shorts/PROJECT_ID" \
+  -H "Authorization: Bearer TOKEN_DE_COMPARTILHAMENTO" \
+  -H "Accept: application/json"
+```
+
+Nessas rotas, não envie `X-Workspace-Id`: o token já dá acesso aos workspaces de que a
+conta é dona.
