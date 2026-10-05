@@ -1,0 +1,260 @@
+---
+title: 'Gerar Vídeo'
+api: 'POST /ai-usage/video'
+description: 'Pede um vídeo com IA a partir de texto, imagem inicial, referências ou template'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/ai-usage/video
+```
+
+Cria o vídeo, debita os créditos e responde `202` com o `id`. Acompanhe em
+[Consultar Vídeo](/api-reference/videos/show). Veja o
+[guia de Geração de Vídeo](/api-reference/videos) para modelos, preços e a fila.
+
+<Note>
+Exige papel `owner`, `admin` ou `editor` no workspace. O pedido não é idempotente:
+repetir cobra de novo.
+</Note>
+
+## Body
+
+<ParamField body="terms_accepted" type="boolean" required>
+  Precisa ser `true`. Confirma os termos de uso: sem conteúdo pornográfico e só imagens e
+  vídeos de pessoas que autorizaram o uso. Veja [Termos de uso](/api-reference/videos).
+</ParamField>
+
+<ParamField body="model" type="string">
+  `id` de um modelo de [Modelos de Vídeo](/api-reference/videos/models). Obrigatório sem
+  `template`.
+</ParamField>
+
+<ParamField body="prompt" type="string">
+  Descrição do vídeo, com até 2000 caracteres. Obrigatório sem `template`.
+</ParamField>
+
+<ParamField body="duration_secs" type="integer">
+  Duração em segundos, uma das `durations` do modelo. Obrigatório sem `template`.
+</ParamField>
+
+<ParamField body="aspect_ratio" type="string">
+  `9:16` ou `16:9`, entre os `aspect_ratios` do modelo. Obrigatório sem `template`.
+</ParamField>
+
+<ParamField body="audio" type="boolean">
+  Gera com áudio. Omitido = padrão do modelo (`audio_default`). Em modelos sem áudio, envie
+  `false` ou omita.
+</ParamField>
+
+<ParamField body="image_url" type="string">
+  Imagem inicial: o vídeo começa nela. Envie a `asset.canonical_url` de um
+  [upload](/api-reference/uploads/create) do mesmo workspace, o `asset.remoteUrl` de uma
+  imagem gerada ou o `last_frame.remoteUrl` de um vídeo pronto. Só em modelos com
+  `supports_image: true`. Não combina com referências.
+</ParamField>
+
+<ParamField body="reference_images" type="array">
+  Até `reference.images` URLs de imagens (mesmas fontes de `image_url`) que guiam a cena
+  sem virar o primeiro quadro.
+</ParamField>
+
+<ParamField body="reference_videos" type="array">
+  Até `reference.videos` URLs de vídeos: `asset.canonical_url` de um upload MP4 ou MOV de
+  até 50 MB, ou o `asset.remoteUrl` de um vídeo gerado no workspace. Cada um com 2 a 15
+  segundos; somados, até 15 segundos. Os segundos enviados também são cobrados.
+</ParamField>
+
+<ParamField body="height" type="integer">
+  Resolução, entre as `qualities` do modelo (por exemplo `480`). Omitido = `height` padrão
+  do modelo.
+</ParamField>
+
+<ParamField body="draft" type="boolean" default="false">
+  Gera um rascunho em 480p, pelo preço do 480p, que pode virar
+  [versão final](/api-reference/videos/final). Só em modelos com `draft` no catálogo. Com
+  `draft`, omita `height` ou envie `480`.
+</ParamField>
+
+<ParamField body="template" type="string">
+  `slug` de um template do catálogo. Com template, `model`, `prompt`, `duration_secs`,
+  `aspect_ratio`, `audio` e as referências são ignorados: a receita define tudo.
+</ParamField>
+
+<ParamField body="inputs" type="object">
+  Campos do template (`fields`), cada valor com até 200 caracteres. Em campos `select`,
+  envie uma das `options`.
+</ParamField>
+
+<ParamField body="consent" type="boolean">
+  Obrigatório (`true`) nos templates com `consent: true`: confirma que você tem
+  autorização para usar a foto.
+</ParamField>
+
+## Resposta
+
+<ResponseField name="id" type="string">ID do vídeo.</ResponseField>
+<ResponseField name="status" type="string">`pending` (começou) ou `queued` (esperando vaga da conta).</ResponseField>
+<ResponseField name="model" type="string">Modelo usado.</ResponseField>
+<ResponseField name="credits_charged" type="integer">Créditos debitados.</ResponseField>
+<ResponseField name="credits_balance" type="integer">Saldo restante do dono do workspace.</ResponseField>
+<ResponseField name="queued" type="boolean">`true` quando entrou na fila da conta.</ResponseField>
+<ResponseField name="queue_position" type="integer | null">Posição na fila (1 = o próximo). `null` fora da fila.</ResponseField>
+<ResponseField name="queue" type="object">Vagas da conta agora: `slots`, `queue_limit`, `active` e `queued`.</ResponseField>
+
+## Erros
+
+| HTTP | Mensagem | Quando |
+|---|---|---|
+| 400 | Créditos insuficientes... (`code: insufficient_credits`) | Saldo não cobre o vídeo; traz `credits_required` e `credits_available` |
+| 403 | Você não tem permissão para esta ação neste espaço de trabalho. | Papel `viewer` |
+| 422 | Aceite os termos de uso para gerar vídeos... | `terms_accepted` ausente ou diferente de `true` |
+| 422 | Escolha uma duração da lista. | `duration_secs` fora das `durations` do modelo |
+| 422 | Escolha um formato da lista. | `aspect_ratio` fora dos `aspect_ratios` do modelo |
+| 422 | Este modelo não gera nessa resolução. | `height` fora das `qualities` |
+| 422 | Este modelo não faz rascunho. | `draft: true` em modelo sem rascunho |
+| 422 | Este modelo só gera vídeo a partir de texto... | `image_url` em modelo sem imagem inicial |
+| 422 | Use a imagem inicial ou as referências, não as duas juntas. | `image_url` junto com referências |
+| 422 | Este modelo aceita até N imagens de referência. | Referências demais |
+| 422 | Cada vídeo de referência precisa ter entre 2 e 15 segundos. | Vídeo de referência curto ou longo demais |
+| 422 | A imagem escolhida não está disponível neste espaço... (`code: reference_unavailable`) | Imagem ou vídeo de outro workspace |
+| 429 | Sua fila está cheia... (`code: video_generation_queue_full`) | Já há 10 vídeos esperando na conta |
+| 429 | Você atingiu o limite de 50 vídeos em 24 horas... (`code: video_generation_daily_limit`) | Limite do membro |
+| 503 | A geração de vídeo não está disponível no momento. (`code: video_generation_unavailable`) | Modelo indisponível agora |
+
+Erros de validação do corpo respondem `422` no formato padrão, com `message` e `errors`.
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/ai-usage/video" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "terms_accepted": true,
+    "model": "minimax-h3-turbo",
+    "prompt": "um cachorro caramelo de óculos escuros andando de skate na praia",
+    "duration_secs": 5,
+    "aspect_ratio": "9:16"
+  }'
+```
+
+```bash Imagem inicial
+curl -X POST "https://api.realoficial.com.br/api/v1/ai-usage/video" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "terms_accepted": true,
+    "model": "minimax-h3-turbo",
+    "prompt": "a câmera se aproxima devagar enquanto o produto gira",
+    "duration_secs": 5,
+    "aspect_ratio": "9:16",
+    "image_url": "https://media.realoficial.com.br/_media/uploads/3f2b8c1e-9a4d-4e7f-b2c1-0d9e8f7a6b5c.png"
+  }'
+```
+
+```bash Rascunho em 480p
+curl -X POST "https://api.realoficial.com.br/api/v1/ai-usage/video" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "terms_accepted": true,
+    "model": "seedance-2.5",
+    "prompt": "um robô dançando numa pista de neon",
+    "duration_secs": 5,
+    "aspect_ratio": "9:16",
+    "draft": true
+  }'
+```
+
+```bash Template
+curl -X POST "https://api.realoficial.com.br/api/v1/ai-usage/video" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "terms_accepted": true,
+    "template": "opening-hook",
+    "inputs": { "channel": "Real Oficial", "vibe": "neon" }
+  }'
+```
+
+```javascript JavaScript
+const api = 'https://api.realoficial.com.br/api/v1';
+const headers = {
+  Authorization: `Bearer ${token}`,
+  'Content-Type': 'application/json',
+  Accept: 'application/json'
+};
+
+const created = await fetch(`${api}/ai-usage/video`, {
+  method: 'POST',
+  headers,
+  body: JSON.stringify({
+    terms_accepted: true,
+    model: 'minimax-h3-turbo',
+    prompt: 'um cachorro caramelo de óculos escuros andando de skate na praia',
+    duration_secs: 5,
+    aspect_ratio: '9:16'
+  })
+}).then((response) => response.json());
+
+const unfinished = ['queued', 'pending', 'submitting', 'processing'];
+let video;
+do {
+  await new Promise((resolve) => setTimeout(resolve, 10000));
+  video = await fetch(`${api}/ai-usage/video/${created.id}`, { headers })
+    .then((response) => response.json());
+} while (unfinished.includes(video.status));
+
+if (video.status === 'failed') throw new Error(video.error);
+console.log(video.asset.playbackUrl); // URL temporária do MP4
+```
+</RequestExample>
+
+<ResponseExample>
+```json 202 - Vídeo começou
+{
+  "id": "01k6vid0000000000000000001",
+  "status": "pending",
+  "model": "minimax-h3-turbo",
+  "credits_charged": 55,
+  "credits_balance": 445,
+  "queued": false,
+  "queue_position": null,
+  "queue": { "slots": 1, "queue_limit": 10, "active": 1, "queued": 0 }
+}
+```
+
+```json 202 - Na fila da conta
+{
+  "id": "01k6vid0000000000000000002",
+  "status": "queued",
+  "model": "minimax-h3-turbo",
+  "credits_charged": 55,
+  "credits_balance": 390,
+  "queued": true,
+  "queue_position": 1,
+  "queue": { "slots": 1, "queue_limit": 10, "active": 1, "queued": 1 }
+}
+```
+
+```json 400 - Créditos insuficientes
+{
+  "error": "Créditos insuficientes: este vídeo custa 55 créditos e você tem 20.",
+  "code": "insufficient_credits",
+  "credits_required": 55,
+  "credits_available": 20
+}
+```
+
+```json 429 - Fila cheia
+{
+  "error": "Sua fila está cheia: já há 10 vídeos esperando. Aguarde alguns começarem para pedir outro.",
+  "code": "video_generation_queue_full"
+}
+```
+</ResponseExample>

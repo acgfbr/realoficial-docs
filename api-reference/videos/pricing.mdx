@@ -1,0 +1,82 @@
+---
+title: 'Tabela Pública de Preços'
+api: 'GET /landing/video-pricing'
+description: 'Preços de geração de vídeo por segundo, sem autenticação'
+---
+
+import { LivePricing } from '/snippets/live-pricing.jsx';
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/landing/video-pricing
+```
+
+Endpoint público, **sem autenticação**, para exibir preços em páginas abertas. Traz o
+mesmo catálogo de [Modelos de Vídeo](/api-reference/videos/models), sem templates, sem
+valor do crédito e sem as vagas da conta.
+
+<Warning>
+A resposta tem cache de até 5 minutos (`generated_at` diz quando foi calculada). Para
+saber o valor exato que será cobrado, use [Modelos de Vídeo](/api-reference/videos/models),
+que é calculado na hora.
+</Warning>
+
+## Preços agora
+
+<LivePricing kind="video" />
+
+## Resposta
+
+<ResponseField name="available" type="boolean">`false` quando a geração de vídeo está indisponível.</ResponseField>
+<ResponseField name="default_model" type="string">Modelo sugerido.</ResponseField>
+<ResponseField name="durations" type="array">União das durações de todos os modelos, em segundos.</ResponseField>
+<ResponseField name="aspect_ratios" type="array">Formatos possíveis.</ResponseField>
+<ResponseField name="models" type="array">
+  Mesmos campos de `models` em [Modelos de Vídeo](/api-reference/videos/models).
+</ResponseField>
+<ResponseField name="generated_at" type="string">Quando a tabela foi calculada.</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/landing/video-pricing" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "available": true,
+  "default_model": "minimax-h3-turbo",
+  "durations": [4, 5, 6, 8, 10],
+  "aspect_ratios": ["9:16", "16:9"],
+  "models": [
+    {
+      "id": "minimax-h3-turbo",
+      "label": "MiniMax H3 Turbo",
+      "tier": "budget",
+      "height": 768,
+      "credits_per_second": 11,
+      "audio_credits_per_second": 11,
+      "qualities": [
+        { "height": 768, "credits_per_second": 11, "audio_credits_per_second": 11, "reference": { "credits_per_second": 11, "audio_credits_per_second": 11, "video_credits_per_second": 11 } }
+      ],
+      "draft": null,
+      "audio_default": true,
+      "audio_locked": false,
+      "durations": [5, 10],
+      "aspect_ratios": ["9:16", "16:9"],
+      "supports_image": true,
+      "rejects_real_faces": false,
+      "reference": { "images": 9, "videos": 3, "credits_per_second": 11, "audio_credits_per_second": 11, "video_credits_per_second": 11, "video_min_billed_secs": 0, "clip_min_secs": 2, "clip_max_secs": 15, "video_total_secs": 15 }
+    }
+  ],
+  "generated_at": "2026-10-05T12:00:00Z"
+}
+```
+</ResponseExample>
+
+<Note>
+O exemplo foi resumido. Preços mudam: use sempre a resposta real.
+</Note>

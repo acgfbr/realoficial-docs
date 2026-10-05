@@ -53,7 +53,9 @@ O corpo aceita **somente** os campos abaixo; campos extras respondem `422`.
 
 <ParamField body="content_type" type="string" required>
   Tipo MIME do arquivo. Para referência de imagem: `image/png`, `image/jpeg`,
-  `image/webp` ou `image/gif`.
+  `image/webp` ou `image/gif`. Para vídeo de referência da
+  [geração de vídeo](/api-reference/videos): `video/mp4` ou `video/quicktime`, com até
+  50 MB.
 </ParamField>
 
 <ParamField body="size_bytes" type="integer" required>

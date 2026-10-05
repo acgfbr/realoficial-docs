@@ -1,0 +1,70 @@
+---
+title: 'Excluir Vídeo'
+api: 'DELETE /ai-usage/video/{id}'
+description: 'Exclui um vídeo pronto ou com falha, ou tira da fila com os créditos de volta'
+---
+
+## Endpoint
+
+```text
+DELETE https://api.realoficial.com.br/api/v1/ai-usage/video/{id}
+```
+
+| Situação do vídeo | O que acontece |
+|---|---|
+| `queued` (na fila da conta) | Sai da fila e os créditos voltam: `refunded: true` |
+| `completed`, `failed`, `expired` | O vídeo e o arquivo são apagados; os créditos **não** voltam |
+| `pending`, `submitting`, `processing` | Não exclui: responde `409` até terminar |
+
+<Note>
+Exige papel `owner`, `admin` ou `editor` no workspace.
+</Note>
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  ID do vídeo.
+</ParamField>
+
+## Resposta
+
+<ResponseField name="deleted" type="boolean">Sempre `true`.</ResponseField>
+<ResponseField name="refunded" type="boolean">`true` quando o vídeo saiu da fila e os créditos voltaram.</ResponseField>
+
+## Erros
+
+| HTTP | Mensagem | Quando |
+|---|---|---|
+| 403 | Você não tem permissão para esta ação neste espaço de trabalho. | Papel `viewer` |
+| 404 | Vídeo não encontrado. (`code: not_found`) | ID de outro workspace ou inexistente |
+| 409 | Este vídeo ainda está sendo gerado. Aguarde terminar para excluir. (`code: video_generation_in_progress`) | Vídeo gerando, inclusive o que acabou de sair da fila |
+
+<RequestExample>
+```bash cURL
+curl -X DELETE "https://api.realoficial.com.br/api/v1/ai-usage/video/01k6vid0000000000000000002" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Tirado da fila
+{
+  "deleted": true,
+  "refunded": true
+}
+```
+
+```json 200 - Excluído
+{
+  "deleted": true
+}
+```
+
+```json 409 - Gerando
+{
+  "error": "Este vídeo ainda está sendo gerado. Aguarde terminar para excluir.",
+  "code": "video_generation_in_progress"
+}
+```
+</ResponseExample>

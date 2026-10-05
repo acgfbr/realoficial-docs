@@ -1,0 +1,65 @@
+---
+title: 'Listar Vídeos'
+api: 'GET /ai-usage/video'
+description: 'Lista os vídeos com IA do workspace, do mais novo ao mais antigo'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/ai-usage/video
+```
+
+Traz os vídeos do workspace atual (inclusive os pedidos por outros membros), no mesmo
+formato de [Consultar Vídeo](/api-reference/videos/show), e as vagas da conta.
+
+## Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  Página.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="20">
+  Itens por página, de 1 a 50.
+</ParamField>
+
+## Resposta
+
+<ResponseField name="data" type="array">Vídeos, no formato de [Consultar Vídeo](/api-reference/videos/show) (sem `queue` em cada item).</ResponseField>
+<ResponseField name="meta" type="object">`current_page`, `last_page`, `per_page` e `total`.</ResponseField>
+<ResponseField name="queue" type="object">Vagas da conta agora: `slots`, `queue_limit`, `active` e `queued`.</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/ai-usage/video?page=1&limit=20" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "data": [
+    {
+      "id": "01k6vid0000000000000000002",
+      "status": "queued",
+      "model": "minimax-h3-turbo",
+      "model_label": "MiniMax H3 Turbo",
+      "prompt": "um robô dançando numa pista de neon",
+      "aspect_ratio": "9:16",
+      "duration_secs": 5,
+      "height": 768,
+      "credits": 55,
+      "queue_position": 1
+    }
+  ],
+  "meta": { "current_page": 1, "last_page": 1, "per_page": 20, "total": 1 },
+  "queue": { "slots": 1, "queue_limit": 10, "active": 1, "queued": 1 }
+}
+```
+</ResponseExample>
+
+<Note>
+O exemplo foi resumido: cada item traz todos os campos de Consultar Vídeo.
+</Note>

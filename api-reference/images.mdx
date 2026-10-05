@@ -3,6 +3,8 @@ title: 'Geração de Imagem'
 description: 'Gere e edite imagens com IA a partir de um prompt, com ou sem imagem de referência'
 ---
 
+import { LivePricing } from '/snippets/live-pricing.jsx';
+
 A API gera imagens a partir de um texto (`prompt`) e também edita uma imagem sua quando
 você envia uma referência. A geração é assíncrona e cobrada em créditos por imagem.
 
@@ -49,40 +51,41 @@ inclusive de pacotes avulsos.
   </Step>
 </Steps>
 
-## Modelos
+## Modelos e preços
 
-Catálogo atual. Os modelos e preços podem mudar: consulte sempre
-[Modelos de Imagem](/api-reference/images/models) antes de cobrar seu usuário.
+Tabela ao vivo, com até 5 minutos de atraso. Os modelos e preços mudam: consulte sempre
+[Modelos de Imagem](/api-reference/images/models) antes de cobrar seu usuário. Veja
+também [Preços em Tempo Real](/api-reference/ai-pricing).
 
-| `model` | Créditos por imagem | Imagem de referência | Formato de saída |
-|---|---:|---|---|
-| `gpt-image-2` (padrão) | 5 | Opcional | PNG |
-| `nano-banana-2` | 26 | Opcional | PNG |
-| `krea-2-turbo` | 10 | Não aceita | WebP |
-| `z-image-turbo` | 8 | Opcional | WebP |
-| `flux-2-klein-4b` | 8 | Opcional | WebP |
-| `qwen-image-edit-2511` | 16 | Obrigatória | WebP |
-| `longcat-image-edit-turbo` | 16 | Obrigatória | WebP |
+<LivePricing kind="image" />
 
 ## Tamanho da imagem
 
 As imagens saem em resolução de até 1K (lado maior por volta de 1024 px). A API não
-aceita largura, altura, proporção ou qualidade:
+aceita largura, altura ou qualidade:
 
-- **sem referência**, a imagem sai quadrada (1024×1024);
+- **sem referência**, envie `aspectRatio` para escolher a proporção: `1:1` (padrão),
+  `16:9`, `9:16`, `4:5`, `5:4`, `4:3`, `3:4`, `3:2` ou `2:3`. A lista atual vem em
+  `aspect_ratios` no catálogo;
 - **com referência**, a imagem acompanha a proporção da referência, dentro dos limites de
-  cada modelo. `gpt-image-2` aceita referências com proporção entre 1:3 e 3:1;
-  `nano-banana-2` usa a proporção suportada mais próxima (1:1, 3:2, 2:3, 3:4, 4:3, 4:5,
-  5:4, 9:16, 16:9 ou 21:9).
+  cada modelo, e `aspectRatio` não é aceito. `gpt-image-2` aceita referências com
+  proporção entre 1:3 e 3:1; `nano-banana-2` usa a proporção suportada mais próxima.
 
-O tamanho final vem em `width` e `height` no status. Para um formato específico, envie
-uma referência nessa proporção ou redimensione a imagem depois.
+O tamanho final vem em `width` e `height` no status.
+
+## Modo econômico
+
+Modelos com `economy_credits_per_image` no catálogo também geram no modo econômico:
+envie `economy: true` para pagar esse preço menor e receber a imagem em até 24 horas, em
+vez de na hora. Enquanto isso o status fica `pending`. Se não ficar pronta em 24 horas, a
+geração termina em `failed` com os créditos devolvidos.
 
 ## Créditos
 
 - A cobrança é antecipada: `count × créditos do modelo`, debitada no pedido.
 - Se o saldo não cobre o lote inteiro, nada é criado e a resposta é
   `400 insufficient_credits`.
+- No modo econômico, vale `economy_credits_per_image` no lugar de `credits_per_image`.
 - Cada imagem que falha tem seus créditos devolvidos, inclusive em recusa pelo filtro de
   conteúdo e em tempo esgotado. O status informa `credits_refunded`.
 - Em workspace de equipe, os créditos debitados são os do dono.
@@ -115,7 +118,7 @@ sempre que precisar de uma URL válida.
 ## Limitações
 
 - uma imagem de referência por geração;
-- sem escolha de proporção, tamanho, qualidade ou seed;
+- proporção só sem imagem de referência; sem escolha de tamanho, qualidade ou seed;
 - sem webhook de conclusão;
 - sem listagem nem exclusão de gerações avulsas;
 - a imagem gerada não entra automaticamente na biblioteca nem na timeline de um short.

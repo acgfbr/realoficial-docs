@@ -1,0 +1,170 @@
+---
+title: 'Consultar Vídeo'
+api: 'GET /ai-usage/video/{id}'
+description: 'Retorna status e resultado de um vídeo com IA'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/ai-usage/video/{id}
+```
+
+Consulte a cada 5 a 15 segundos até `status` ser `completed` ou `failed`.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  O `id` devolvido por [Gerar Vídeo](/api-reference/videos/create).
+</ParamField>
+
+## Status
+
+| `status` | Significado |
+|---|---|
+| `queued` | Pago, esperando vaga da conta (`queue_position` diz a posição) |
+| `pending`, `submitting`, `processing` | Gerando |
+| `completed` | Pronto: `asset` preenchido |
+| `failed` | Falhou: `error` e `credits_refunded` preenchidos |
+| `expired` | Passou de 30 dias e o arquivo foi apagado |
+
+Um vídeo que o processamento não conclui no prazo termina em `failed`, com os créditos
+devolvidos.
+
+## Resposta
+
+<ResponseField name="id" type="string">ID do vídeo.</ResponseField>
+<ResponseField name="status" type="string">Veja a tabela acima.</ResponseField>
+<ResponseField name="model" type="string">Modelo usado.</ResponseField>
+<ResponseField name="model_label" type="string">Nome do modelo.</ResponseField>
+<ResponseField name="tier" type="string">`budget`, `standard` ou `premium`.</ResponseField>
+<ResponseField name="template" type="string | null">`slug` do template, quando veio de um.</ResponseField>
+<ResponseField name="prompt" type="string | null">Prompt enviado. `null` em vídeo de template.</ResponseField>
+<ResponseField name="task_type" type="string">`text`, `image` (imagem inicial) ou `reference`.</ResponseField>
+<ResponseField name="aspect_ratio" type="string">`9:16` ou `16:9`.</ResponseField>
+<ResponseField name="duration_secs" type="integer">Duração pedida.</ResponseField>
+<ResponseField name="height" type="integer">Resolução (480, 720, 1080...).</ResponseField>
+<ResponseField name="audio" type="boolean">Se foi gerado com áudio.</ResponseField>
+<ResponseField name="credits" type="integer">Créditos cobrados.</ResponseField>
+<ResponseField name="queue_position" type="integer | null">Posição na fila da conta (1 = o próximo). `null` fora da fila.</ResponseField>
+<ResponseField name="queue" type="object">Vagas da conta agora: `slots`, `queue_limit`, `active` e `queued`.</ResponseField>
+<ResponseField name="references" type="object | null">
+  Quando houve referências: `images`, `videos` e `video_secs` (segundos de vídeo
+  enviados).
+</ResponseField>
+<ResponseField name="draft" type="object | null">
+  Só em rascunho.
+  <Expandable title="Propriedades">
+    <ResponseField name="final_height" type="integer">Resolução da versão final (1080).</ResponseField>
+    <ResponseField name="final_credits" type="integer">Preço da versão final deste rascunho.</ResponseField>
+    <ResponseField name="final_available_until" type="string | null">Prazo para pedir a versão final.</ResponseField>
+    <ResponseField name="can_finalize" type="boolean">Pronto, no prazo e sem versão final pedida.</ResponseField>
+    <ResponseField name="final" type="object | null">Versão final já pedida: `id` e `status`.</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="draft_of" type="string | null">Na versão final: `id` do rascunho de origem.</ResponseField>
+<ResponseField name="source_image_url" type="string">Quando houve imagem inicial: URL temporária dela.</ResponseField>
+<ResponseField name="created_by" type="object | null">Membro que pediu: `id` e `name`.</ResponseField>
+<ResponseField name="created_at" type="string">Criação.</ResponseField>
+<ResponseField name="completed_at" type="string | null">Conclusão ou falha.</ResponseField>
+<ResponseField name="asset" type="object">
+  Só em `completed`.
+  <Expandable title="Propriedades">
+    <ResponseField name="remoteUrl" type="string">Endereço permanente do vídeo. Use em `reference_videos` de um novo pedido.</ResponseField>
+    <ResponseField name="playbackUrl" type="string">URL temporária do MP4 para exibir ou baixar.</ResponseField>
+    <ResponseField name="playbackUrlExpiresAt" type="string">Expiração de `playbackUrl`.</ResponseField>
+    <ResponseField name="remoteFileKey" type="string">Identificador interno do arquivo.</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="result_duration_secs" type="number | null">Só em `completed`. Duração real do arquivo (5 s pedidos saem por volta de 5,2 s).</ResponseField>
+<ResponseField name="last_frame" type="object">
+  Só em `completed`, quando disponível. Último quadro do vídeo, no mesmo formato de
+  `asset`. Use `last_frame.remoteUrl` como `image_url` para continuar a cena num novo
+  vídeo.
+</ResponseField>
+<ResponseField name="error" type="string">Só em `failed`. Mensagem para o usuário final.</ResponseField>
+<ResponseField name="credits_refunded" type="boolean">
+  Só em `failed`. Se os créditos já foram devolvidos. Pode vir `false` por alguns
+  instantes logo após a falha; consulte de novo.
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/ai-usage/video/01k6vid0000000000000000001" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Pronto
+{
+  "id": "01k6vid0000000000000000001",
+  "status": "completed",
+  "model": "minimax-h3-turbo",
+  "model_label": "MiniMax H3 Turbo",
+  "tier": "budget",
+  "template": null,
+  "prompt": "um cachorro caramelo de óculos escuros andando de skate na praia",
+  "task_type": "text",
+  "aspect_ratio": "9:16",
+  "duration_secs": 5,
+  "height": 768,
+  "audio": true,
+  "credits": 55,
+  "queue_position": null,
+  "draft": null,
+  "draft_of": null,
+  "references": null,
+  "created_by": { "id": "01k6user000000000000000001", "name": "Ana" },
+  "created_at": "2026-10-05T12:00:00+00:00",
+  "completed_at": "2026-10-05T12:00:40+00:00",
+  "asset": {
+    "remoteUrl": "https://media.realoficial.com.br/_media/video-generations/01k6user000000000000000001/01k6vid0000000000000000001.mp4",
+    "remoteFileKey": "video-generations/01k6user000000000000000001/01k6vid0000000000000000001.mp4",
+    "playbackUrl": "https://media.realoficial.com.br/...assinado...",
+    "playbackUrlExpiresAt": "2026-10-05T13:00:40+00:00"
+  },
+  "result_duration_secs": 5.17,
+  "last_frame": {
+    "remoteUrl": "https://media.realoficial.com.br/_media/video-generations/01k6user000000000000000001/01k6vid0000000000000000001-last.jpg",
+    "remoteFileKey": "video-generations/01k6user000000000000000001/01k6vid0000000000000000001-last.jpg",
+    "playbackUrl": "https://media.realoficial.com.br/...assinado...",
+    "playbackUrlExpiresAt": "2026-10-05T13:00:40+00:00"
+  },
+  "queue": { "slots": 1, "queue_limit": 10, "active": 0, "queued": 0 }
+}
+```
+
+```json 200 - Na fila
+{
+  "id": "01k6vid0000000000000000002",
+  "status": "queued",
+  "model": "minimax-h3-turbo",
+  "queue_position": 1,
+  "credits": 55,
+  "queue": { "slots": 1, "queue_limit": 10, "active": 1, "queued": 1 }
+}
+```
+
+```json 200 - Falhou
+{
+  "id": "01k6vid0000000000000000003",
+  "status": "failed",
+  "model": "seedance-2.0-mini",
+  "error": "Este modelo não aceita foto ou vídeo com pessoa real. Use outro modelo ou outra referência. Os créditos foram devolvidos.",
+  "credits_refunded": true
+}
+```
+
+```json 404 - Não encontrado
+{
+  "error": "Vídeo não encontrado.",
+  "code": "not_found"
+}
+```
+</ResponseExample>
+
+<Note>
+Os exemplos de fila e falha foram resumidos: a resposta real traz todos os campos.
+</Note>

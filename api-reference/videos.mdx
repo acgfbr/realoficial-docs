@@ -1,0 +1,182 @@
+---
+title: 'Geração de Vídeo'
+description: 'Gere vídeos com IA a partir de um texto, de uma imagem inicial, de referências ou de templates'
+---
+
+import { LivePricing } from '/snippets/live-pricing.jsx';
+
+A API gera vídeos curtos (de 4 a 10 segundos, conforme o modelo) a partir de um texto,
+de uma imagem inicial ou de imagens e vídeos de referência. A geração é assíncrona e
+cobrada em créditos por segundo de vídeo.
+
+## Endpoints
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `GET` | `/ai-usage/video/models` | Modelos, preços atuais, templates e as vagas da sua conta |
+| `GET` | `/landing/video-pricing` | Tabela pública de preços, sem autenticação |
+| `POST` | `/ai-usage/video` | Pede um vídeo |
+| `GET` | `/ai-usage/video/{id}` | Status e resultado de um vídeo |
+| `GET` | `/ai-usage/video` | Vídeos do workspace, do mais novo ao mais antigo |
+| `DELETE` | `/ai-usage/video/{id}` | Exclui um vídeo ou tira da fila |
+| `POST` | `/ai-usage/video/{id}/final` | Versão final de um rascunho |
+
+Pedir, excluir e gerar a versão final exigem papel `owner`, `admin` ou `editor` no
+workspace. Qualquer membro pode consultar. Não é preciso ter assinatura: basta saldo de
+créditos, inclusive de pacotes avulsos.
+
+## Fluxo
+
+<Steps>
+  <Step title="Escolha o modelo">
+    `GET /ai-usage/video/models` devolve os modelos, o preço por segundo, as durações e
+    formatos de cada um e as vagas da sua conta.
+  </Step>
+  <Step title="Envie as imagens ou vídeos (opcional)">
+    Faça o [upload](/api-reference/uploads/create) e guarde `asset.canonical_url`.
+    Também valem imagens e vídeos já gerados no mesmo workspace.
+  </Step>
+  <Step title="Peça o vídeo">
+    `POST /ai-usage/video` com `prompt`, `model`, `duration_secs`, `aspect_ratio` e
+    `terms_accepted: true`. Os créditos são debitados na hora e a resposta traz o `id`.
+  </Step>
+  <Step title="Acompanhe">
+    Consulte `GET /ai-usage/video/{id}` a cada 5 a 15 segundos até `completed` ou
+    `failed`. Um vídeo leva de alguns segundos a poucos minutos. Não existe webhook.
+  </Step>
+  <Step title="Baixe o vídeo">
+    `asset.playbackUrl` é uma URL temporária do MP4. Baixe o arquivo ou consulte o status
+    de novo para receber uma URL nova.
+  </Step>
+</Steps>
+
+## Modelos e preços
+
+Tabela ao vivo, com até 5 minutos de atraso. Os modelos e preços mudam: consulte sempre
+[Modelos de Vídeo](/api-reference/videos/models) antes de cobrar seu usuário. Veja
+também [Preços em Tempo Real](/api-reference/ai-pricing).
+
+<LivePricing kind="video" />
+
+Cada modelo aceita só as durações (`durations`) e os formatos (`aspect_ratios`) que o
+catálogo lista para ele. Os formatos possíveis são `9:16` (vertical) e `16:9`
+(horizontal).
+
+## Créditos
+
+- O preço é por segundo: `credits_per_second × duration_secs`. Nos modelos em que o
+  áudio custa a mais, vale `audio_credits_per_second` com `audio: true`.
+- A cobrança é antecipada, no pedido. Sem saldo, nada é criado e a resposta é
+  `400 insufficient_credits`, com `credits_required` e `credits_available`.
+- Vídeo que falha tem os créditos devolvidos, inclusive em recusa pela política de
+  conteúdo e em tempo esgotado. O status informa `credits_refunded`.
+- Em workspace de equipe, os créditos debitados são os do dono.
+- Referências e outras resoluções têm preço próprio. A conta completa está em
+  [Preços em Tempo Real](/api-reference/ai-pricing).
+
+<Warning>
+O pedido não é idempotente. Repetir o `POST` cobra de novo. Guarde o `id` da resposta.
+</Warning>
+
+## Termos de uso
+
+Todo pedido exige `terms_accepted: true`. Ao enviar, você confirma que o conteúdo segue
+os termos de uso da Real Oficial:
+
+- não gerar conteúdo pornográfico;
+- usar somente imagens e vídeos de pessoas que autorizaram o uso.
+
+Mostre esses termos ao seu usuário antes do primeiro vídeo. O descumprimento pode levar
+ao bloqueio da conta.
+
+## Imagem inicial e referências
+
+Um pedido usa **uma** destas formas, nunca as duas juntas:
+
+- **Imagem inicial** (`image_url`): o vídeo começa nessa imagem. Só nos modelos com
+  `supports_image: true`.
+- **Referências** (`reference_images` e `reference_videos`): imagens e vídeos que guiam a
+  aparência e o movimento sem virar o primeiro quadro. Só nos modelos com `reference`
+  diferente de `null`, até `reference.images` imagens e `reference.videos` vídeos.
+
+Cada vídeo de referência precisa ser MP4 ou MOV de até 50 MB, com 2 a 15 segundos; somados,
+no máximo 15 segundos. Com vídeo de referência, os segundos dele também são cobrados (veja
+a tabela de [Preços em Tempo Real](/api-reference/ai-pricing)).
+
+<Note>
+Modelos com `rejects_real_faces: true` recusam foto ou vídeo com rosto de pessoa real. O
+pedido termina em `failed` com os créditos devolvidos. Use produtos, cenários, desenhos
+ou personagens.
+</Note>
+
+Para encadear vídeos, use o `last_frame.remoteUrl` de um vídeo pronto como `image_url`
+do próximo ("continuar daqui"), ou o `asset.remoteUrl` dele como `reference_videos`.
+
+## Resolução e rascunho
+
+O catálogo lista em `qualities` as resoluções de cada modelo, cada uma com o seu preço.
+Envie `height` (por exemplo `480`) para escolher; sem ele, vale o `height` padrão do
+modelo.
+
+Modelos com `draft` diferente de `null` fazem **rascunho**: envie `draft: true` para gerar
+em 480p pelo preço do 480p e conferir a cena. Se gostar, peça a
+[versão final](/api-reference/videos/final), que sai em 1080p com o mesmo prompt,
+referências, duração e formato, cobrada pelo preço de `draft.final`. A versão final só
+pode ser pedida até 7 dias depois do rascunho.
+
+## Templates
+
+`GET /ai-usage/video/models` lista em `templates` receitas prontas (abertura de canal,
+foto animada, anúncio de produto e outras). Com `template`, o servidor define modelo,
+duração, formato, áudio e prompt; você envia só os campos do template (`inputs`) e, se o
+template pedir, a foto (`image_url`) e a autorização (`consent: true`). O preço do
+template vem em `credits`.
+
+## Fila de geração
+
+Cada conta gera alguns vídeos ao mesmo tempo, conforme o plano do dono do workspace. As
+vagas valem para todos os workspaces e membros do dono:
+
+| Plano | Vídeos ao mesmo tempo |
+|---|---:|
+| Sem plano (só créditos avulsos) | 1 |
+| Lite | 1 |
+| Criador | 2 |
+| Viral | 3 |
+| Business | 4 |
+
+O pedido além das vagas é aceito, **cobrado na hora** e fica com `status: queued`. Ele
+começa sozinho, por ordem de chegada, quando um vídeo da conta termina. Cabem até 10
+vídeos esperando por conta; acima disso a resposta é `429 video_generation_queue_full`.
+Para desistir de um vídeo na fila, use [Excluir Vídeo](/api-reference/videos/delete): os
+créditos voltam.
+
+As vagas e o uso atual vêm em `queue` (`slots`, `queue_limit`, `active`, `queued`) no
+catálogo, na listagem, no status e na resposta do pedido.
+
+## Status
+
+| `status` | Significado |
+|---|---|
+| `queued` | Pago, esperando vaga da conta |
+| `pending`, `submitting`, `processing` | Gerando |
+| `completed` | Pronto: `asset` preenchido |
+| `failed` | Falhou: `error` e `credits_refunded` preenchidos |
+| `expired` | Passou de 30 dias e o arquivo foi apagado |
+
+Trate `queued`, `pending`, `submitting` e `processing` como "em andamento".
+
+## Armazenamento
+
+Os vídeos ficam em armazenamento privado por 30 dias. A API entrega URLs temporárias; a
+expiração vem em `asset.playbackUrlExpiresAt`. Consulte o status de novo sempre que
+precisar de uma URL válida. `asset.remoteUrl` é o endereço permanente do vídeo dentro da
+Real Oficial.
+
+## Limitações
+
+- até 50 vídeos por membro a cada 24 horas;
+- sem webhook de conclusão;
+- uma imagem inicial ou um conjunto de referências por pedido, não os dois;
+- áudio de referência não é aceito;
+- duração, formato e resolução só entre as opções de cada modelo.

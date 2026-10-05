@@ -1,0 +1,227 @@
+---
+title: 'Modelos de Vídeo'
+api: 'GET /ai-usage/video/models'
+description: 'Lista os modelos de vídeo, o preço atual por segundo, os templates e as vagas da sua conta'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/ai-usage/video/models
+```
+
+Retorna os modelos disponíveis agora e o preço que será cobrado no próximo pedido. O
+valor é calculado a cada chamada, sem cache. Para exibir preços sem autenticação, use a
+[Tabela Pública de Preços](/api-reference/videos/pricing).
+
+## Resposta
+
+<ResponseField name="available" type="boolean">
+  `false` quando a geração de vídeo está indisponível no momento.
+</ResponseField>
+
+<ResponseField name="credit_value" type="object | null">
+  Valor estimado de 1 crédito em reais para o dono do workspace: `brl` e `source`
+  (`plan` quando vem do plano, `recharge` quando vem do preço da recarga avulsa).
+</ResponseField>
+
+<ResponseField name="queue" type="object">
+  Vagas da conta e uso agora. Veja [Fila de geração](/api-reference/videos).
+  <Expandable title="Propriedades">
+    <ResponseField name="slots" type="integer">Vídeos gerando ao mesmo tempo no plano do dono.</ResponseField>
+    <ResponseField name="queue_limit" type="integer">Máximo de vídeos esperando na fila.</ResponseField>
+    <ResponseField name="active" type="integer">Gerando agora.</ResponseField>
+    <ResponseField name="queued" type="integer">Esperando agora.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="default_model" type="string">Modelo sugerido.</ResponseField>
+<ResponseField name="durations" type="array">União das durações de todos os modelos, em segundos.</ResponseField>
+<ResponseField name="aspect_ratios" type="array">Formatos possíveis: `9:16` e `16:9`.</ResponseField>
+
+<ResponseField name="models" type="array">
+  Do mais barato ao mais caro.
+  <Expandable title="Propriedades">
+    <ResponseField name="id" type="string">Valor a enviar em `model`.</ResponseField>
+    <ResponseField name="label" type="string">Nome para exibir.</ResponseField>
+    <ResponseField name="tier" type="string">Faixa de preço: `budget`, `standard` ou `premium`.</ResponseField>
+    <ResponseField name="height" type="integer">Resolução padrão (lado menor do quadro, como `720`).</ResponseField>
+    <ResponseField name="credits_per_second" type="integer">Preço por segundo sem áudio, na resolução padrão.</ResponseField>
+    <ResponseField name="audio_credits_per_second" type="integer | null">
+      Preço por segundo com áudio. `null` = o modelo gera vídeo sem áudio. Igual a
+      `credits_per_second` = áudio incluído.
+    </ResponseField>
+    <ResponseField name="audio_default" type="boolean">Se o áudio vem ligado quando `audio` é omitido.</ResponseField>
+    <ResponseField name="audio_locked" type="boolean">Áudio sempre ligado, sem opção de desligar.</ResponseField>
+    <ResponseField name="qualities" type="array">
+      Resoluções que você pode escolher em `height`, cada uma com `height`,
+      `credits_per_second`, `audio_credits_per_second` e `reference` (preços com
+      referência). Um item só = sem escolha.
+    </ResponseField>
+    <ResponseField name="draft" type="object | null">
+      Rascunho: `height` (480), `final` (preços da versão final, em 1080p) e
+      `final_valid_days` (prazo para pedir a final). `null` = o modelo não faz rascunho.
+    </ResponseField>
+    <ResponseField name="durations" type="array">Durações aceitas, em segundos.</ResponseField>
+    <ResponseField name="aspect_ratios" type="array">Formatos aceitos.</ResponseField>
+    <ResponseField name="supports_image" type="boolean">Aceita imagem inicial (`image_url`).</ResponseField>
+    <ResponseField name="rejects_real_faces" type="boolean">Recusa foto ou vídeo com pessoa real.</ResponseField>
+    <ResponseField name="reference" type="object | null">
+      Modo referência: `images` e `videos` (máximo por pedido), `credits_per_second`,
+      `audio_credits_per_second`, `video_credits_per_second` (preço com vídeo de
+      referência, sobre a duração mais os segundos do vídeo), `video_min_billed_secs`
+      (mínimo cobrado do vídeo enviado), `clip_min_secs`, `clip_max_secs` e
+      `video_total_secs`. `null` = o modelo não aceita referências.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="templates" type="array">
+  Receitas prontas.
+  <Expandable title="Propriedades">
+    <ResponseField name="slug" type="string">Valor a enviar em `template`.</ResponseField>
+    <ResponseField name="category" type="string">`creator`, `photo`, `business`, `style` ou `fun`.</ResponseField>
+    <ResponseField name="model" type="string">Modelo usado pelo template.</ResponseField>
+    <ResponseField name="model_label" type="string">Nome do modelo.</ResponseField>
+    <ResponseField name="mode" type="string">`text`, `image` (a foto é o primeiro quadro) ou `reference` (a foto guia uma cena nova).</ResponseField>
+    <ResponseField name="needs_image" type="boolean">Exige `image_url`.</ResponseField>
+    <ResponseField name="consent" type="boolean">Exige `consent: true` (foto de pessoa).</ResponseField>
+    <ResponseField name="duration_secs" type="integer">Duração fixa.</ResponseField>
+    <ResponseField name="aspect_ratio" type="string">Formato fixo.</ResponseField>
+    <ResponseField name="audio" type="boolean">Se gera com áudio.</ResponseField>
+    <ResponseField name="credits" type="integer">Preço do template.</ResponseField>
+    <ResponseField name="fields" type="array">
+      Campos de `inputs`: `key`, `type` (`text` ou `select`), `required`, `max`
+      (caracteres) e `options` (para `select`).
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl "https://api.realoficial.com.br/api/v1/ai-usage/video/models" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Accept: application/json"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Sucesso
+{
+  "available": true,
+  "credit_value": { "brl": 0.0333, "source": "plan" },
+  "queue": { "slots": 2, "queue_limit": 10, "active": 0, "queued": 0 },
+  "default_model": "minimax-h3-turbo",
+  "durations": [4, 5, 6, 8, 10],
+  "aspect_ratios": ["9:16", "16:9"],
+  "models": [
+    {
+      "id": "minimax-h3-turbo",
+      "label": "MiniMax H3 Turbo",
+      "tier": "budget",
+      "height": 768,
+      "credits_per_second": 11,
+      "audio_credits_per_second": 11,
+      "qualities": [
+        {
+          "height": 768,
+          "credits_per_second": 11,
+          "audio_credits_per_second": 11,
+          "reference": { "credits_per_second": 11, "audio_credits_per_second": 11, "video_credits_per_second": 11 }
+        }
+      ],
+      "draft": null,
+      "audio_default": true,
+      "audio_locked": false,
+      "durations": [5, 10],
+      "aspect_ratios": ["9:16", "16:9"],
+      "supports_image": true,
+      "rejects_real_faces": false,
+      "reference": {
+        "images": 9,
+        "videos": 3,
+        "credits_per_second": 11,
+        "audio_credits_per_second": 11,
+        "video_credits_per_second": 11,
+        "video_min_billed_secs": 0,
+        "clip_min_secs": 2,
+        "clip_max_secs": 15,
+        "video_total_secs": 15
+      }
+    },
+    {
+      "id": "seedance-2.5",
+      "label": "Seedance 2.5",
+      "tier": "premium",
+      "height": 720,
+      "credits_per_second": 94,
+      "audio_credits_per_second": 94,
+      "qualities": [
+        {
+          "height": 480,
+          "credits_per_second": 43,
+          "audio_credits_per_second": 43,
+          "reference": { "credits_per_second": 43, "audio_credits_per_second": 43, "video_credits_per_second": 26 }
+        },
+        {
+          "height": 720,
+          "credits_per_second": 94,
+          "audio_credits_per_second": 94,
+          "reference": { "credits_per_second": 94, "audio_credits_per_second": 94, "video_credits_per_second": 56 }
+        }
+      ],
+      "draft": {
+        "height": 480,
+        "final": {
+          "height": 1080,
+          "credits_per_second": 229,
+          "audio_credits_per_second": 229,
+          "reference": { "credits_per_second": 229, "audio_credits_per_second": 229, "video_credits_per_second": 137 }
+        },
+        "final_valid_days": 7
+      },
+      "audio_default": true,
+      "audio_locked": false,
+      "durations": [5, 10],
+      "aspect_ratios": ["9:16", "16:9"],
+      "supports_image": true,
+      "rejects_real_faces": true,
+      "reference": {
+        "images": 10,
+        "videos": 3,
+        "credits_per_second": 94,
+        "audio_credits_per_second": 94,
+        "video_credits_per_second": 56,
+        "video_min_billed_secs": 4,
+        "clip_min_secs": 2,
+        "clip_max_secs": 15,
+        "video_total_secs": 15
+      }
+    }
+  ],
+  "templates": [
+    {
+      "slug": "opening-hook",
+      "category": "creator",
+      "model": "minimax-h3",
+      "model_label": "MiniMax H3",
+      "mode": "text",
+      "needs_image": false,
+      "consent": false,
+      "duration_secs": 5,
+      "aspect_ratio": "9:16",
+      "audio": true,
+      "credits": 110,
+      "fields": [
+        { "key": "channel", "type": "text", "required": true, "max": 30, "options": null },
+        { "key": "vibe", "type": "select", "required": true, "max": null, "options": ["energetic", "cinematic", "neon"] }
+      ]
+    }
+  ]
+}
+```
+</ResponseExample>
+
+<Note>
+O exemplo foi resumido. Modelos, preços e templates mudam: use sempre a resposta real.
+</Note>

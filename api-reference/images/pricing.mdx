@@ -4,6 +4,8 @@ api: 'GET /landing/image-pricing'
 description: 'Preços de geração de imagem e quantas imagens cada plano cobre, sem autenticação'
 ---
 
+import { LivePricing } from '/snippets/live-pricing.jsx';
+
 ## Endpoint
 
 ```text
@@ -15,14 +17,20 @@ mesmo catálogo de [Modelos de Imagem](/api-reference/images/models) e, para cad
 atual, quantas imagens de cada modelo os créditos mensais cobrem.
 
 <Warning>
-A resposta tem cache de até 10 minutos. Para saber o valor exato que será cobrado, use
-[Modelos de Imagem](/api-reference/images/models), que é calculado na hora.
+A resposta tem cache de até 5 minutos (`generated_at` diz quando foi calculada). Para
+saber o valor exato que será cobrado, use [Modelos de Imagem](/api-reference/images/models),
+que é calculado na hora.
 </Warning>
+
+## Preços agora
+
+<LivePricing kind="image" />
 
 ## Resposta
 
 Além dos campos de [Modelos de Imagem](/api-reference/images/models) (`models`,
-`default`, `max_images_per_request`, `promotion`, `thumbnail_workflows`):
+`default`, `max_images_per_request`, `aspect_ratios`, `economy`, `promotion`,
+`thumbnail_workflows`):
 
 <ResponseField name="thumbnails" type="array">
   Resumo dos modos de thumbnail: `mode`, `credits_per_image`,
@@ -62,7 +70,8 @@ curl "https://api.realoficial.com.br/api/v1/landing/image-pricing" \
       "id": "gpt-image-2",
       "label": "GPT Image 2",
       "credits_per_image": 5,
-      "regular_credits_per_image": 5
+      "regular_credits_per_image": 5,
+      "economy_credits_per_image": 3
     }
   ],
   "default": "gpt-image-2",

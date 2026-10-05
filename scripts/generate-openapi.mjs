@@ -24,6 +24,7 @@ const tagNames = {
   dubbing: 'Dublagem',
   translations: 'Tradução de legendas',
   images: 'Geração de imagem',
+  videos: 'Geração de vídeo',
   thumbnails: 'Thumbnails',
   uploads: 'Uploads de mídia',
   'auto-edit': 'Auto Edit',
@@ -45,13 +46,14 @@ const workspaceTags = new Set([
   'Dublagem',
   'Tradução de legendas',
   'Geração de imagem',
+  'Geração de vídeo',
   'Thumbnails',
   'Uploads de mídia',
   'Auto Edit',
 ]);
 
 // Endpoints públicos: sem Bearer e sem contexto de workspace.
-const publicPaths = new Set(['/login', '/landing/image-pricing']);
+const publicPaths = new Set(['/login', '/landing/image-pricing', '/landing/video-pricing']);
 
 
 function filesUnder(directory) {

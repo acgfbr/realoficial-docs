@@ -31,8 +31,9 @@ Rate limit: 60 requisições por minuto. Respeite `poll_after_ms` entre consulta
   Volume da fila de toda a plataforma: `queued`, `processing`, `total` e `sampled_at`.
 </ResponseField>
 <ResponseField name="own" type="object">
-  Suas gerações em andamento: `queued`, `processing`, `total` e `jobs` (com `id`,
-  `status`, `model`, `created_at`, `updated_at`).
+  Suas gerações em andamento: `queued`, `processing`, `total`, `economy` (pedidos do modo
+  econômico esperando, fora das outras contagens) e `jobs` (com `id`, `status`,
+  `economy`, `model`, `created_at`, `updated_at`).
 </ResponseField>
 <ResponseField name="poll_after_ms" type="integer">Intervalo recomendado até a próxima consulta.</ResponseField>
 

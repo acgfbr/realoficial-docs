@@ -1,0 +1,80 @@
+---
+title: 'Preços em Tempo Real'
+description: 'Como consultar o preço atual da geração de imagem e de vídeo antes de cobrar seu usuário'
+---
+
+import { LivePricing } from '/snippets/live-pricing.jsx';
+
+A geração de imagem e de vídeo é cobrada em créditos, e os preços mudam: entram modelos
+novos, há campanhas de desconto e ajustes de custo. **Não copie preços para o seu código.**
+Consulte a API e use o valor que ela devolve.
+
+## Onde consultar
+
+| Endpoint | Autenticação | Atualização | Use para |
+|---|---|---|---|
+| `GET /ai-usage/image/models` | Bearer | Na hora | Saber o preço exato antes de gerar imagem |
+| `GET /ai-usage/video/models` | Bearer | Na hora | Saber o preço exato antes de gerar vídeo, com as vagas da sua conta |
+| `GET /landing/image-pricing` | Nenhuma | Cache de até 5 min | Exibir preços de imagem em páginas abertas |
+| `GET /landing/video-pricing` | Nenhuma | Cache de até 5 min | Exibir preços de vídeo em páginas abertas |
+
+Os endpoints públicos guardam a tabela por até 5 minutos, cada tipo no seu próprio cache;
+o campo `generated_at` diz quando ela foi calculada. A cobrança sempre usa o preço do
+momento do pedido, e a resposta da geração traz o valor debitado (`credits_charged`).
+
+<Tip>
+No seu app, guarde a tabela por até 5 minutos por tipo (imagem e vídeo) e consulte de
+novo depois disso. Antes de cobrar o seu usuário, prefira os endpoints autenticados, que
+não têm cache.
+</Tip>
+
+## Imagem agora
+
+<LivePricing kind="image" />
+
+O preço de um pedido é `count × credits_per_image` do modelo (ou
+`economy_credits_per_image` no modo econômico). Detalhes em
+[Geração de Imagem](/api-reference/images).
+
+## Vídeo agora
+
+<LivePricing kind="video" />
+
+O vídeo é cobrado por segundo. Para um pedido com `duration_secs` segundos:
+
+| Situação | Créditos |
+|---|---|
+| Normal | `credits_per_second × duration_secs` (ou `audio_credits_per_second` com áudio ligado) |
+| Outra resolução (`height`) | O mesmo cálculo com os preços da resolução em `qualities` |
+| Com imagens de referência | `reference.credits_per_second × duration_secs` (ou o de áudio) |
+| Com vídeo de referência | `reference.video_credits_per_second × (duration_secs + segundos do vídeo)`; os segundos do vídeo são arredondados para cima e nunca contam menos que `video_min_billed_secs` |
+| Versão final de rascunho | O mesmo cálculo com os preços de `draft.final` |
+
+Detalhes em [Geração de Vídeo](/api-reference/videos).
+
+## Exemplo: consultar com cache de 5 minutos
+
+```javascript JavaScript
+const API = 'https://api.realoficial.com.br/api/v1';
+const FIVE_MINUTES = 5 * 60 * 1000;
+const cache = new Map();
+
+// kind: 'image' ou 'video'. Com token, o preço é calculado na hora.
+async function pricing(kind, token) {
+  const hit = cache.get(kind);
+  if (hit && Date.now() - hit.at < FIVE_MINUTES) return hit.data;
+
+  const url = token ? `${API}/ai-usage/${kind}/models` : `${API}/landing/${kind}-pricing`;
+  const headers = { Accept: 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const data = await fetch(url, { headers }).then((response) => response.json());
+  cache.set(kind, { at: Date.now(), data });
+  return data;
+}
+
+// Preço de 5 s de vídeo com áudio no modelo padrão
+const video = await pricing('video', token);
+const model = video.models.find((option) => option.id === video.default_model);
+const credits = (model.audio_credits_per_second ?? model.credits_per_second) * 5;
+```

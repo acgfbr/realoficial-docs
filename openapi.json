@@ -27,6 +27,9 @@
       "name": "Geração de imagem"
     },
     {
+      "name": "Geração de vídeo"
+    },
+    {
       "name": "Auto Edit"
     },
     {
@@ -121,6 +124,16 @@
                   "imageUrl": {
                     "type": "string",
                     "description": "Imagem de referência para edição. Envie a asset.canonicalurl de um upload feito no mesmo workspace, ou o asset.remoteUrl de uma imagem gerada antes. Uma referência por pedido."
+                  },
+                  "aspectRatio": {
+                    "type": "string",
+                    "default": "1:1",
+                    "description": "Proporção da imagem sem referência: 1:1, 16:9, 9:16, 4:5, 5:4, 4:3, 3:4, 3:2 ou 2:3 (lista atual em aspectratios de Modelos de Imagem). Com imageUrl, a proporção segue a da referência e este campo é recusado."
+                  },
+                  "economy": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Modo econômico: cobra economycreditsperimage em vez de creditsperimage e entrega a imagem em até 24 horas. Só nos modelos com economycreditsperimage no catálogo."
                   },
                   "enhancePrompt": {
                     "type": "boolean",
@@ -262,6 +275,365 @@
                 "type": "string"
               }
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/ai-usage/video": {
+      "post": {
+        "tags": [
+          "Geração de vídeo"
+        ],
+        "summary": "Gerar Vídeo",
+        "description": "Pede um vídeo com IA a partir de texto, imagem inicial, referências ou template",
+        "operationId": "post_ai_usage_video",
+        "x-docs-source": "api-reference/videos/create.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Corpo da requisição.",
+                "properties": {
+                  "terms_accepted": {
+                    "type": "boolean",
+                    "description": "Precisa ser true. Confirma os termos de uso: sem conteúdo pornográfico e só imagens e vídeos de pessoas que autorizaram o uso. Veja Termos de uso."
+                  },
+                  "model": {
+                    "type": "string",
+                    "description": "id de um modelo de Modelos de Vídeo. Obrigatório sem template."
+                  },
+                  "prompt": {
+                    "type": "string",
+                    "description": "Descrição do vídeo, com até 2000 caracteres. Obrigatório sem template."
+                  },
+                  "duration_secs": {
+                    "type": "integer",
+                    "description": "Duração em segundos, uma das durations do modelo. Obrigatório sem template."
+                  },
+                  "aspect_ratio": {
+                    "type": "string",
+                    "description": "9:16 ou 16:9, entre os aspectratios do modelo. Obrigatório sem template."
+                  },
+                  "audio": {
+                    "type": "boolean",
+                    "description": "Gera com áudio. Omitido = padrão do modelo (audiodefault). Em modelos sem áudio, envie false ou omita."
+                  },
+                  "image_url": {
+                    "type": "string",
+                    "description": "Imagem inicial: o vídeo começa nela. Envie a asset.canonicalurl de um upload do mesmo workspace, o asset.remoteUrl de uma imagem gerada ou o lastframe.remoteUrl de um vídeo pronto. Só em modelos com supportsimage: true. Não combina com referências."
+                  },
+                  "reference_images": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Até reference.images URLs de imagens (mesmas fontes de imageurl) que guiam a cena sem virar o primeiro quadro."
+                  },
+                  "reference_videos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Até reference.videos URLs de vídeos: asset.canonicalurl de um upload MP4 ou MOV de até 50 MB, ou o asset.remoteUrl de um vídeo gerado no workspace. Cada um com 2 a 15 segundos; somados, até 15 segundos. Os segundos enviados também são cobrados."
+                  },
+                  "height": {
+                    "type": "integer",
+                    "description": "Resolução, entre as qualities do modelo (por exemplo 480). Omitido = height padrão do modelo."
+                  },
+                  "draft": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Gera um rascunho em 480p, pelo preço do 480p, que pode virar versão final. Só em modelos com draft no catálogo. Com draft, omita height ou envie 480."
+                  },
+                  "template": {
+                    "type": "string",
+                    "description": "slug de um template do catálogo. Com template, model, prompt, durationsecs, aspectratio, audio e as referências são ignorados: a receita define tudo."
+                  },
+                  "inputs": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "description": "Campos do template (fields), cada valor com até 200 caracteres. Em campos select, envie uma das options."
+                  },
+                  "consent": {
+                    "type": "boolean",
+                    "description": "Obrigatório (true) nos templates com consent: true: confirma que você tem autorização para usar a foto."
+                  }
+                },
+                "required": [
+                  "terms_accepted"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Geração de vídeo"
+        ],
+        "summary": "Listar Vídeos",
+        "description": "Lista os vídeos com IA do workspace, do mais novo ao mais antigo",
+        "operationId": "get_ai_usage_video",
+        "x-docs-source": "api-reference/videos/list.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Página.",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Itens por página, de 1 a 50.",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/ai-usage/video/{id}": {
+      "delete": {
+        "tags": [
+          "Geração de vídeo"
+        ],
+        "summary": "Excluir Vídeo",
+        "description": "Exclui um vídeo pronto ou com falha, ou tira da fila com os créditos de volta",
+        "operationId": "delete_ai_usage_video_by_id",
+        "x-docs-source": "api-reference/videos/delete.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID do vídeo.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Geração de vídeo"
+        ],
+        "summary": "Consultar Vídeo",
+        "description": "Retorna status e resultado de um vídeo com IA",
+        "operationId": "get_ai_usage_video_by_id",
+        "x-docs-source": "api-reference/videos/show.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "O id devolvido por Gerar Vídeo.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/ai-usage/video/{id}/final": {
+      "post": {
+        "tags": [
+          "Geração de vídeo"
+        ],
+        "summary": "Versão Final do Rascunho",
+        "description": "Gera em 1080p a versão final de um rascunho pronto",
+        "operationId": "post_ai_usage_video_by_id_final",
+        "x-docs-source": "api-reference/videos/final.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID do rascunho.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Corpo da requisição.",
+                "properties": {
+                  "terms_accepted": {
+                    "type": "boolean",
+                    "description": "Precisa ser true, como em Gerar Vídeo."
+                  }
+                },
+                "required": [
+                  "terms_accepted"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/ai-usage/video/models": {
+      "get": {
+        "tags": [
+          "Geração de vídeo"
+        ],
+        "summary": "Modelos de Vídeo",
+        "description": "Lista os modelos de vídeo, o preço atual por segundo, os templates e as vagas da sua conta",
+        "operationId": "get_ai_usage_video_models",
+        "x-docs-source": "api-reference/videos/models.mdx",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkspaceId"
           }
         ],
         "responses": {
@@ -2448,6 +2820,33 @@
         "description": "Preços de geração de imagem e quantas imagens cada plano cobre, sem autenticação",
         "operationId": "get_landing_image_pricing",
         "x-docs-source": "api-reference/images/pricing.mdx",
+        "responses": {
+          "200": {
+            "description": "Operação concluída com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": []
+      }
+    },
+    "/landing/video-pricing": {
+      "get": {
+        "tags": [
+          "Geração de vídeo"
+        ],
+        "summary": "Tabela Pública de Preços",
+        "description": "Preços de geração de vídeo por segundo, sem autenticação",
+        "operationId": "get_landing_video_pricing",
+        "x-docs-source": "api-reference/videos/pricing.mdx",
         "responses": {
           "200": {
             "description": "Operação concluída com sucesso.",
@@ -4669,7 +5068,7 @@
                   },
                   "content_type": {
                     "type": "string",
-                    "description": "Tipo MIME do arquivo. Para referência de imagem: image/png, image/jpeg, image/webp ou image/gif."
+                    "description": "Tipo MIME do arquivo. Para referência de imagem: image/png, image/jpeg, image/webp ou image/gif. Para vídeo de referência da geração de vídeo: video/mp4 ou video/quicktime, com até 50 MB."
                   },
                   "size_bytes": {
                     "type": "integer",

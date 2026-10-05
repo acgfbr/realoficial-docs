@@ -38,6 +38,7 @@
           "introduction",
           "authentication",
           "plans",
+          "api-reference/ai-pricing",
           "api-reference/overview",
           "api-reference/workspaces"
         ]
@@ -114,6 +115,18 @@
           "api-reference/images/create",
           "api-reference/images/show",
           "api-reference/images/queue"
+        ]
+      },
+      {
+        "group": "IA - Vídeos",
+        "pages": [
+          "api-reference/videos/models",
+          "api-reference/videos/pricing",
+          "api-reference/videos/create",
+          "api-reference/videos/show",
+          "api-reference/videos/list",
+          "api-reference/videos/delete",
+          "api-reference/videos/final"
         ]
       },
       {
@@ -259,6 +272,7 @@
           "api-reference/dubbing",
           "api-reference/translations",
           "api-reference/images",
+          "api-reference/videos",
           "api-reference/thumbnails",
           "api-reference/social-accounts",
           "api-reference/social-posts",

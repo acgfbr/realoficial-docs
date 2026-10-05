@@ -1,0 +1,83 @@
+---
+title: 'Versão Final do Rascunho'
+api: 'POST /ai-usage/video/{id}/final'
+description: 'Gera em 1080p a versão final de um rascunho pronto'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/ai-usage/video/{id}/final
+```
+
+Cria um vídeo novo em 1080p a partir de um rascunho (`draft: true`) pronto. Prompt,
+referências, duração, formato e áudio vêm do rascunho. O preço segue `draft.final` do
+modelo e aparece antes em `draft.final_credits` no
+[status do rascunho](/api-reference/videos/show). A versão final entra na
+[fila da conta](/api-reference/videos) como qualquer pedido.
+
+<Note>
+Exige papel `owner`, `admin` ou `editor` no workspace. O rascunho precisa estar
+`completed` e ter sido gerado nos últimos 7 dias (`draft.final_available_until`). Cada
+rascunho tem uma versão final; se ela falhar, os créditos voltam e você pode pedir de
+novo.
+</Note>
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  ID do rascunho.
+</ParamField>
+
+## Body
+
+<ParamField body="terms_accepted" type="boolean" required>
+  Precisa ser `true`, como em [Gerar Vídeo](/api-reference/videos/create).
+</ParamField>
+
+## Resposta
+
+Mesma resposta de [Gerar Vídeo](/api-reference/videos/create): `id` da versão final,
+`status`, `credits_charged`, `credits_balance`, `queued`, `queue_position` e `queue`.
+
+## Erros
+
+| HTTP | Mensagem | Quando |
+|---|---|---|
+| 400 | Créditos insuficientes... (`code: insufficient_credits`) | Saldo não cobre a versão final |
+| 404 | Vídeo não encontrado. (`code: not_found`) | ID de outro workspace ou inexistente |
+| 409 | Este rascunho não pode mais virar versão final... (`code: draft_unavailable`) | Não é rascunho, não está pronto ou passou de 7 dias |
+| 409 | A versão final deste rascunho já foi pedida. (`code: draft_final_exists`) | Já existe versão final na fila, gerando ou pronta |
+| 422 | Aceite os termos de uso para gerar vídeos... | `terms_accepted` ausente |
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/ai-usage/video/01k6vid0000000000000000004/final" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{ "terms_accepted": true }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 202 - Versão final pedida
+{
+  "id": "01k6vid0000000000000000005",
+  "status": "pending",
+  "model": "seedance-2.5",
+  "credits_charged": 1145,
+  "credits_balance": 2855,
+  "queued": false,
+  "queue_position": null,
+  "queue": { "slots": 2, "queue_limit": 10, "active": 1, "queued": 0 }
+}
+```
+
+```json 409 - Fora do prazo
+{
+  "error": "Este rascunho não pode mais virar versão final: ele precisa estar pronto e ter sido gerado nos últimos 7 dias.",
+  "code": "draft_unavailable"
+}
+```
+</ResponseExample>

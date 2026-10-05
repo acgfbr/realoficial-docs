@@ -23,7 +23,7 @@ funciona para IDs de [thumbnail](/api-reference/thumbnails).
 
 | `status` | Significado |
 |---|---|
-| `pending` | Na fila |
+| `pending` | Na fila (no modo econômico, até 24 horas) |
 | `processing` | Gerando |
 | `completed` | Pronta: `images` e `asset` preenchidos |
 | `failed` | Falhou: `error` e `credits_refunded` preenchidos |
@@ -42,6 +42,7 @@ dois como "em andamento". Uma geração sem avanço por 15 minutos é encerrada 
 <ResponseField name="width" type="integer">Largura da imagem.</ResponseField>
 <ResponseField name="height" type="integer">Altura da imagem.</ResponseField>
 <ResponseField name="created_at" type="string">Criação.</ResponseField>
+<ResponseField name="economy" type="boolean">Se foi pedida no modo econômico (pode ficar `pending` por até 24 horas).</ResponseField>
 <ResponseField name="images" type="array">Só em `completed`. Uma URL temporária da imagem.</ResponseField>
 <ResponseField name="asset" type="object">
   Só em `completed`.
