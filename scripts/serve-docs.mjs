@@ -18,6 +18,9 @@ const mintlifyPort = parsePort(
   'MINTLIFY_INTERNAL_PORT',
 );
 
+// Mintlify 4.3+ only listens on `localhost`, which may resolve to ::1 instead of 127.0.0.1.
+const mintlifyHost = 'localhost';
+
 if (publicPort === mintlifyPort) {
   throw new Error('The public and internal Mintlify ports must be different.');
 }
@@ -89,7 +92,7 @@ const server = createServer(async (request, response) => {
 });
 
 server.on('upgrade', (request, clientSocket, head) => {
-  const upstreamSocket = connect(mintlifyPort, '127.0.0.1', () => {
+  const upstreamSocket = connect(mintlifyPort, mintlifyHost, () => {
     upstreamSocket.write(`${request.method} ${request.url} HTTP/${request.httpVersion}\r\n`);
 
     for (const [name, value] of Object.entries(request.headers)) {
@@ -214,7 +217,7 @@ function sendText(request, response, content, contentType) {
 function proxyRequest(request, response) {
   const upstreamRequest = createProxyRequest(
     {
-      hostname: '127.0.0.1',
+      hostname: mintlifyHost,
       port: mintlifyPort,
       path: request.url,
       method: request.method,
@@ -374,7 +377,7 @@ function waitForPort(port, timeoutMs) {
 
   return new Promise((resolvePromise, rejectPromise) => {
     const tryConnection = () => {
-      const socket = connect(port, '127.0.0.1');
+      const socket = connect(port, mintlifyHost);
 
       socket.once('connect', () => {
         socket.destroy();

@@ -2,7 +2,7 @@ FROM node:23-alpine
 
 WORKDIR /app
 
-RUN npm install -g mintlify
+RUN npm install -g mintlify@4.3.8
 
 COPY . .
 
