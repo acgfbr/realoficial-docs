@@ -5,7 +5,7 @@ description: 'Gere vídeos com IA a partir de um texto, de uma imagem inicial, d
 
 import { LivePricing } from '/snippets/live-pricing.jsx';
 
-A API gera vídeos curtos (de 4 a 10 segundos, conforme o modelo) a partir de um texto,
+A API gera vídeos curtos (de 4 a 30 segundos, conforme o modelo) a partir de um texto,
 de uma imagem inicial ou de imagens e vídeos de referência. A geração é assíncrona e
 cobrada em créditos por segundo de vídeo.
 
@@ -20,9 +20,11 @@ cobrada em créditos por segundo de vídeo.
 | `GET` | `/ai-usage/video` | Vídeos do workspace, do mais novo ao mais antigo |
 | `DELETE` | `/ai-usage/video/{id}` | Exclui um vídeo ou tira da fila |
 | `POST` | `/ai-usage/video/{id}/final` | Versão final de um rascunho |
+| `POST` | `/ai-usage/video/{id}/download` | Link de download (registra o download) |
+| `POST` | `/ai-usage/video/{id}/refund-request` | Pede reembolso de um Real Xablau |
 
-Pedir, excluir e gerar a versão final exigem papel `owner`, `admin` ou `editor` no
-workspace. Qualquer membro pode consultar. Não é preciso ter assinatura: basta saldo de
+Pedir, excluir, gerar a versão final e pedir reembolso exigem papel `owner`, `admin` ou `editor` no
+workspace. Qualquer membro pode consultar e baixar. Não é preciso ter assinatura: basta saldo de
 créditos, inclusive de pacotes avulsos.
 
 ## Fluxo
@@ -66,10 +68,23 @@ catálogo lista para ele. Os formatos possíveis são `9:16` (vertical) e `16:9`
 
 - O preço é por segundo: `credits_per_second × duration_secs`. Nos modelos em que o
   áudio custa a mais, vale `audio_credits_per_second` com `audio: true`.
+- **Vídeos grátis no MiniMax Real H3 Ultra:** cada assinatura inclui gerações grátis por mês
+  só nos modelos com `included_in_plan: true` no catálogo (hoje, o `minimax-h3-turbo`),
+  com texto ou imagem inicial; pedido com `reference_images` ou `reference_videos` também
+  entra quando o modelo traz `included_in_plan_references: true` (promoção; sem ele,
+  cobra crédito): Lite 50, Criador 100, Viral 200, Business
+  1.000; pacote de crédito avulso, nenhuma. Não acumulam e renovam no ciclo da
+  assinatura. Cada vídeo conta 1, de qualquer duração.
+  Com cota, o pedido sai com `credits_charged: 0` e `included_in_plan: true`; os outros
+  modelos de vídeo sempre cobram crédito. O saldo vem em `included_videos` (`limit`,
+  `used`, `remaining`, `resets_at`). Vídeo grátis que falha devolve a vaga.
 - A cobrança é antecipada, no pedido. Sem saldo, nada é criado e a resposta é
   `400 insufficient_credits`, com `credits_required` e `credits_available`.
 - Vídeo que falha tem os créditos devolvidos, inclusive em recusa pela política de
   conteúdo e em tempo esgotado. O status informa `credits_refunded`.
+- No Real Xablau, trecho recusado pelo filtro de conteúdo fica com o vídeo original e
+  sai do preço: o vídeo é entregue e os créditos do trecho voltam (`swap_rejected`).
+  Se todos os trechos forem recusados, o pedido falha com estorno total.
 - Em workspace de equipe, os créditos debitados são os do dono.
 - Referências e outras resoluções têm preço próprio. A conta completa está em
   [Preços em Tempo Real](/api-reference/ai-pricing).
@@ -135,7 +150,8 @@ template vem em `credits`.
 ## Fila de geração
 
 Cada conta gera alguns vídeos ao mesmo tempo, conforme o plano do dono do workspace. As
-vagas valem para todos os workspaces e membros do dono:
+vagas valem para todos os workspaces e membros do dono. O número de cada plano também
+vem em `max_parallel_video_generations` na listagem de planos:
 
 | Plano | Vídeos ao mesmo tempo |
 |---|---:|
@@ -152,7 +168,8 @@ Para desistir de um vídeo na fila, use [Excluir Vídeo](/api-reference/videos/d
 créditos voltam.
 
 As vagas e o uso atual vêm em `queue` (`slots`, `queue_limit`, `active`, `queued`) no
-catálogo, na listagem, no status e na resposta do pedido.
+catálogo, na listagem, no status e na resposta do pedido. `queue.upgrade` aponta o plano
+mais próximo que gera mais vídeos ao mesmo tempo (`tier` e `slots`), ou `null` no topo.
 
 ## Status
 
@@ -162,13 +179,13 @@ catálogo, na listagem, no status e na resposta do pedido.
 | `pending`, `submitting`, `processing` | Gerando |
 | `completed` | Pronto: `asset` preenchido |
 | `failed` | Falhou: `error` e `credits_refunded` preenchidos |
-| `expired` | Passou de 30 dias e o arquivo foi apagado |
+| `expired` | O arquivo foi apagado do armazenamento |
 
 Trate `queued`, `pending`, `submitting` e `processing` como "em andamento".
 
 ## Armazenamento
 
-Os vídeos ficam em armazenamento privado por 30 dias. A API entrega URLs temporárias; a
+Os vídeos ficam em armazenamento privado. A API entrega URLs temporárias; a
 expiração vem em `asset.playbackUrlExpiresAt`. Consulte o status de novo sempre que
 precisar de uma URL válida. `asset.remoteUrl` é o endereço permanente do vídeo dentro da
 Real Oficial.

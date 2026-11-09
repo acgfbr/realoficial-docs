@@ -1,0 +1,45 @@
+---
+title: 'Avatares'
+description: 'Personagens salvos no workspace para usar no Real Xablau e nos templates de vídeo com referência'
+---
+
+Um avatar é um personagem salvo no workspace: um nome, um retrato e uma **ficha**, uma
+imagem com o mesmo personagem de frente, de 3/4, de perfil e de corpo inteiro. A ficha
+mantém a identidade do personagem melhor que uma foto solta.
+
+Existem dois tipos:
+
+- **Presets**: personagens prontos, sintéticos (não usam o rosto de ninguém), grátis e
+  prontos na hora.
+- **Avatares do workspace**: criados a partir de uma foto, com o consentimento de quem
+  aparece nela. A ficha é gerada em segundo plano e custa uma imagem (créditos de imagem
+  ou uma das imagens inclusas no plano).
+
+## Endpoints
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `GET` | `/ai-avatars` | Presets, avatares do workspace e o custo de criar |
+| `POST` | `/ai-avatars` | Cria um avatar a partir de uma foto |
+| `PATCH` | `/ai-avatars/{id}` | Renomeia |
+| `DELETE` | `/ai-avatars/{id}` | Exclui |
+
+Criar, renomear e excluir exigem papel `owner`, `admin` ou `editor` no workspace. Qualquer
+membro pode listar.
+
+## Usando um avatar num vídeo
+
+Mande o `image_url` do avatar onde mandaria a URL de uma imagem enviada, em
+[Criar Vídeo](/api-reference/videos/create):
+
+- **Real Xablau** (`real-xablau`): como a imagem daquele personagem em `reference_images`
+  (uma por personagem, na ordem de `swap_targets`). O modelo recebe a indicação de que a
+  ficha mostra uma pessoa só.
+- **Templates de vídeo com referência** (por exemplo `goal-celebration`, `anime`): como
+  `image_url`. Com avatar, o consentimento já está dado (o preset é sintético e o avatar
+  de foto gravou o aceite ao ser criado), então `consent` não é exigido.
+
+<Note>
+O avatar de foto só fica pronto para uso quando `status` for `ready`; antes disso o
+`image_url` vem `null`. Consulte a lista de novo a cada poucos segundos.
+</Note>

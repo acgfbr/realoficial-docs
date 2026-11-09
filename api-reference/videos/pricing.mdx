@@ -14,7 +14,9 @@ GET https://api.realoficial.com.br/api/v1/landing/video-pricing
 
 Endpoint público, **sem autenticação**, para exibir preços em páginas abertas. Traz o
 mesmo catálogo de [Modelos de Vídeo](/api-reference/videos/models), sem templates, sem
-valor do crédito e sem as vagas da conta.
+valor do crédito e sem as vagas da conta. A troca de personagem fica fora de `models`,
+porque o preço dela é em reais: o Real Xablau vem em `real_xablau` e o Real Xablau Lite,
+em `GET /landing/xablau-lite`.
 
 <Warning>
 A resposta tem cache de até 5 minutos (`generated_at` diz quando foi calculada). Para
@@ -35,7 +37,29 @@ que é calculado na hora.
 <ResponseField name="models" type="array">
   Mesmos campos de `models` em [Modelos de Vídeo](/api-reference/videos/models).
 </ResponseField>
+<ResponseField name="real_xablau" type="object | null">
+  Preço do Real Xablau por segundo entregue, igual para todo plano. Os créditos debitados
+  dependem do valor do crédito do seu plano. `null` = ferramenta indisponível.
+  <Expandable title="Propriedades">
+    <ResponseField name="promo" type="boolean">`true` com promoção ativa.</ResponseField>
+    <ResponseField name="qualities" type="array">
+      Uma entrada por resolução, da menor para a maior: `height`, `brl_per_second` e
+      `regular_brl_per_second` (preço fora da promoção).
+    </ResponseField>
+    <ResponseField name="clip_min_secs" type="integer">Menor vídeo aceito, em segundos.</ResponseField>
+    <ResponseField name="clip_max_secs" type="integer">Maior vídeo aceito, em segundos.</ResponseField>
+    <ResponseField name="part_secs" type="integer">Acima disso, o vídeo é feito em partes desse tamanho, sem custo a mais.</ResponseField>
+    <ResponseField name="max_characters" type="integer">Máximo de personagens por vídeo.</ResponseField>
+  </Expandable>
+</ResponseField>
 <ResponseField name="generated_at" type="string">Quando a tabela foi calculada.</ResponseField>
+
+## Real Xablau Lite
+
+O preço do Lite vem da rota pública `GET /landing/xablau-lite`, também sem autenticação:
+`paid.brl_per_second` é o preço por segundo depois da cota grátis e `paid.max_secs`, a
+duração máxima do vídeo pago. `paid: null` = sem cobrança. `available: false` = ferramenta
+indisponível.
 
 <RequestExample>
 ```bash cURL
@@ -49,18 +73,18 @@ curl "https://api.realoficial.com.br/api/v1/landing/video-pricing" \
 {
   "available": true,
   "default_model": "minimax-h3-turbo",
-  "durations": [4, 5, 6, 8, 10],
+  "durations": [4, 5, 6, 8, 10, 15, 20, 30],
   "aspect_ratios": ["9:16", "16:9"],
   "models": [
     {
       "id": "minimax-h3-turbo",
-      "label": "MiniMax H3 Turbo",
+      "label": "MiniMax Real H3 Ultra",
       "tier": "budget",
       "height": 768,
-      "credits_per_second": 11,
-      "audio_credits_per_second": 11,
+      "credits_per_second": 3,
+      "audio_credits_per_second": 3,
       "qualities": [
-        { "height": 768, "credits_per_second": 11, "audio_credits_per_second": 11, "reference": { "credits_per_second": 11, "audio_credits_per_second": 11, "video_credits_per_second": 11 } }
+        { "height": 768, "credits_per_second": 3, "audio_credits_per_second": 3, "reference": { "credits_per_second": 3, "audio_credits_per_second": 3, "video_credits_per_second": 6 } }
       ],
       "draft": null,
       "audio_default": true,
@@ -69,9 +93,21 @@ curl "https://api.realoficial.com.br/api/v1/landing/video-pricing" \
       "aspect_ratios": ["9:16", "16:9"],
       "supports_image": true,
       "rejects_real_faces": false,
-      "reference": { "images": 9, "videos": 3, "credits_per_second": 11, "audio_credits_per_second": 11, "video_credits_per_second": 11, "video_min_billed_secs": 0, "clip_min_secs": 2, "clip_max_secs": 15, "video_total_secs": 15 }
+      "reference": { "images": 9, "videos": 3, "credits_per_second": 3, "audio_credits_per_second": 3, "video_credits_per_second": 6, "video_min_billed_secs": 0, "clip_min_secs": 2, "clip_max_secs": 15, "video_total_secs": 15 }
     }
   ],
+  "real_xablau": {
+    "promo": false,
+    "qualities": [
+      { "height": 480, "brl_per_second": 1, "regular_brl_per_second": 1 },
+      { "height": 720, "brl_per_second": 2, "regular_brl_per_second": 2 },
+      { "height": 1080, "brl_per_second": 4, "regular_brl_per_second": 4 }
+    ],
+    "clip_min_secs": 2,
+    "clip_max_secs": 60,
+    "part_secs": 15,
+    "max_characters": 3
+  },
   "generated_at": "2026-10-05T12:00:00Z"
 }
 ```

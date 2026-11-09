@@ -1,0 +1,27 @@
+---
+title: 'Renomear Avatar'
+api: 'PATCH /ai-avatars/{id}'
+description: 'Troca o nome de um avatar do workspace'
+---
+
+## Endpoint
+
+```text
+PATCH https://api.realoficial.com.br/api/v1/ai-avatars/{id}
+```
+
+## Body
+
+<ParamField body="name" type="string" required>Novo nome, até 60 caracteres.</ParamField>
+
+## Resposta
+
+<ResponseField name="avatar" type="object">O avatar, no formato de [Listar Avatares](/api-reference/avatars/list).</ResponseField>
+
+## Erros
+
+| HTTP | Mensagem | Quando |
+|---|---|---|
+| 403 | Você não tem permissão para esta ação neste espaço de trabalho. | Papel `viewer` |
+| 404 | Avatar não encontrado. | ID de outro workspace, preset ou inexistente |
+| 422 | Dê um nome para o avatar. | `name` vazio ou longo |

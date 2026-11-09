@@ -1,0 +1,85 @@
+---
+title: 'Baixar o Vídeo'
+api: 'POST /ai-usage/video/{id}/download'
+description: 'Gera o link de download de um vídeo pronto e registra o download'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/ai-usage/video/{id}/download
+```
+
+Gera, na hora do clique, um link temporário do vídeo servido como anexo
+(`Content-Disposition: attachment`) e registra o download. Use este endpoint no botão de
+baixar, no lugar de `download.url` do [status do vídeo](/api-reference/videos/show).
+
+<Warning>
+No Real Xablau, **baixar encerra o direito ao [reembolso](/api-reference/videos/refund-request)**
+da troca: sem pedido, `refund_available` passa a `false` com
+`refund_unavailable_reason: "downloaded"`; com um pedido esperando revisão, ele é encerrado
+como `rejected` (`refund_closed: true`), com o motivo em `refund_request.rejection_reason`.
+Avise antes de chamar quando `refund_available` for `true` ou `refund_request.status` for
+`"pending"`.
+</Warning>
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  ID do vídeo.
+</ParamField>
+
+## Body
+
+<ParamField body="version" type="string">
+  `full_hd` (padrão: o arquivo atual, Full HD quando já existe) ou `standard` (a versão sem
+  melhoria, como saiu da geração; sem ela, vem o arquivo atual).
+</ParamField>
+
+## Resposta
+
+`201`:
+
+<ResponseField name="download" type="object">
+  <Expandable title="Propriedades">
+    <ResponseField name="url" type="string">URL temporária de download (10 minutos). Use logo em seguida.</ResponseField>
+    <ResponseField name="filename" type="string">Nome do arquivo (ex.: `real-xablau-1d7bfx2a.mp4`).</ResponseField>
+    <ResponseField name="expiresAt" type="string">Expiração de `url`.</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="refund_closed" type="boolean">
+  `true` quando o download encerrou um pedido de reembolso que esperava revisão. Busque o
+  [status do vídeo](/api-reference/videos/show) para mostrar o pedido encerrado.
+</ResponseField>
+
+## Erros
+
+| HTTP | `code` | Quando |
+|---|---|---|
+| 404 | `not_found` | ID de outro workspace, inexistente ou vídeo que não está `completed` |
+| 410 | `video_removed` | Real Xablau com reembolso aprovado: o vídeo saiu da conta (`result_removed: true`) |
+| 422 | | `version` fora da lista |
+| 429 | | Mais de 60 downloads por minuto |
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/ai-usage/video/01k6vid0000000000000000004/download" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{ "version": "full_hd" }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 201
+{
+  "download": {
+    "url": "https://media.realoficial.com.br/...",
+    "filename": "real-xablau-1d7bfx2a.mp4",
+    "expiresAt": "2026-10-10T18:40:00+00:00"
+  },
+  "refund_closed": false
+}
+```
+</ResponseExample>

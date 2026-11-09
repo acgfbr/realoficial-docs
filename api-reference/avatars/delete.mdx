@@ -1,0 +1,25 @@
+---
+title: 'Excluir Avatar'
+api: 'DELETE /ai-avatars/{id}'
+description: 'Tira o avatar do workspace'
+---
+
+## Endpoint
+
+```text
+DELETE https://api.realoficial.com.br/api/v1/ai-avatars/{id}
+```
+
+O avatar sai da lista na hora. Vídeos já feitos com ele não mudam. Presets não podem ser
+excluídos.
+
+## Resposta
+
+<ResponseField name="deleted" type="boolean">Sempre `true`.</ResponseField>
+
+## Erros
+
+| HTTP | Mensagem | Quando |
+|---|---|---|
+| 403 | Você não tem permissão para esta ação neste espaço de trabalho. | Papel `viewer` |
+| 404 | Avatar não encontrado. | ID de outro workspace, preset ou inexistente |

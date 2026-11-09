@@ -32,11 +32,13 @@ repetir cobra de novo.
 </ParamField>
 
 <ParamField body="prompt" type="string">
-  Descrição do vídeo, com até 2000 caracteres. Obrigatório sem `template`.
+  Descrição do vídeo, com até 2000 caracteres. Obrigatório sem `template`, exceto na
+  troca de personagem, onde é opcional e vira instruções extras.
 </ParamField>
 
 <ParamField body="duration_secs" type="integer">
-  Duração em segundos, uma das `durations` do modelo. Obrigatório sem `template`.
+  Duração em segundos, uma das `durations` do modelo. Obrigatório sem `template`, exceto
+  na troca de personagem: lá a duração segue o vídeo enviado (arredondada, de 2 a 15 s).
 </ParamField>
 
 <ParamField body="aspect_ratio" type="string">
@@ -57,18 +59,23 @@ repetir cobra de novo.
 
 <ParamField body="reference_images" type="array">
   Até `reference.images` URLs de imagens (mesmas fontes de `image_url`) que guiam a cena
-  sem virar o primeiro quadro.
+  sem virar o primeiro quadro. Pode ir o `image_url` de um [avatar](/api-reference/avatars)
+  (a ficha com as 4 vistas): o modelo é avisado de que a ficha é uma pessoa só. Modelos
+  com `rejects_real_faces` recusam rosto real, inclusive o de avatar criado de foto.
 </ParamField>
 
 <ParamField body="reference_videos" type="array">
   Até `reference.videos` URLs de vídeos: `asset.canonical_url` de um upload MP4 ou MOV de
-  até 50 MB, ou o `asset.remoteUrl` de um vídeo gerado no workspace. Cada um com 2 a 15
-  segundos; somados, até 15 segundos. Os segundos enviados também são cobrados.
+  até `reference.video_max_mb` MB, ou o `asset.remoteUrl` de um vídeo gerado no workspace.
+  Cada um com `reference.clip_min_secs` a `reference.clip_max_secs` segundos; somados, até
+  `reference.video_total_secs` (hoje 50 MB e 15 s na maioria dos modelos; 300 MB e 60 s no
+  Real Xablau). Os segundos enviados também são cobrados, exceto onde
+  `reference.video_bills_input` é `false`.
 </ParamField>
 
 <ParamField body="height" type="integer">
   Resolução, entre as `qualities` do modelo (por exemplo `480`). Omitido = `height` padrão
-  do modelo.
+  do modelo. No Real Xablau: `480` (padrão), `720` (o dobro) ou `1080` (4 vezes o preço de 480p).
 </ParamField>
 
 <ParamField body="draft" type="boolean" default="false">
@@ -89,7 +96,79 @@ repetir cobra de novo.
 
 <ParamField body="consent" type="boolean">
   Obrigatório (`true`) nos templates com `consent: true`: confirma que você tem
-  autorização para usar a foto.
+  autorização para usar a foto. Dispensado quando `image_url` é de um
+  [avatar](/api-reference/avatars) (o aceite já está dado).
+</ParamField>
+
+<ParamField body="swap_targets" type="array">
+  Troca de personagem (Real Xablau, modelo com `tool: character_swap`): quem trocar no
+  vídeo, um texto por imagem de `reference_images`, na mesma ordem, cada um com até 300
+  caracteres. Descreva pela roupa, cabelo ou posição; nome de pessoa não funciona. Ex.:
+  `["o homem de camisa amarela à esquerda"]`.
+
+  O pedido leva exatamente 1 vídeo em `reference_videos` (MP4 ou MOV, 2 a 60 s, até
+  300 MB) e de 1 a 4 imagens. `prompt` vira instruções extras (opcional); `duration_secs`
+  e `audio` são ignorados: a saída tem a duração do vídeo enviado e o áudio original.
+  Vídeo acima de 15 s é gerado em partes (acompanhe por `parts` em
+  [Consultar Vídeo](/api-reference/videos/show)).
+
+  Preço por segundo do vídeo enviado, em reais (`brl_per_second` no catálogo), convertido
+  em créditos pelo valor do crédito do plano do dono do workspace; o valor sai em
+  `credits_charged`. Só para quem tem plano ativo ou já comprou um pacote de créditos
+  (`eligible` no catálogo). Trecho recusado pelo filtro de conteúdo fica com o vídeo
+  original e os créditos dele voltam (`swap_rejected`), desde que seja até um terço do
+  vídeo; acima disso o vídeo não é entregue (`failed`) e todos os créditos voltam.
+  Mandar de novo o mesmo vídeo já recusado pelo filtro nas últimas 24 h é recusado
+  antes de cobrar (`code: swap_source_rejected`): com as mesmas imagens, recusado 2 vezes
+  com outras, ou recusado 3 vezes somando os dois filtros e qualquer imagem.
+  Em `reference_images` pode ir o `image_url` de um [avatar](/api-reference/avatars):
+  a ficha vale como a imagem daquele personagem.
+</ParamField>
+
+<ParamField body="swap_style" type="string">
+  Real Xablau "Mudar estilo": em vez de trocar pessoas, o vídeo inteiro muda de estilo
+  (anime, massinha, pixel art...), com as mesmas pessoas, movimentos e áudio original.
+  Use um `id` de `styles.presets` do modelo em [Modelos](/api-reference/videos/models).
+  O pedido leva só o vídeo em `reference_videos`: `reference_images` e `swap_targets`
+  vazios, e `prompt` é ignorado.
+  Preço, partes, estorno de trecho recusado e bloqueio do mesmo vídeo são os mesmos da
+  troca de personagem.
+</ParamField>
+
+<ParamField body="swap_edit" type="string">
+  Real Xablau "Editar cena": o que mudar no vídeo, em até 500 caracteres (cenário, roupa,
+  luz, clima). Ex.: `"troque o fundo por uma praia ao pôr do sol"`. As pessoas, os
+  movimentos e o áudio continuam iguais. Vai com o vídeo em `reference_videos`, no máximo
+  1 imagem em `reference_images` (a referência do lugar ou da roupa), `swap_targets`
+  vazio e sem `swap_style`. Vídeo acima de 15 s: a parte 1 é gerada primeiro, e
+  as outras usam um quadro dela como referência de cena (a edição longa demora mais).
+  Preço igual ao da troca de personagem.
+</ParamField>
+
+<ParamField body="swap_outfit" type="boolean">
+  Troca de personagem: `true` veste cada personagem com a roupa da imagem dele (útil com
+  [avatares](/api-reference/avatars)). Sem isso, o personagem tende a ficar com a roupa de
+  quem está no vídeo.
+</ParamField>
+
+<ParamField body="confirm_duplicate" type="boolean">
+  Real Xablau: `true` confirma que você quer outra troca igual a uma enviada há menos de
+  3 minutos (mesmo vídeo, mesmos alvos, mesmo modo e resolução). Sem isso, a repetida é
+  recusada com `409` e `code: swap_duplicate`, sem cobrar, e traz `duplicate_of` (o ID da
+  troca que já está sendo feita). Troca anterior que falhou não conta.
+</ParamField>
+
+<ParamField body="confirm_refund_repeat" type="boolean">
+  Só no Real Xablau. O mesmo vídeo de origem (mesmo tamanho e duração) de uma troca que já
+  teve pedido de [reembolso](/api-reference/videos/refund-request), em qualquer status, é
+  recusado com `409` e `code: swap_refund_repeat`, sem cobrar. Envie `true` para gerar mesmo
+  assim: a troca nasce sem direito a reembolso (`refund_unavailable_reason: "repeat_source"`).
+</ParamField>
+
+<ParamField body="uncensored_accepted" type="boolean">
+  Obrigatório (`true`) nos modelos com `uncensored: true`: confirma que você leu o aviso
+  de que o modelo é menos restrito (ainda pode recusar conteúdo) e que a responsabilidade
+  pelo conteúdo gerado é sua. O aceite fica registrado no vídeo.
 </ParamField>
 
 ## Resposta
@@ -97,11 +176,13 @@ repetir cobra de novo.
 <ResponseField name="id" type="string">ID do vídeo.</ResponseField>
 <ResponseField name="status" type="string">`pending` (começou) ou `queued` (esperando vaga da conta).</ResponseField>
 <ResponseField name="model" type="string">Modelo usado.</ResponseField>
-<ResponseField name="credits_charged" type="integer">Créditos debitados.</ResponseField>
+<ResponseField name="credits_charged" type="integer">Créditos debitados (0 quando saiu dos vídeos grátis do plano).</ResponseField>
+<ResponseField name="included_in_plan" type="boolean">Saiu dos vídeos grátis do plano (só MiniMax Real H3 Ultra).</ResponseField>
+<ResponseField name="included_videos" type="object | null">Vídeos grátis do plano depois do pedido: `limit`, `used`, `remaining`, `resets_at`. `null` = sem cota.</ResponseField>
 <ResponseField name="credits_balance" type="integer">Saldo restante do dono do workspace.</ResponseField>
 <ResponseField name="queued" type="boolean">`true` quando entrou na fila da conta.</ResponseField>
 <ResponseField name="queue_position" type="integer | null">Posição na fila (1 = o próximo). `null` fora da fila.</ResponseField>
-<ResponseField name="queue" type="object">Vagas da conta agora: `slots`, `queue_limit`, `active` e `queued`.</ResponseField>
+<ResponseField name="queue" type="object">Vagas da conta agora: `slots`, `queue_limit`, `active`, `queued` e `upgrade` (plano mais próximo que gera mais vídeos ao mesmo tempo, ou `null`).</ResponseField>
 
 ## Erros
 
@@ -109,7 +190,15 @@ repetir cobra de novo.
 |---|---|---|
 | 400 | Créditos insuficientes... (`code: insufficient_credits`) | Saldo não cobre o vídeo; traz `credits_required` e `credits_available` |
 | 403 | Você não tem permissão para esta ação neste espaço de trabalho. | Papel `viewer` |
+| 403 | O Real Xablau é exclusivo para quem tem um plano ativo ou já comprou um pacote de créditos. (`code: plan_required`) | Real Xablau com dono do workspace sem plano ativo e sem pacote comprado |
+| 409 | Você enviou esta mesma troca há N s e ela já está sendo feita... (`code: swap_duplicate`) | Real Xablau: a mesma troca há menos de 3 minutos, sem `confirm_duplicate: true`; traz `duplicate_of`. Nada é cobrado |
+| 409 | Você já pediu reembolso de uma troca com este mesmo vídeo... (`code: swap_refund_repeat`) | Real Xablau: mesmo vídeo de uma troca que já teve pedido de reembolso, sem `confirm_refund_repeat: true`. Nada é cobrado |
 | 422 | Aceite os termos de uso para gerar vídeos... | `terms_accepted` ausente ou diferente de `true` |
+| 422 | Este modelo tem menos restrições. Leia e aceite o aviso... | `uncensored_accepted` ausente num modelo com `uncensored: true` |
+| 422 | Envie um vídeo (de 2 a 60 segundos)... / Diga quem trocar no vídeo... | Troca de personagem sem 1 vídeo, sem imagem ou sem um `swap_targets` por imagem |
+| 422 | Para mudar o estilo, envie só o vídeo... | `swap_style` com imagem |
+| 422 | Escolha um estilo da lista. | `swap_style` fora de `styles.presets` |
+| 422 | Diga o que mudar no vídeo. / Para editar a cena, envie no máximo 1 imagem... / Escolha entre editar a cena e mudar o estilo... | `swap_edit` vazio ou longo demais, com 2 imagens ou junto com `swap_style` |
 | 422 | Escolha uma duração da lista. | `duration_secs` fora das `durations` do modelo |
 | 422 | Escolha um formato da lista. | `aspect_ratio` fora dos `aspect_ratios` do modelo |
 | 422 | Este modelo não gera nessa resolução. | `height` fora das `qualities` |
@@ -119,6 +208,7 @@ repetir cobra de novo.
 | 422 | Este modelo aceita até N imagens de referência. | Referências demais |
 | 422 | Cada vídeo de referência precisa ter entre 2 e 15 segundos. | Vídeo de referência curto ou longo demais |
 | 422 | A imagem escolhida não está disponível neste espaço... (`code: reference_unavailable`) | Imagem ou vídeo de outro workspace |
+| 422 | Este vídeo já foi recusado pelo filtro de conteúdo... (`code: swap_source_rejected`) | Real Xablau: o mesmo vídeo (com as mesmas imagens, recusado 2 vezes com outras, ou 3 vezes com qualquer imagem) foi recusado pelo filtro nas últimas 24 h. Nada é cobrado |
 | 429 | Sua fila está cheia... (`code: video_generation_queue_full`) | Já há 10 vídeos esperando na conta |
 | 429 | Você atingiu o limite de 50 vídeos em 24 horas... (`code: video_generation_daily_limit`) | Limite do membro |
 | 503 | A geração de vídeo não está disponível no momento. (`code: video_generation_unavailable`) | Modelo indisponível agora |
@@ -221,11 +311,11 @@ console.log(video.asset.playbackUrl); // URL temporária do MP4
   "id": "01k6vid0000000000000000001",
   "status": "pending",
   "model": "minimax-h3-turbo",
-  "credits_charged": 55,
-  "credits_balance": 445,
+  "credits_charged": 15,
+  "credits_balance": 485,
   "queued": false,
   "queue_position": null,
-  "queue": { "slots": 1, "queue_limit": 10, "active": 1, "queued": 0 }
+  "queue": { "slots": 1, "queue_limit": 10, "active": 1, "queued": 0, "upgrade": { "tier": "criador", "slots": 2 } }
 }
 ```
 
@@ -234,20 +324,20 @@ console.log(video.asset.playbackUrl); // URL temporária do MP4
   "id": "01k6vid0000000000000000002",
   "status": "queued",
   "model": "minimax-h3-turbo",
-  "credits_charged": 55,
-  "credits_balance": 390,
+  "credits_charged": 15,
+  "credits_balance": 470,
   "queued": true,
   "queue_position": 1,
-  "queue": { "slots": 1, "queue_limit": 10, "active": 1, "queued": 1 }
+  "queue": { "slots": 1, "queue_limit": 10, "active": 1, "queued": 1, "upgrade": { "tier": "criador", "slots": 2 } }
 }
 ```
 
 ```json 400 - Créditos insuficientes
 {
-  "error": "Créditos insuficientes: este vídeo custa 55 créditos e você tem 20.",
+  "error": "Créditos insuficientes: este vídeo custa 15 créditos e você tem 3.",
   "code": "insufficient_credits",
-  "credits_required": 55,
-  "credits_available": 20
+  "credits_required": 15,
+  "credits_available": 3
 }
 ```
 

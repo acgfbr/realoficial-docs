@@ -1,0 +1,83 @@
+---
+title: 'Pedir Reembolso do Real Xablau'
+api: 'POST /ai-usage/video/{id}/refund-request'
+description: 'Pede à equipe o reembolso de um Real Xablau pronto que saiu com defeito'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/ai-usage/video/{id}/refund-request
+```
+
+Abre um pedido de reembolso para um vídeo do Real Xablau (`real-xablau`) pronto. A equipe
+assiste ao vídeo enviado e ao resultado e decide. Aprovado, os **créditos** voltam ao saldo
+do dono do workspace (nunca dinheiro) e o vídeo **sai da conta** (`result_removed: true`: sem
+player, download nem uso como referência); recusado, o motivo aparece em
+`refund_request.rejection_reason` no [status do vídeo](/api-reference/videos/show).
+
+Todo pedido é analisado pela equipe, em até 24 horas.
+
+<Note>
+Exige papel `owner`, `admin` ou `editor` no workspace. O vídeo precisa estar `completed`,
+ter sido cobrado em créditos e ter ficado pronto há no máximo 7 dias
+(`refund_available_until`) e não pode ter sido [baixado](/api-reference/videos/download):
+vídeo baixado não tem reembolso, e baixar com um pedido esperando encerra o pedido como
+`rejected`. Cada vídeo aceita **um** pedido, e a decisão é final. Cada
+conta pode ter **um** pedido esperando revisão por vez e até 5 pedidos a cada 30 dias. Conta com
+pagamento contestado ou estornado não pede. Vídeo que falhou não precisa de pedido: os
+créditos voltam sozinhos. Se um trecho já foi devolvido pelo filtro de conteúdo
+(`swap_rejected`), o pedido cobre só o restante.
+</Note>
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  ID do vídeo.
+</ParamField>
+
+## Body
+
+<ParamField body="reason_code" type="string" required>
+  Motivo: `model_failed` (o vídeo saiu com defeito), `wrong_person` (trocou a pessoa
+  errada) ou `other`. `bad_result` deixou de ser aceito em 10/10/2026 (não ter gostado do
+  resultado, sem defeito, não é motivo de reembolso).
+</ParamField>
+
+<ParamField body="reason" type="string" required>
+  O que deu errado, de 10 a 1.000 caracteres. Ajuda dizer em que momento do vídeo.
+</ParamField>
+
+## Resposta
+
+`201` com o vídeo no formato do [status do vídeo](/api-reference/videos/show), já com
+`refund_available: false` e `refund_request.status: "pending"`.
+
+## Erros
+
+| HTTP | `code` | Quando |
+|---|---|---|
+| 403 | | Papel sem permissão no workspace |
+| 403 | `refund_payment_reversed` | A conta teve um pagamento contestado ou estornado |
+| 404 | `not_found` | ID de outro workspace ou inexistente |
+| 409 | `refund_not_swap` | O vídeo não é do Real Xablau |
+| 409 | `refund_not_completed` | O vídeo não está pronto |
+| 409 | `refund_no_charge` | O vídeo não foi cobrado em créditos |
+| 409 | `refund_window_expired` | Passaram 7 dias desde que ficou pronto |
+| 409 | `refund_fully_refunded` | Os créditos do vídeo já voltaram |
+| 409 | `refund_already_requested` | O vídeo já tem um pedido |
+| 409 | `refund_downloaded` | O vídeo já foi baixado (`refund_unavailable_reason: "downloaded"`) |
+| 409 | `refund_repeat_source` | A troca foi gerada com `confirm_refund_repeat` (mesmo vídeo de uma troca que já teve pedido): não tem reembolso |
+| 422 | | `reason_code` fora da lista ou `reason` com menos de 10 caracteres |
+| 429 | `refund_too_many_pending` | A conta já tem um pedido esperando revisão (um por vez) |
+| 429 | `refund_too_many_requests` | A conta já fez 5 pedidos nos últimos 30 dias |
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.realoficial.com.br/api/v1/ai-usage/video/01k6vid0000000000000000004/refund-request" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{ "reason_code": "model_failed", "reason": "O rosto do personagem deforma a partir dos 8 segundos." }'
+```
+</RequestExample>

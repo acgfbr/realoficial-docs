@@ -8,6 +8,7 @@ export const LivePricing = ({ kind }) => {
    */
   const endpoint = kind === 'video' ? '/landing/video-pricing' : '/landing/image-pricing';
   const url = `https://api.realoficial.com.br/api/v1${endpoint}`;
+  const liteUrl = 'https://api.realoficial.com.br/api/v1/landing/xablau-lite';
   const storageKey = `realoficial-pricing:${kind}`;
   const ttl = 5 * 60 * 1000;
   const [state, setState] = useState({ status: 'loading', data: null });
@@ -24,6 +25,12 @@ export const LivePricing = ({ kind }) => {
       const response = await fetch(url, { headers: { Accept: 'application/json' } });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
+      if (kind === 'video') {
+        // O preço do Xablau Lite vem da rota dele; se ela falhar, a tabela sai sem essa linha.
+        data.xablau_lite = await fetch(liteUrl, { headers: { Accept: 'application/json' } })
+          .then((lite) => (lite.ok ? lite.json() : null))
+          .catch(() => null);
+      }
       try {
         window.localStorage.setItem(storageKey, JSON.stringify({ at: Date.now(), data }));
       } catch (error) {
@@ -37,7 +44,7 @@ export const LivePricing = ({ kind }) => {
     return () => {
       alive = false;
     };
-  }, [url, storageKey]);
+  }, [url, liteUrl, storageKey, kind]);
 
   const formatDate = (iso) => {
     const date = new Date(iso || '');
@@ -45,6 +52,8 @@ export const LivePricing = ({ kind }) => {
       ? ''
       : date.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
   };
+  const brl = (value) =>
+    Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const perSecond = (sheet, withAudio) => {
     const audio = sheet.audio_credits_per_second;
     return withAudio && audio != null && audio !== sheet.credits_per_second
@@ -77,6 +86,8 @@ export const LivePricing = ({ kind }) => {
     if (data.available === false || models.length === 0) {
       return <p>A geração de vídeo está indisponível no momento.</p>;
     }
+    const swap = data.real_xablau;
+    const lite = data.xablau_lite && data.xablau_lite.available ? data.xablau_lite : null;
     return (
       <div>
         <table>
@@ -146,6 +157,57 @@ export const LivePricing = ({ kind }) => {
             })}
           </tbody>
         </table>
+        {swap || lite ? (
+          <div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Troca de personagem</th>
+                  <th>Preço por segundo</th>
+                  <th>Limites</th>
+                </tr>
+              </thead>
+              <tbody>
+                {swap ? (
+                  <tr>
+                    <td>Real Xablau</td>
+                    <td>
+                      {(swap.qualities || []).map((quality) => (
+                        <div key={quality.height}>
+                          {quality.height}p: {brl(quality.brl_per_second)}
+                          {quality.regular_brl_per_second > quality.brl_per_second ? (
+                            <s style={{ opacity: 0.6 }}> {brl(quality.regular_brl_per_second)}</s>
+                          ) : null}
+                        </div>
+                      ))}
+                    </td>
+                    <td>
+                      Vídeo de {swap.clip_min_secs} a {swap.clip_max_secs} s, até{' '}
+                      {swap.max_characters} personagens. Cobra só os segundos entregues.
+                    </td>
+                  </tr>
+                ) : null}
+                {lite ? (
+                  <tr>
+                    <td>Real Xablau Lite</td>
+                    <td>
+                      {lite.paid
+                        ? `${brl(lite.paid.brl_per_second)} depois da cota grátis`
+                        : 'Só na cota grátis'}
+                    </td>
+                    <td>
+                      Vídeo de até {lite.paid ? lite.paid.max_secs : lite.max_secs.free} s.
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+            <p style={{ fontSize: '0.8rem', opacity: 0.75 }}>
+              Preço em reais, igual para todo plano. Os créditos debitados dependem do valor do
+              crédito do seu plano.
+            </p>
+          </div>
+        ) : null}
         {footnote}
       </div>
     );

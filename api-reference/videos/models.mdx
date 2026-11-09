@@ -25,6 +25,14 @@ valor é calculado a cada chamada, sem cache. Para exibir preços sem autentica�
   (`plan` quando vem do plano, `recharge` quando vem do preço da recarga avulsa).
 </ResponseField>
 
+<ResponseField name="included_videos" type="object | null">
+  Vídeos grátis do plano do dono neste ciclo, só nos modelos com `included_in_plan: true`
+  (hoje, o MiniMax Real H3 Ultra); com referências, só nos que trazem
+  `included_in_plan_references: true`: `limit`, `used`, `remaining` e
+  `resets_at`. Não acumulam.
+  `null` = sem cota (sem assinatura).
+</ResponseField>
+
 <ResponseField name="queue" type="object">
   Vagas da conta e uso agora. Veja [Fila de geração](/api-reference/videos).
   <Expandable title="Propriedades">
@@ -56,7 +64,8 @@ valor é calculado a cada chamada, sem cache. Para exibir preços sem autentica�
     <ResponseField name="qualities" type="array">
       Resoluções que você pode escolher em `height`, cada uma com `height`,
       `credits_per_second`, `audio_credits_per_second` e `reference` (preços com
-      referência). Um item só = sem escolha.
+      referência); no Real Xablau também `regular_credits_per_second`, `brl_per_second` e
+      `regular_brl_per_second`. Um item só = sem escolha.
     </ResponseField>
     <ResponseField name="draft" type="object | null">
       Rascunho: `height` (480), `final` (preços da versão final, em 1080p) e
@@ -65,13 +74,48 @@ valor é calculado a cada chamada, sem cache. Para exibir preços sem autentica�
     <ResponseField name="durations" type="array">Durações aceitas, em segundos.</ResponseField>
     <ResponseField name="aspect_ratios" type="array">Formatos aceitos.</ResponseField>
     <ResponseField name="supports_image" type="boolean">Aceita imagem inicial (`image_url`).</ResponseField>
+    <ResponseField name="included_in_plan" type="boolean">Usa os vídeos grátis do plano antes de cobrar crédito (hoje só o MiniMax Real H3 Ultra).</ResponseField>
+    <ResponseField name="included_in_plan_references" type="boolean">O modo referência (`reference_images`/`reference_videos`) também usa os vídeos grátis do plano (promoção; `false` = referência cobra crédito).</ResponseField>
     <ResponseField name="rejects_real_faces" type="boolean">Recusa foto ou vídeo com pessoa real.</ResponseField>
+    <ResponseField name="tool" type="string | null">`character_swap` = troca de personagem em vídeo (pedido com `swap_targets`; veja [Criar vídeo](/api-reference/videos/create)). `null` = modelo comum.</ResponseField>
+    <ResponseField name="uncensored" type="boolean">Modelo menos restrito (ainda pode recusar conteúdo): o pedido exige `uncensored_accepted: true`.</ResponseField>
+    <ResponseField name="promo" type="boolean">O preço de `credits_per_second` é promocional; o preço cheio está em `regular_credits_per_second`.</ResponseField>
+    <ResponseField name="regular_credits_per_second" type="integer">Preço por segundo fora da promoção.</ResponseField>
+    <ResponseField name="promo_until" type="string | null">Fim da promoção com data (ISO 8601), como a promoção da família Seedance (1.0 Pro Fast, 1.0 Pro, 2.0 Mini, 2.0 Fast, 2.0 e 2.5) até 12/10/2026 23:59 (Brasília). Nessa promoção, todos os preços do modelo (resoluções, vídeo de referência e versão final) já vêm com o desconto e voltam sozinhos ao cheio depois da data. `null` = promoção sem data ou sem promoção.</ResponseField>
+    <ResponseField name="brl_per_second" type="number | null">
+      Só no Real Xablau: preço por segundo em reais, igual para todo plano (veja a
+      [tabela pública](/api-reference/videos/pricing)). `credits_per_second` é esse valor
+      convertido pelo crédito do plano do dono do workspace, por isso varia de conta para
+      conta. `null` nos outros modelos.
+    </ResponseField>
+    <ResponseField name="regular_brl_per_second" type="number | null">Só no Real Xablau: preço por segundo em reais fora da promoção.</ResponseField>
+    <ResponseField name="eligible" type="boolean">
+      Só no Real Xablau: se o dono do workspace pode gerar (plano ativo ou pacote de créditos
+      comprado). `false` = o pedido volta `403 plan_required`.
+    </ResponseField>
+    <ResponseField name="styles" type="object">
+      Só no Real Xablau: os estilos do modo "Mudar estilo" (pedido com `swap_style`).
+      `original` traz `video_url` e `poster_url` do clipe de prévia sem estilo; `presets` é
+      a lista, na ordem da tela, com `id`, `label` (no idioma do pedido), `video_url` e
+      `poster_url` (o mesmo clipe naquele estilo). A lista vem do servidor: desenhe o que
+      vier.
+    </ResponseField>
+    <ResponseField name="swap_features" type="array">
+      Só no Real Xablau: o que o pedido aceita além da troca de personagem: `style`
+      (`swap_style`), `edit` (`swap_edit`) e `outfit` (`swap_outfit`).
+    </ResponseField>
+    <ResponseField name="swap_edit" type="object">
+      Só no Real Xablau: limites do "Editar cena": `max_chars` (texto) e `images` (imagens de
+      referência).
+    </ResponseField>
     <ResponseField name="reference" type="object | null">
       Modo referência: `images` e `videos` (máximo por pedido), `credits_per_second`,
       `audio_credits_per_second`, `video_credits_per_second` (preço com vídeo de
       referência, sobre a duração mais os segundos do vídeo), `video_min_billed_secs`
-      (mínimo cobrado do vídeo enviado), `clip_min_secs`, `clip_max_secs` e
-      `video_total_secs`. `null` = o modelo não aceita referências.
+      (mínimo cobrado do vídeo enviado), `clip_min_secs`, `clip_max_secs`,
+      `video_total_secs`, `video_max_mb` (tamanho máximo de cada vídeo enviado) e
+      `video_bills_input` (`false` = só a saída é cobrada, sem os segundos do vídeo
+      enviado). `null` = o modelo não aceita referências.
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -110,24 +154,24 @@ curl "https://api.realoficial.com.br/api/v1/ai-usage/video/models" \
 {
   "available": true,
   "credit_value": { "brl": 0.0333, "source": "plan" },
-  "queue": { "slots": 2, "queue_limit": 10, "active": 0, "queued": 0 },
+  "queue": { "slots": 2, "queue_limit": 10, "active": 0, "queued": 0, "upgrade": { "tier": "viral", "slots": 3 } },
   "default_model": "minimax-h3-turbo",
-  "durations": [4, 5, 6, 8, 10],
+  "durations": [4, 5, 6, 8, 10, 15, 20, 30],
   "aspect_ratios": ["9:16", "16:9"],
   "models": [
     {
       "id": "minimax-h3-turbo",
-      "label": "MiniMax H3 Turbo",
+      "label": "MiniMax Real H3 Ultra",
       "tier": "budget",
       "height": 768,
-      "credits_per_second": 11,
-      "audio_credits_per_second": 11,
+      "credits_per_second": 3,
+      "audio_credits_per_second": 3,
       "qualities": [
         {
           "height": 768,
-          "credits_per_second": 11,
-          "audio_credits_per_second": 11,
-          "reference": { "credits_per_second": 11, "audio_credits_per_second": 11, "video_credits_per_second": 11 }
+          "credits_per_second": 3,
+          "audio_credits_per_second": 3,
+          "reference": { "credits_per_second": 3, "audio_credits_per_second": 3, "video_credits_per_second": 6 }
         }
       ],
       "draft": null,
@@ -140,9 +184,9 @@ curl "https://api.realoficial.com.br/api/v1/ai-usage/video/models" \
       "reference": {
         "images": 9,
         "videos": 3,
-        "credits_per_second": 11,
-        "audio_credits_per_second": 11,
-        "video_credits_per_second": 11,
+        "credits_per_second": 3,
+        "audio_credits_per_second": 3,
+        "video_credits_per_second": 6,
         "video_min_billed_secs": 0,
         "clip_min_secs": 2,
         "clip_max_secs": 15,

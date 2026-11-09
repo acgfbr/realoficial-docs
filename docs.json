@@ -126,7 +126,18 @@
           "api-reference/videos/show",
           "api-reference/videos/list",
           "api-reference/videos/delete",
-          "api-reference/videos/final"
+          "api-reference/videos/final",
+          "api-reference/videos/download",
+          "api-reference/videos/refund-request"
+        ]
+      },
+      {
+        "group": "IA - Avatares",
+        "pages": [
+          "api-reference/avatars/list",
+          "api-reference/avatars/create",
+          "api-reference/avatars/update",
+          "api-reference/avatars/delete"
         ]
       },
       {
@@ -273,6 +284,7 @@
           "api-reference/translations",
           "api-reference/images",
           "api-reference/videos",
+          "api-reference/avatars",
           "api-reference/thumbnails",
           "api-reference/social-accounts",
           "api-reference/social-posts",

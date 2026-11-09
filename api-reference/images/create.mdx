@@ -63,7 +63,9 @@ repetir cobra de novo.
 <ResponseField name="count" type="integer">Quantidade de imagens criadas.</ResponseField>
 <ResponseField name="model" type="string">Modelo usado.</ResponseField>
 <ResponseField name="credits_per_image" type="integer">Preço cobrado por imagem.</ResponseField>
-<ResponseField name="credits_charged" type="integer">Total debitado.</ResponseField>
+<ResponseField name="credits_charged" type="integer">Total debitado (só as imagens fora da cota do plano).</ResponseField>
+<ResponseField name="included_images_used" type="integer">Quantas imagens deste pedido saíram das imagens inclusas no plano.</ResponseField>
+<ResponseField name="included_images" type="object | null">Cota do plano depois do pedido: `limit`, `used`, `remaining`, `resets_at`. `null` = sem cota.</ResponseField>
 <ResponseField name="credits_balance" type="integer">Saldo restante do dono do workspace.</ResponseField>
 <ResponseField name="status" type="string">Sempre `pending`.</ResponseField>
 <ResponseField name="economy" type="boolean">Se o pedido foi no modo econômico.</ResponseField>

@@ -26,7 +26,7 @@ Consulte a cada 5 a 15 segundos até `status` ser `completed` ou `failed`.
 | `pending`, `submitting`, `processing` | Gerando |
 | `completed` | Pronto: `asset` preenchido |
 | `failed` | Falhou: `error` e `credits_refunded` preenchidos |
-| `expired` | Passou de 30 dias e o arquivo foi apagado |
+| `expired` | O arquivo foi apagado do armazenamento |
 
 Um vídeo que o processamento não conclui no prazo termina em `failed`, com os créditos
 devolvidos.
@@ -71,12 +71,87 @@ devolvidos.
   Só em `completed`.
   <Expandable title="Propriedades">
     <ResponseField name="remoteUrl" type="string">Endereço permanente do vídeo. Use em `reference_videos` de um novo pedido.</ResponseField>
-    <ResponseField name="playbackUrl" type="string">URL temporária do MP4 para exibir ou baixar.</ResponseField>
+    <ResponseField name="playbackUrl" type="string">URL temporária do MP4 para exibir. Para baixar, use [Baixar o vídeo](/api-reference/videos/download).</ResponseField>
     <ResponseField name="playbackUrlExpiresAt" type="string">Expiração de `playbackUrl`.</ResponseField>
     <ResponseField name="remoteFileKey" type="string">Identificador interno do arquivo.</ResponseField>
   </Expandable>
 </ResponseField>
 <ResponseField name="result_duration_secs" type="number | null">Só em `completed`. Duração real do arquivo (5 s pedidos saem por volta de 5,2 s).</ResponseField>
+<ResponseField name="download" type="object | null">
+  Só em `completed`. O mesmo vídeo servido como anexo (`Content-Disposition: attachment`).
+  Mantido por compatibilidade: o botão de baixar deve usar
+  [Baixar o vídeo](/api-reference/videos/download), que registra o download (no Real
+  Xablau, baixar encerra o direito ao reembolso).
+  <Expandable title="Propriedades">
+    <ResponseField name="url" type="string">URL temporária de download.</ResponseField>
+    <ResponseField name="filename" type="string">Nome do arquivo (ex.: `real-xablau-1d7bfx2a.mp4`).</ResponseField>
+    <ResponseField name="expiresAt" type="string">Expiração de `url`.</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="parts" type="object | null">
+  Real Xablau em andamento: vídeo acima de 15 s é gerado em partes. `total` e `done`
+  (partes prontas ou recusadas). `null` fora de andamento ou antes de o vídeo ser dividido.
+</ResponseField>
+<ResponseField name="source_video" type="object">
+  Só no Real Xablau: o vídeo enviado, para mostrar antes e depois. `playbackUrl` e
+  `playbackUrlExpiresAt`.
+</ResponseField>
+<ResponseField name="swap_mode" type="string | null">
+  Real Xablau: o que a troca fez: `character` (trocar personagem), `style` (mudar estilo,
+  com o id em `swap_style`) ou `edit` (editar cena). `null` nos outros modelos.
+</ResponseField>
+
+<ResponseField name="swap_style" type="string | null">Real Xablau "Mudar estilo": o id do estilo. `null` nos outros casos.</ResponseField>
+
+<ResponseField name="swap_rejected" type="object | null">
+  Só em `completed` do Real Xablau (`real-xablau`). `null` quando todo o vídeo foi
+  trocado. Quando o filtro de conteúdo recusa até um terço do vídeo, ele sai mesmo assim:
+  o trecho fica com o vídeo original, sem troca, e os créditos dele voltam ao saldo.
+  Acima de um terço, o vídeo termina em `failed` e todos os créditos voltam.
+  <Expandable title="Propriedades">
+    <ResponseField name="secs" type="number">Segundos que ficaram sem troca.</ResponseField>
+    <ResponseField name="ranges" type="array">Trechos sem troca, `[início, fim]` em segundos do vídeo enviado.</ResponseField>
+    <ResponseField name="credits_refunded" type="integer">Créditos devolvidos por esses trechos.</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="content_rejected" type="boolean">
+  Só no Real Xablau. `true` quando o filtro de conteúdo recusou o vídeo inteiro, mais de
+  um terço dele (`failed`) ou um trecho (`swap_rejected`). Enviar o mesmo vídeo de novo
+  não muda o resultado: troque o vídeo ou as imagens. Personagem recusado por direitos
+  autorais (personagem conhecido de anime, filme, série ou jogo) não entra aqui: termina em
+  `failed` com a própria mensagem em `error`.
+</ResponseField>
+<ResponseField name="refund_available" type="boolean">
+  Só no Real Xablau. `true` quando dá para [pedir reembolso](/api-reference/videos/refund-request):
+  vídeo `completed`, cobrado em créditos, até 7 dias depois de pronto, ainda sem pedido e
+  ainda não [baixado](/api-reference/videos/download).
+</ResponseField>
+<ResponseField name="result_removed" type="boolean">
+  Só no Real Xablau. `true` quando o reembolso do vídeo foi aprovado: os créditos voltaram e o
+  vídeo saiu da conta. Nesse caso a resposta vem sem `asset`, `download`, `standard`, `full_hd`
+  e `last_frame`, o [download](/api-reference/videos/download) responde `410` e o vídeo não pode
+  ser usado como referência.
+</ResponseField>
+<ResponseField name="refund_unavailable_reason" type="string | null">
+  Só no Real Xablau. Por que `refund_available` é `false`, quando a tela deve dizer:
+  `downloaded` (o vídeo já foi baixado, por isso não tem reembolso) ou `repeat_source` (gerada
+  com `confirm_refund_repeat`: o mesmo vídeo já teve pedido de reembolso em outra troca). `null` quando dá para
+  pedir, quando já há pedido ou quando o motivo não é mostrado (fora do prazo, por exemplo).
+</ResponseField>
+<ResponseField name="refund_available_until" type="string | null">
+  Só no Real Xablau. Até quando dá para pedir (ISO 8601); `null` quando `refund_available` é `false`.
+</ResponseField>
+<ResponseField name="refund_request" type="object | null">
+  Só no Real Xablau. O pedido de reembolso do vídeo, revisado pela equipe; `null` sem pedido.
+  <Expandable title="Propriedades">
+    <ResponseField name="status" type="string">`pending` (em análise), `approved` (créditos devolvidos) ou `rejected`.</ResponseField>
+    <ResponseField name="reason_code" type="string">`bad_result`, `model_failed`, `wrong_person` ou `other`.</ResponseField>
+    <ResponseField name="created_at" type="string">Quando foi pedido.</ResponseField>
+    <ResponseField name="reviewed_at" type="string | null">Quando a equipe decidiu.</ResponseField>
+    <ResponseField name="credits_refunded" type="integer | null">Créditos devolvidos na aprovação.</ResponseField>
+    <ResponseField name="rejection_reason" type="string | null">Na recusa, o motivo escrito pela equipe.</ResponseField>
+  </Expandable>
+</ResponseField>
 <ResponseField name="last_frame" type="object">
   Só em `completed`, quando disponível. Último quadro do vídeo, no mesmo formato de
   `asset`. Use `last_frame.remoteUrl` como `image_url` para continuar a cena num novo
@@ -102,7 +177,7 @@ curl "https://api.realoficial.com.br/api/v1/ai-usage/video/01k6vid00000000000000
   "id": "01k6vid0000000000000000001",
   "status": "completed",
   "model": "minimax-h3-turbo",
-  "model_label": "MiniMax H3 Turbo",
+  "model_label": "MiniMax Real H3 Ultra",
   "tier": "budget",
   "template": null,
   "prompt": "um cachorro caramelo de óculos escuros andando de skate na praia",
@@ -111,7 +186,7 @@ curl "https://api.realoficial.com.br/api/v1/ai-usage/video/01k6vid00000000000000
   "duration_secs": 5,
   "height": 768,
   "audio": true,
-  "credits": 55,
+  "credits": 15,
   "queue_position": null,
   "draft": null,
   "draft_of": null,
@@ -132,7 +207,7 @@ curl "https://api.realoficial.com.br/api/v1/ai-usage/video/01k6vid00000000000000
     "playbackUrl": "https://media.realoficial.com.br/...assinado...",
     "playbackUrlExpiresAt": "2026-10-05T13:00:40+00:00"
   },
-  "queue": { "slots": 1, "queue_limit": 10, "active": 0, "queued": 0 }
+  "queue": { "slots": 1, "queue_limit": 10, "active": 0, "queued": 0, "upgrade": { "tier": "criador", "slots": 2 } }
 }
 ```
 
@@ -142,8 +217,8 @@ curl "https://api.realoficial.com.br/api/v1/ai-usage/video/01k6vid00000000000000
   "status": "queued",
   "model": "minimax-h3-turbo",
   "queue_position": 1,
-  "credits": 55,
-  "queue": { "slots": 1, "queue_limit": 10, "active": 1, "queued": 1 }
+  "credits": 15,
+  "queue": { "slots": 1, "queue_limit": 10, "active": 1, "queued": 1, "upgrade": { "tier": "criador", "slots": 2 } }
 }
 ```
 

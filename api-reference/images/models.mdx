@@ -22,6 +22,7 @@ com descontos ativos. O valor é calculado a cada chamada, sem cache.
     <ResponseField name="credits_per_image" type="integer">Preço atual por imagem, com desconto quando houver.</ResponseField>
     <ResponseField name="regular_credits_per_image" type="integer">Preço sem desconto.</ResponseField>
     <ResponseField name="economy_credits_per_image" type="integer | null">Preço no modo econômico (entrega em até 24 h). `null` = o modelo só gera na hora.</ResponseField>
+    <ResponseField name="included_in_plan" type="boolean">Se o modelo usa as imagens inclusas no plano antes de cobrar crédito.</ResponseField>
     <ResponseField name="accepts_reference_image" type="boolean">Se aceita imagem de referência.</ResponseField>
     <ResponseField name="requires_reference_image" type="boolean">Se só funciona com imagem de referência.</ResponseField>
     <ResponseField name="max_reference_images" type="integer">Capacidade do modelo. `POST /ai-usage/image` aceita uma referência por pedido.</ResponseField>
@@ -30,6 +31,7 @@ com descontos ativos. O valor é calculado a cada chamada, sem cache.
 
 <ResponseField name="default" type="string">Modelo usado quando `model` é omitido.</ResponseField>
 <ResponseField name="max_images_per_request" type="integer">Máximo de `count` por pedido.</ResponseField>
+<ResponseField name="included_images" type="object | null">Imagens inclusas no plano do dono neste mês: `limit`, `used`, `remaining` e `resets_at` (quando renova). Não acumulam. `null` = sem cota (sem assinatura).</ResponseField>
 <ResponseField name="aspect_ratios" type="array">Proporções aceitas em `aspectRatio` (sem imagem de referência).</ResponseField>
 <ResponseField name="economy" type="object">Modo econômico: `max_hours` (prazo de entrega).</ResponseField>
 <ResponseField name="promotion" type="object | null">
@@ -60,6 +62,7 @@ curl "https://api.realoficial.com.br/api/v1/ai-usage/image/models" \
       "credits_per_image": 5,
       "regular_credits_per_image": 5,
       "economy_credits_per_image": 3,
+      "included_in_plan": true,
       "max_reference_images": 16,
       "accepts_reference_image": true,
       "requires_reference_image": false,
@@ -80,6 +83,7 @@ curl "https://api.realoficial.com.br/api/v1/ai-usage/image/models" \
   ],
   "default": "gpt-image-2",
   "max_images_per_request": 4,
+  "included_images": { "limit": 100, "used": 12, "remaining": 88, "resets_at": "2026-10-20T08:00:00+00:00" },
   "aspect_ratios": ["1:1", "16:9", "9:16", "4:5", "5:4", "4:3", "3:4", "3:2", "2:3"],
   "economy": { "max_hours": 24 },
   "promotion": null,
@@ -88,7 +92,7 @@ curl "https://api.realoficial.com.br/api/v1/ai-usage/image/models" \
       "id": "scene",
       "credits_per_image": 5,
       "regular_credits_per_image": 5,
-      "model_credits": { "gpt-image-2": 5, "nano-banana-2": 26 },
+      "model_credits": { "gpt-image-2": 5, "nano-banana-2": 32 },
       "min_count": 1,
       "max_count": 4,
       "model_ids": ["gpt-image-2", "nano-banana-2"],

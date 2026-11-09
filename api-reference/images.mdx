@@ -69,7 +69,7 @@ aceita largura, altura ou qualidade:
   `aspect_ratios` no catálogo;
 - **com referência**, a imagem acompanha a proporção da referência, dentro dos limites de
   cada modelo, e `aspectRatio` não é aceito. `gpt-image-2` aceita referências com
-  proporção entre 1:3 e 3:1; `nano-banana-2` usa a proporção suportada mais próxima.
+  proporção entre 1:3 e 3:1; `nano-banana-2` e `nano-banana-2-lite` usam a proporção suportada mais próxima.
 
 O tamanho final vem em `width` e `height` no status.
 
@@ -82,7 +82,13 @@ geração termina em `failed` com os créditos devolvidos.
 
 ## Créditos
 
-- A cobrança é antecipada: `count × créditos do modelo`, debitada no pedido.
+- **Imagens inclusas no plano:** cada assinatura inclui imagens por mês, que não acumulam e
+  renovam no ciclo da assinatura (Lite 50, Criador 100, Viral 200, Business 1.000; pacote de
+  crédito avulso, nenhuma). Elas saem primeiro, de graça, nos modelos com
+  `included_in_plan: true` no catálogo (todos menos os Nano Banana), aqui e nas thumbnails.
+  O saldo da cota vem em `included_images` (`limit`, `used`, `remaining`, `resets_at`).
+  Imagem da cota que falha devolve a vaga, sem estorno de crédito.
+- A cobrança é antecipada: `(count − imagens inclusas) × créditos do modelo`, debitada no pedido.
 - Se o saldo não cobre o lote inteiro, nada é criado e a resposta é
   `400 insufficient_credits`.
 - No modo econômico, vale `economy_credits_per_image` no lugar de `credits_per_image`.

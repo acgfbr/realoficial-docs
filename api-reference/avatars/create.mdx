@@ -1,0 +1,48 @@
+---
+title: 'Criar Avatar'
+api: 'POST /ai-avatars'
+description: 'Cria um avatar a partir de uma foto; a ficha é gerada em segundo plano'
+---
+
+## Endpoint
+
+```text
+POST https://api.realoficial.com.br/api/v1/ai-avatars
+```
+
+A resposta sai na hora com `status: generating`. Consulte
+[Listar Avatares](/api-reference/avatars/list) até `status` virar `ready` (normalmente em
+menos de um minuto) ou `failed`.
+
+Custa uma imagem: sai das imagens inclusas no plano quando houver, senão debita
+`sheet_credits` créditos. Se a ficha falhar, os créditos voltam.
+
+## Body
+
+<ParamField body="name" type="string" required>
+  Nome do avatar, até 60 caracteres.
+</ParamField>
+<ParamField body="image_url" type="string" required>
+  Foto enviada pelo upload do editor neste workspace (URL canônica do upload).
+</ParamField>
+<ParamField body="consent" type="boolean" required>
+  `true`: você tem autorização para usar a imagem de quem aparece na foto.
+</ParamField>
+<ParamField body="style" type="string" default="realistic">
+  `realistic`, `anime`, `3d`, `claymation` ou `cartoon`.
+</ParamField>
+
+## Resposta `202`
+
+<ResponseField name="avatar" type="object">O avatar criado, no formato de [Listar Avatares](/api-reference/avatars/list).</ResponseField>
+
+## Erros
+
+| HTTP | Mensagem | Quando |
+|---|---|---|
+| 400 | Créditos insuficientes... (`code: insufficient_credits`) | Sem imagens do plano e sem créditos para a ficha |
+| 403 | Você não tem permissão para esta ação neste espaço de trabalho. | Papel `viewer` |
+| 403 | (`code: workspace_spend_limit_reached`) | Limite de gasto do membro no workspace |
+| 422 | Confirme que você tem autorização para usar esta imagem. | `consent` ausente ou `false` |
+| 422 | Dê um nome para o avatar. / O nome pode ter até 60 caracteres. | `name` vazio ou longo |
+| 422 | A foto escolhida não está disponível neste espaço... (`code: reference_unavailable`) | Foto de outro workspace ou URL fora do upload |

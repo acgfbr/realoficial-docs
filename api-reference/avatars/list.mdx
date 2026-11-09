@@ -1,0 +1,36 @@
+---
+title: 'Listar Avatares'
+api: 'GET /ai-avatars'
+description: 'Presets e avatares do workspace, com o custo de criar um avatar'
+---
+
+## Endpoint
+
+```text
+GET https://api.realoficial.com.br/api/v1/ai-avatars
+```
+
+## Resposta
+
+<ResponseField name="presets" type="array">
+  Personagens prontos e grátis, no mesmo formato de `avatars` (com `preset: true`).
+</ResponseField>
+<ResponseField name="avatars" type="array">
+  Avatares do workspace, do mais novo para o mais antigo.
+  <Expandable title="Propriedades">
+    <ResponseField name="id" type="string">ID do avatar (o slug, nos presets).</ResponseField>
+    <ResponseField name="name" type="string">Nome.</ResponseField>
+    <ResponseField name="preset" type="boolean">`true` nos presets.</ResponseField>
+    <ResponseField name="real_photo" type="boolean">`true` quando foi criado a partir de foto de uma pessoa real.</ResponseField>
+    <ResponseField name="status" type="string">`generating` (ficha em geração), `ready` ou `failed`.</ResponseField>
+    <ResponseField name="style" type="string | null">Estilo da ficha: `realistic`, `anime`, `3d`, `claymation` ou `cartoon`.</ResponseField>
+    <ResponseField name="portrait_url" type="string | null">Retrato para exibir. Nos avatares do workspace é uma URL assinada que expira.</ResponseField>
+    <ResponseField name="sheet_url" type="string | null">Ficha para exibir (URL assinada nos avatares do workspace).</ResponseField>
+    <ResponseField name="image_url" type="string | null">A imagem a mandar no pedido de vídeo. `null` até o avatar ficar `ready`.</ResponseField>
+    <ResponseField name="error" type="string | null">Só em `failed`: mensagem para o usuário final. Os créditos já foram devolvidos.</ResponseField>
+    <ResponseField name="created_at" type="string | null">ISO 8601; `null` nos presets.</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="styles" type="array">Estilos aceitos ao criar.</ResponseField>
+<ResponseField name="sheet_credits" type="integer">Créditos que a ficha custa quando não entra nas imagens do plano.</ResponseField>
+<ResponseField name="sheet_included_in_plan" type="boolean">`true` quando a próxima ficha sai das imagens inclusas no plano, sem créditos.</ResponseField>
