@@ -25,8 +25,7 @@ Este endpoint requer autenticação via Bearer Token.
 <Warning>
 **Para usar renderização em lote:**
 - Usuário deve ter um plano ativo
-- O limite por hora depende do plano: Lite 30, Criador 60, Viral 90, Business 90 (sem assinatura: 3). Vale por membro do workspace e por hora civil. O lote é tudo-ou-nada: se não couber no restante da hora, nenhum corte é enfileirado
-- O pedido não é rejeitado com base no tamanho atual da fila de processamento
+- O limite de renders por hora depende do plano. Os cortes que cabem na hora são iniciados e os demais voltam em `deferred_short_ids`. Veja [Limites e cotas](/limits#renders-por-hora)
 - Usuários que nunca fizeram depósito terão **marca d'água** nos vídeos
 </Warning>
 
@@ -118,13 +117,16 @@ $data = json_decode($response, true);
 <ResponseExample>
 ```json 200 - Sucesso
 {
-  "message": "Acompanhe na tela de meus vídeos :)"
+  "message": "Acompanhe na tela de meus vídeos :)",
+  "unavailable_short_ids": [],
+  "deferred_short_ids": []
 }
 ```
 
 ```json 429 - Limite Horário Atingido
 {
-  "error": "Você já gerou 30 cortes nesta hora. Seu plano permite 30 cortes por hora. Aguarde para fazer mais renderizações."
+  "error": "Você já gerou 30 cortes nesta hora. Seu plano permite 30 cortes por hora. Aguarde para fazer mais renderizações.",
+  "code": "render_hourly_limit_exceeded"
 }
 ```
 

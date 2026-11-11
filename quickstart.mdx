@@ -1,0 +1,235 @@
+---
+title: 'Quickstart'
+description: 'Do link de um vídeo ao primeiro corte renderizado, em quatro chamadas'
+---
+
+Este guia leva um vídeo do YouTube até um MP4 pronto para publicar. São quatro chamadas:
+criar o projeto, esperar os cortes, renderizar um deles e pegar o link do arquivo.
+
+## Antes de começar
+
+- Uma conta em [app.realoficial.com.br](https://app.realoficial.com.br). A API funciona
+  em qualquer plano, inclusive o gratuito.
+- 5 créditos de saldo. O exemplo processa 5 minutos de vídeo e cada minuto processado
+  custa 1 crédito.
+- Um vídeo do YouTube com pelo menos 5 minutos. YouTube Shorts não são aceitos.
+- `curl` e `jq` instalados.
+
+## 1. Pegue seu token
+
+No dashboard, abra **Configurações > Segurança** e copie o token. Ele não expira.
+
+```bash
+export RO_TOKEN="seu_token_aqui"
+export RO_API="https://api.realoficial.com.br/api/v1"
+```
+
+Se preferir obter o token por código, [`POST /login`](/api-reference/auth/login) devolve o
+mesmo valor em `user.token`.
+
+## 2. Crie o projeto
+
+Envie o link do vídeo e o trecho que deve ser analisado. `startTime` e `endTime` são em
+segundos.
+
+```bash
+curl -s -X POST "$RO_API/createShorts" \
+  -H "Authorization: Bearer $RO_TOKEN" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "url": "https://www.youtube.com/watch?v=VIDEO_ID",
+    "video_type": "shorts",
+    "aspect_ratio": "vertical",
+    "clipDuration": "60",
+    "startTime": 0,
+    "endTime": 300
+  }'
+```
+
+A resposta traz o projeto. Guarde o `id`:
+
+```json
+{
+  "data": {
+    "id": "01k3ab12yqtsyrzjb0fveqy5zx",
+    "status": "pending"
+  }
+}
+```
+
+```bash
+export PROJECT_ID="01k3ab12yqtsyrzjb0fveqy5zx"
+```
+
+<Warning>
+Envie `Accept: application/json` em todas as chamadas. Sem esse header, um erro de
+validação volta como redirect `302` em vez de JSON. Veja [Erros](/errors).
+</Warning>
+
+Todos os campos e regras de duração estão em
+[Criar Projeto com IA](/api-reference/projects/create).
+
+## 3. Espere os cortes
+
+O processamento é assíncrono. Consulte os cortes do projeto a cada 10 a 30 segundos até
+`project.status` ser `face_analysis_done`:
+
+```bash
+curl -s "$RO_API/shorts/$PROJECT_ID?sort=score&limit=3" \
+  -H "Authorization: Bearer $RO_TOKEN" \
+  -H "Accept: application/json" \
+  | jq '{status: .project.status, cortes: [.data.data[] | {id, title, score}]}'
+```
+
+```json
+{
+  "status": "face_analysis_done",
+  "cortes": [
+    { "id": "01k4ef56yqtsyrzjb0gveqy7cd", "title": "Momento viral #1", "score": 9.2 },
+    { "id": "01k4ef57yqtsyrzjb0gveqy8de", "title": "Momento viral #2", "score": 8.7 }
+  ]
+}
+```
+
+Com `sort=score`, o primeiro corte é o que a IA avaliou melhor. Guarde o `id` dele:
+
+```bash
+export SHORT_ID="01k4ef56yqtsyrzjb0gveqy7cd"
+```
+
+## 4. Renderize um corte
+
+```bash
+curl -s -X POST "$RO_API/shorts/$PROJECT_ID/$SHORT_ID/render" \
+  -H "Authorization: Bearer $RO_TOKEN" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json"
+```
+
+```json
+{
+  "data": {
+    "render_id": "01k6ij90yqtsyrzjb0hveqy9ef",
+    "status": "pending"
+  }
+}
+```
+
+```bash
+export RENDER_ID="01k6ij90yqtsyrzjb0hveqy9ef"
+```
+
+A quantidade de renders por hora depende do plano. Contas que nunca fizeram uma compra
+ficam limitadas a 3 por hora e recebem marca d'água. Veja [Limites e cotas](/limits).
+
+## 5. Pegue o vídeo
+
+Um render costuma levar de 30 segundos a 2 minutos. Consulte a lista de renders do
+projeto até o seu aparecer com `status: done`:
+
+```bash
+curl -s "$RO_API/renders?project_id=$PROJECT_ID" \
+  -H "Authorization: Bearer $RO_TOKEN" \
+  -H "Accept: application/json" \
+  | jq --arg id "$RENDER_ID" '.data.data[] | select(.id == $id) | {status, download_url}'
+```
+
+```json
+{
+  "status": "done",
+  "download_url": "https://cdn-wasabi.realoficial.com.br/renders/01k6ij90yqtsyrzjb0hveqy9ef.mp4?v=20250124"
+}
+```
+
+`download_url` é o link direto do MP4.
+
+## Script completo
+
+O mesmo fluxo em um arquivo só. Ele cria o projeto, espera, renderiza o corte de maior
+`score` e imprime o link do vídeo.
+
+```bash primeiro-corte.sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+: "${RO_TOKEN:?defina RO_TOKEN com o seu token}"
+VIDEO_URL="${1:?uso: ./primeiro-corte.sh URL_DO_VIDEO}"
+API="${RO_API:-https://api.realoficial.com.br/api/v1}"
+
+# api MÉTODO CAMINHO [JSON]
+api() {
+  curl -sS -X "$1" "$API$2" \
+    -H "Authorization: Bearer $RO_TOKEN" \
+    -H "Accept: application/json" \
+    -H "Content-Type: application/json" \
+    ${3:+-d "$3"}
+}
+
+# 1. Cria o projeto: 5 minutos de vídeo, 5 créditos
+BODY=$(jq -n --arg url "$VIDEO_URL" '{
+  url: $url,
+  video_type: "shorts",
+  aspect_ratio: "vertical",
+  clipDuration: "60",
+  startTime: 0,
+  endTime: 300
+}')
+PROJECT=$(api POST /createShorts "$BODY")
+PROJECT_ID=$(jq -r '.data.id // empty' <<<"$PROJECT")
+[ -n "$PROJECT_ID" ] || { echo "Erro ao criar o projeto: $PROJECT" >&2; exit 1; }
+echo "Projeto criado: $PROJECT_ID" >&2
+
+# 2. Espera os cortes
+while :; do
+  SHORTS=$(api GET "/shorts/$PROJECT_ID?sort=score&limit=1")
+  STATUS=$(jq -r '.project.status // "desconhecido"' <<<"$SHORTS")
+  echo "  projeto: $STATUS" >&2
+  case "$STATUS" in
+    face_analysis_done) break ;;
+    refunded*) echo "O projeto foi reembolsado e não gerou cortes." >&2; exit 1 ;;
+  esac
+  sleep 20
+done
+SHORT_ID=$(jq -r '.data.data[0].id // empty' <<<"$SHORTS")
+[ -n "$SHORT_ID" ] || { echo "O projeto terminou sem cortes." >&2; exit 1; }
+
+# 3. Renderiza o corte de maior score
+RENDER=$(api POST "/shorts/$PROJECT_ID/$SHORT_ID/render")
+RENDER_ID=$(jq -r '.data.render_id // empty' <<<"$RENDER")
+[ -n "$RENDER_ID" ] || { echo "Erro ao renderizar: $RENDER" >&2; exit 1; }
+echo "Render iniciado: $RENDER_ID" >&2
+
+# 4. Espera o vídeo e imprime o link
+while :; do
+  ROW=$(api GET "/renders?project_id=$PROJECT_ID" \
+    | jq -c --arg id "$RENDER_ID" '.data.data[] | select(.id == $id)')
+  case "$(jq -r '.status // empty' <<<"$ROW")" in
+    done) jq -r '.download_url' <<<"$ROW"; break ;;
+    error) echo "A renderização falhou." >&2; exit 1 ;;
+  esac
+  sleep 10
+done
+```
+
+```bash
+chmod +x primeiro-corte.sh
+./primeiro-corte.sh "https://www.youtube.com/watch?v=VIDEO_ID"
+```
+
+## Em produção
+
+<CardGroup cols={2}>
+  <Card title="Troque o polling por webhooks" icon="bell" href="/api-reference/auth/profile#webhooks">
+    Receba `project.ready` e `render.completed` na sua URL em vez de consultar em laço.
+  </Card>
+  <Card title="Trate os erros" icon="triangle-exclamation" href="/errors">
+    Os formatos de erro variam entre endpoints. Veja como ler todos com o mesmo código.
+  </Card>
+  <Card title="Renderize em lote" icon="layer-group" href="/api-reference/renders/bulk">
+    Envie vários cortes para render em uma única chamada.
+  </Card>
+  <Card title="Publique nas redes" icon="share-nodes" href="/api-reference/social-posts">
+    Conecte contas e publique ou agende os vídeos renderizados.
+  </Card>
+</CardGroup>

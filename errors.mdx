@@ -1,0 +1,146 @@
+---
+title: 'Erros'
+description: 'Os formatos de erro da API e como tratar todos com o mesmo código'
+---
+
+A API v1 cresceu em etapas e os erros não têm um formato único. Esta página mostra os
+formatos que existem e uma forma de ler qualquer um deles.
+
+## Envie sempre `Accept: application/json`
+
+<Warning>
+Sem `Accept: application/json`, um erro de validação **não volta como JSON**. A API
+responde com um redirect `302`, que é o comportamento padrão do framework para clientes
+que não pedem JSON.
+</Warning>
+
+O sintoma engana porque nem todo erro se comporta igual: uma falha de autenticação
+(`401`) volta em JSON mesmo sem o header, e um erro de validação vira `302`. Uma
+integração que esquece o `Accept` funciona até a primeira requisição inválida.
+
+`Content-Type: application/json` descreve o corpo que você envia e só é necessário em
+requisições com corpo. `Accept: application/json` descreve a resposta que você espera e
+vai em todas as requisições, inclusive `GET`.
+
+## Formatos de erro
+
+| Formato | Quando aparece | Exemplo |
+|---|---|---|
+| `error` | Regras de negócio dos endpoints mais antigos | Créditos insuficientes em `/createShorts` |
+| `error` + `code` | Endpoints mais novos e limites | Limite de renders por hora |
+| `message` + `errors` | Validação de campos (`422`) | Campo obrigatório ausente |
+
+<CodeGroup>
+```json error
+{
+  "error": "Você precisa selecionar um intervalo de pelo menos 5 minutos."
+}
+```
+
+```json error + code
+{
+  "error": "A legenda ou a dublagem escolhida não está disponível para este corte. Atualize a página e tente de novo.",
+  "code": "variant_unavailable"
+}
+```
+
+```json message + errors
+{
+  "message": "The video type field is required.",
+  "errors": {
+    "video_type": ["The video type field is required."]
+  }
+}
+```
+</CodeGroup>
+
+Quando existe, `code` é o identificador estável do erro. Use `code` para decidir o que
+fazer e trate o texto de `error` e `message` apenas como mensagem para exibir: o texto
+pode mudar e depende do idioma da conta.
+
+## Como tratar
+
+1. Decida pelo status HTTP.
+2. Se houver `code`, use para distinguir os casos dentro do mesmo status.
+3. Exiba `error` ou, na falta dele, `message`.
+4. Em `422` com `errors`, mostre as mensagens por campo.
+
+```javascript
+const API = 'https://api.realoficial.com.br/api/v1';
+
+async function call(token, path, options = {}) {
+  const response = await fetch(`${API}${path}`, {
+    ...options,
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`,
+      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      ...options.headers,
+    },
+  });
+
+  const body = await response.json().catch(() => null);
+  if (response.ok) return body;
+
+  const error = new Error(body?.error ?? body?.message ?? `HTTP ${response.status}`);
+  error.status = response.status;
+  error.code = body?.code ?? null;     // só nos endpoints que enviam code
+  error.fields = body?.errors ?? null; // só em erros de validação
+  error.retryAfter =
+    Number(response.headers.get('Retry-After')) || body?.retry_after || null;
+  throw error;
+}
+```
+
+## Status HTTP
+
+| Status | Significado nesta API |
+|---|---|
+| `200` | Sucesso |
+| `201` | Recurso criado |
+| `202` | Pedido aceito; o processamento continua em segundo plano |
+| `208` | O recurso já existia e foi reaproveitado, como um render já feito para o mesmo corte |
+| `400` | Regra de negócio não atendida. Os endpoints mais antigos usam `400` onde os mais novos usam `422` |
+| `401` | Token ausente ou inválido |
+| `402` | A operação exige assinatura ativa. Usado por alguns recursos de IA; outros endpoints respondem `403` para o mesmo caso |
+| `403` | Token válido, mas a conta, o plano ou o papel no workspace não permite a operação |
+| `404` | Recurso inexistente ou fora do workspace da requisição |
+| `409` | O estado atual do recurso não permite a operação, como um pedido de reembolso repetido |
+| `422` | Erro de validação de campos ou regra de negócio com `code` |
+| `429` | Limite ou cota atingido. Veja [Limites e cotas](/limits) |
+| `500` | Erro interno |
+
+<Note>
+`208` é uma resposta de sucesso. Um cliente que só aceita `200` e `201` vai tratar como
+falha um render que já está pronto.
+</Note>
+
+## Erros de autenticação e permissão
+
+```json 401
+{
+  "error": "Token invalido ou expirado"
+}
+```
+
+`403` não significa token errado. Ele aparece quando a operação exige assinatura ativa,
+quando o papel do membro no [workspace](/api-reference/workspaces) não permite a ação ou
+quando a conta está bloqueada. Veja [Créditos e planos](/plans).
+
+Um recurso que existe em outro workspace responde `404`, não `403`. Confira o header
+`X-Workspace-Id` antes de concluir que o ID está errado.
+
+## Respostas 429
+
+Um `429` pode ser um limite de requisições por minuto ou uma cota de uso, como renders
+por hora. As cotas costumam trazer `code` e, em alguns endpoints, o header `Retry-After`
+ou o campo `retry_after` com os segundos até a próxima tentativa.
+
+```json 429
+{
+  "error": "Você já gerou 30 cortes nesta hora. Seu plano permite 30 cortes por hora. Aguarde para fazer mais renderizações.",
+  "code": "render_hourly_limit_exceeded"
+}
+```
+
+A lista de limites está em [Limites e cotas](/limits).

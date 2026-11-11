@@ -1,130 +1,91 @@
 ---
 title: Introdução
-description: 'Bem-vindo a API do Real Oficial - Crie cortes de vídeo automaticamente'
+description: 'API da Real Oficial: transforme vídeos longos em cortes prontos para publicar'
 ---
 
 <Frame>
   <img src="/images/doc_real_v2.jpeg" alt="Real Oficial API" />
 </Frame>
 
-## Bem-vindo a API Real Oficial
+A API da Real Oficial recebe um vídeo longo, encontra os melhores momentos, gera os
+cortes, renderiza os arquivos e publica nas redes sociais. Tudo o que está nesta
+documentação pode ser chamado da sua aplicação com um Bearer Token.
 
-A API do Real Oficial permite que você integre nossas funcionalidades de criação automática de cortes de vídeo diretamente em sua aplicação.
-
-<Info>
-A API está liberada para todas as contas: gratuita, pacote de créditos, Lite, Criador,
-Viral e Business. Créditos, assinatura e limites de cada operação continuam sendo
-aplicados normalmente. Consulte [Planos e acesso à API](/plans).
-</Info>
+Qualquer conta pode usar a API, inclusive a gratuita. O que muda entre os planos são os
+créditos e os limites de cada operação. Veja [Créditos e planos](/plans).
 
 <CardGroup cols={2}>
-  <Card
-    title="Autenticação"
-    icon="key"
-    href="/authentication"
-  >
-    Aprenda como autenticar suas requisições
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Do link de um vídeo ao primeiro corte renderizado, em quatro chamadas.
   </Card>
-  <Card
-    title="API Reference"
-    icon="code"
-    href="/api-reference/overview"
-  >
-    Explore todos os endpoints disponíveis
-  </Card>
-  <Card
-    title="Projetos"
-    icon="folder"
-    href="/api-reference/projects/list"
-  >
-    Gerencie seus projetos de vídeo
-  </Card>
-  <Card
-    title="Renders"
-    icon="video"
-    href="/api-reference/renders/list"
-  >
-    Renderize e exporte seus cortes
+  <Card title="Autenticação" icon="key" href="/authentication">
+    Onde pegar o token e como enviá-lo.
   </Card>
 </CardGroup>
 
-## O que você pode fazer
+## Como a API funciona
 
-<AccordionGroup>
-  <Accordion icon="video" title="Criar projetos a partir de vídeos">
-    Envie uma URL do YouTube, Google Drive ou link direto (.mp4) e nosso sistema automaticamente identifica os melhores momentos para cortes.
-  </Accordion>
-  <Accordion icon="folder-plus" title="Criar projetos vazios">
-    Crie um projeto apenas com título usando `POST /projects`, sem processar vídeo ou
-    consumir créditos de processamento.
-  </Accordion>
-  <Accordion icon="scissors" title="Gerar cortes automaticamente">
-    Utilizamos IA para identificar os melhores trechos do seu vídeo e gerar cortes otimizados para redes sociais.
-  </Accordion>
-  <Accordion icon="download" title="Renderizar e exportar">
-    Exporte seus cortes em alta qualidade, prontos para publicação no TikTok, Instagram Reels e YouTube Shorts.
-  </Accordion>
-</AccordionGroup>
-
-## Fluxo básico de integração
+Quase toda operação pesada é assíncrona: você cria o pedido, acompanha o status e usa o
+resultado quando ele fica pronto.
 
 ```mermaid
 sequenceDiagram
-    participant App as Sua Aplicação
+    participant App as Sua aplicação
     participant API as Real Oficial API
-    participant Worker as Workers
-
-    App->>API: POST /login (credenciais)
-    API-->>App: Token de autenticação
 
     App->>API: POST /createShorts (URL do vídeo)
-    API-->>App: Projeto criado
+    API-->>App: Projeto criado (pending)
 
-    Worker->>Worker: Processa vídeo e gera cortes
+    Note over API: Baixa, transcreve e encontra os cortes
 
     App->>API: GET /shorts/{projectId}
-    API-->>App: Lista de cortes gerados
+    API-->>App: Cortes com score
 
     App->>API: POST /shorts/{projectId}/{shortId}/render
-    API-->>App: Renderização iniciada
+    API-->>App: Render iniciado
 
     App->>API: GET /renders
-    API-->>App: Status e URL do vídeo renderizado
+    API-->>App: download_url do MP4
 ```
 
-## Rate Limits
+Para acompanhar, consulte o endpoint de status em intervalos ou configure um
+[webhook](/api-reference/auth/profile#webhooks) para ser avisado quando um projeto ou um
+render termina.
 
-A API possui limites de requisições para garantir estabilidade:
+## O que dá para fazer
 
-| Endpoint | Limite |
-|----------|--------|
-| Login | 60 requisições/minuto |
-| Criar Projeto | 10 requisições/minuto |
-| Renderizar | 50 cortes/hora (ilimitado no plano Business) |
+| Área | O que faz | Comece por |
+|---|---|---|
+| Cortes | Cria projetos a partir de um vídeo, lista e edita os cortes, renderiza os MP4 | [Criar Projeto com IA](/api-reference/projects/create) |
+| IA | Auto Edit, dublagem, tradução de legendas, geração de imagem e vídeo, avatares e thumbnails | [Auto Edit](/api-reference/auto-edit) |
+| Publicação | Conecta contas sociais, publica, agenda e organiza filas de postagem | [Publicações e Agendamento](/api-reference/social-posts) |
+| Conteúdo | Brand kits, templates, biblioteca de arquivos e prompts, uploads de mídia | [Biblioteca](/api-reference/library) |
+| Lives | Monitora lives da Twitch e da Kick e lista os cortes gerados a partir delas | [Iniciar Monitoramento](/api-reference/lives/monitor) |
 
-### Limite de renderização
+## Antes de integrar
 
-O limite é de **50 cortes por hora** para todos os planos, exceto o plano **Business**, que possui renderizações ilimitadas.
-
-Pedidos de renderização não são rejeitados com base no tamanho atual da fila de processamento. As proteções contra render duplicado ou já em andamento continuam ativas.
+<CardGroup cols={2}>
+  <Card title="Convenções da API" icon="book" href="/api-reference/overview">
+    URL base, headers, workspaces e paginação.
+  </Card>
+  <Card title="Erros" icon="triangle-exclamation" href="/errors">
+    Os formatos de erro e como tratar todos.
+  </Card>
+  <Card title="Limites e cotas" icon="gauge" href="/limits">
+    Renders por hora, limites por minuto e cotas de IA.
+  </Card>
+  <Card title="Limitações atuais" icon="circle-info" href="/api-reference/limitations">
+    O que a API ainda não tem endpoint para fazer.
+  </Card>
+</CardGroup>
 
 ## Suporte
 
-Precisa de ajuda? Entre em contato conosco:
-
 <CardGroup cols={2}>
-  <Card
-    title="Discord"
-    icon="discord"
-    href="https://discord.gg/realoficial"
-  >
-    Junte-se a nossa comunidade
+  <Card title="Discord" icon="discord" href="https://discord.gg/realoficial">
+    Tire dúvidas com a comunidade e com o time.
   </Card>
-  <Card
-    title="Email"
-    icon="envelope"
-    href="mailto:antonio@realoficial.com.br"
-  >
+  <Card title="Email" icon="envelope" href="mailto:antonio@realoficial.com.br">
     antonio@realoficial.com.br
   </Card>
 </CardGroup>

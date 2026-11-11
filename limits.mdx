@@ -1,0 +1,91 @@
+---
+title: 'Limites e cotas'
+description: 'Renders por hora, limites de requisição e cotas dos recursos de IA em um só lugar'
+---
+
+A API aplica dois tipos de limite. Os dois respondem `429`:
+
+- **Limite de requisições**: quantas chamadas por minuto um endpoint aceita.
+- **Cota de uso**: quanto de um recurso a conta pode consumir em um período, como renders
+  por hora.
+
+As cotas costumam trazer um `code` que identifica o limite atingido. Veja como ler a
+resposta em [Erros](/errors#respostas-429).
+
+## Renders por hora
+
+Vale para [`POST /shorts/{projectId}/{shortId}/render`](/api-reference/renders/create) e
+[`POST /renders/bulk`](/api-reference/renders/bulk).
+
+| Conta | Renders por hora |
+|---|---:|
+| Nunca fez uma compra | 3 |
+| Sem assinatura, mas já comprou pacote de créditos | 30 |
+| Lite | 30 |
+| Criador | 60 |
+| Viral | 90 |
+| Business | 90 |
+
+- A contagem é por membro do workspace e por hora cheia, por exemplo das 14:00 às 14:59.
+- O plano considerado é o do dono do workspace.
+- Ao passar do limite, a resposta é `429` com `code: "render_hourly_limit_exceeded"`.
+- No lote, os cortes que cabem na hora são iniciados e os demais voltam em
+  `deferred_short_ids`. Reenvie esses IDs na hora seguinte.
+- Pedir de novo um render que já existe responde `208` e não consome a cota.
+
+Contas que nunca fizeram uma compra recebem marca d'água nos vídeos.
+
+<Note>
+Em picos de fila, os endpoints de render podem responder `400` pedindo para tentar mais
+tarde. No lote, essa resposta traz `code: "render_queue_full"` e `retry_after` em
+segundos.
+</Note>
+
+## Limites de requisição
+
+Estes são os endpoints com limite por minuto documentado. Os demais não têm um limite
+publicado; se receber `429`, aguarde e tente de novo.
+
+| Endpoint | Requisições por minuto |
+|---|---:|
+| [Gerar plano de Auto Edit](/api-reference/auto-edit/generate) | 10 |
+| [Criar dublagem](/api-reference/dubbing/create) | 20 |
+| [Gerar thumbnail](/api-reference/thumbnails/generations-create) | 30 |
+| [Criar sessão de thumbnails](/api-reference/thumbnails/sessions-create) | 60 |
+| [Fila de imagens](/api-reference/images/queue) | 60 |
+| [Uploads de mídia](/api-reference/uploads/create) | 60 |
+| [Transcrição do short](/api-reference/shorts/transcript) | 60 |
+| [Download de vídeo gerado](/api-reference/videos/download) | 60 |
+
+## Cotas dos recursos de IA
+
+| Recurso | Cota | Ao atingir |
+|---|---|---|
+| [Auto Edit](/api-reference/auto-edit) | 100 planos por membro por dia, renovada à 00:00 UTC | `429 limit_exceeded` com `Retry-After` |
+| [Dublagem](/api-reference/dubbing#cota-e-custo) | Minutos por mês no workspace do dono, renovados no dia 1 à 00:00 UTC | `429 dubbing_free_limit_reached` |
+| [Geração de vídeo](/api-reference/videos) | 50 vídeos por membro a cada 24 horas | `429 video_generation_daily_limit` |
+| [Geração de vídeo](/api-reference/videos) | 10 vídeos na fila por conta, além das vagas simultâneas do plano | `429 video_generation_queue_full` |
+| [Sugestão de descrição](/api-reference/shorts/transcript) | 100 sugestões por usuário por dia | `429 caption_suggestion_daily_limit` com `Retry-After` |
+| [Pedido de reembolso de vídeo](/api-reference/videos/refund-request) | 1 pedido em revisão por vez e 5 pedidos a cada 30 dias | `429 refund_too_many_pending` ou `refund_too_many_requests` |
+
+O valor atual de cada cota vem na própria API. A dublagem, por exemplo, informa os
+minutos restantes em `GET /dubbing/languages`.
+
+## Tamanho e duração do vídeo de origem
+
+As regras de duração de [`POST /createShorts`](/api-reference/projects/create#validações)
+dependem do modo:
+
+| Modo | Trecho mínimo | Trecho máximo |
+|---|---|---|
+| `shorts` | 5 minutos | 20 horas |
+| `reframe` com `layout: center` | 15 segundos | 60 minutos |
+| `reframe` nos demais layouts | 15 segundos | 5 minutos |
+
+Vídeos com mais de 3 horas exigem assinatura ativa. Arquivos do Google Drive e links
+diretos aceitam até 10 GB.
+
+## O que a API ainda não faz
+
+Limites de requisição e cotas são diferentes de funcionalidades ausentes. Para saber o
+que ainda não tem endpoint, veja [Limitações atuais](/api-reference/limitations).

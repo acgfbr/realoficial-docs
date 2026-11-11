@@ -1,61 +1,43 @@
 ---
-title: 'Planos e acesso à API'
-description: 'Entenda quem pode usar a API e quais limites continuam dependendo do plano ou do saldo de créditos'
+title: 'Créditos e planos'
+description: 'Quem pode usar a API, o que consome créditos e o que depende do plano'
 ---
 
-## Disponibilidade
+## Quem pode usar a API
 
-A API da Real Oficial está disponível para todas as contas. O acesso não é mais
-exclusivo do plano Viral.
+Todas as contas: gratuita, com pacote de créditos, Lite, Criador, Viral e Business. O
+token é o mesmo em qualquer plano e não é preciso informar o plano nas requisições.
 
-| Conta | Pode autenticar e usar a API? |
+Ter acesso à API não torna toda operação gratuita nem disponível. Cada endpoint aplica
+as próprias regras de saldo, assinatura e permissão, descritas abaixo.
+
+## O que consome créditos
+
+| Operação | Custo |
 |---|---|
-| Gratuita, sem assinatura | Sim |
-| Com pacote de créditos | Sim |
-| Lite | Sim |
-| Criador | Sim |
-| Viral | Sim |
-| Business | Sim |
+| [Criar projeto com IA](/api-reference/projects/create) | 1 crédito por minuto de vídeo processado, calculado por `endTime - startTime` |
+| [Criar projeto vazio](/api-reference/projects/create-empty) | Não consome créditos |
+| [Geração de imagem](/api-reference/images) e [de vídeo](/api-reference/videos) | Preço por modelo, que muda com o tempo. Consulte [Preços em tempo real](/api-reference/ai-pricing) |
+| [Dublagem](/api-reference/dubbing#cota-e-custo) | Não consome créditos; usa uma cota mensal em minutos |
+| Demais recursos de IA | O custo está no guia de cada recurso |
 
-O mesmo Bearer Token da conta é usado em todos os casos. Não existe um token diferente
-por plano nem é necessário enviar o nome do plano nas requisições.
+O saldo atual vem no campo `balance` de [`GET /user`](/api-reference/auth/user). Quando o
+saldo não cobre a operação, o endpoint responde com erro e nada é processado.
 
-<Info>
-Lite, Criador, Viral e Business possuem acesso aos recursos classificados como recursos
-de plano pago. As diferenças entre eles ficam nas cotas, créditos e capacidades descritas
-em cada endpoint.
-</Info>
+## O que depende do plano
 
-## Acesso à API não elimina as regras da operação
+| Regra | Exemplo |
+|---|---|
+| Assinatura ativa obrigatória | [Projeto vazio](/api-reference/projects/create-empty), vídeos de origem com mais de 3 horas, [Auto Edit](/api-reference/auto-edit) |
+| Limites maiores | Renders por hora e vídeos gerados ao mesmo tempo. Veja [Limites e cotas](/limits) |
+| Marca d'água | Contas que nunca fizeram uma compra recebem marca d'água nos renders |
 
-Uma conta conseguir autenticar na API não significa que toda operação seja gratuita ou
-esteja disponível sem assinatura. Cada endpoint pode aplicar requisitos próprios:
-
-- saldo suficiente para uma operação cobrada em créditos;
-- assinatura ativa para uma funcionalidade de plano pago;
-- limite específico do plano, como a quantidade de lives monitoradas;
-- permissão do usuário dentro do workspace;
-- rate limit do endpoint.
-
-Por exemplo, uma conta que possui somente um pacote de créditos pode usar a API e
-processar operações compatíveis com esse saldo. Já uma operação documentada como
-“assinatura ativa obrigatória” continuará retornando `403` se a conta não possuir uma
-assinatura ativa.
+Uma operação que exige assinatura responde `403` para contas sem assinatura ativa, mesmo
+com saldo de créditos. Alguns recursos de IA respondem `402` no mesmo caso. Veja
+[Erros](/errors).
 
 ## Workspaces
 
-Quando `X-Workspace-Id` é enviado, o plano, os créditos e os limites utilizados são os do
-dono do workspace. A ação também depende da permissão do membro autenticado.
-
-Consulte [Workspaces](/api-reference/workspaces) para os detalhes de isolamento e papéis.
-
-## Próximos passos
-
-<CardGroup cols={2}>
-  <Card title="Autenticação" icon="key" href="/authentication">
-    Obtenha e envie seu Bearer Token.
-  </Card>
-  <Card title="Criar projeto vazio" icon="folder-plus" href="/api-reference/projects/create-empty">
-    Crie um contêiner vazio para organizar conteúdo.
-  </Card>
-</CardGroup>
+Com `X-Workspace-Id`, o plano, os créditos e os limites usados são os do **dono do
+workspace**, não os do membro que fez a chamada. A ação também depende do papel desse
+membro. Veja [Workspaces](/api-reference/workspaces).

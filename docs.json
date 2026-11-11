@@ -31,281 +31,314 @@
     }
   },
   "navigation": {
-    "groups": [
+    "tabs": [
       {
-        "group": "Comece Aqui",
-        "pages": [
-          "introduction",
-          "authentication",
-          "plans",
-          "api-reference/ai-pricing",
-          "api-reference/overview",
-          "api-reference/workspaces"
+        "tab": "Guias",
+        "groups": [
+          {
+            "group": "Comece aqui",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "authentication"
+            ]
+          },
+          {
+            "group": "Conceitos",
+            "pages": [
+              "api-reference/overview",
+              "api-reference/workspaces",
+              "plans",
+              "api-reference/ai-pricing",
+              "errors",
+              "limits",
+              "api-reference/limitations"
+            ]
+          },
+          {
+            "group": "Ferramentas",
+            "pages": [
+              "api-reference/openapi",
+              "api-reference/embed"
+            ]
+          }
         ]
       },
       {
-        "group": "Autenticação",
-        "pages": [
-          "api-reference/auth/login",
-          "api-reference/auth/user",
-          "api-reference/auth/profile"
-        ]
-      },
-      {
-        "group": "Projetos",
-        "pages": [
-          "api-reference/projects/video-metadata",
-          "api-reference/projects/create-empty",
-          "api-reference/projects/create",
-          "api-reference/projects/list"
-        ]
-      },
-      {
-        "group": "Shorts",
-        "pages": [
-          "api-reference/shorts/list",
-          "api-reference/shorts/preview",
-          "api-reference/shorts/timeline",
-          "api-reference/shorts/transcript"
-        ]
-      },
-      {
-        "group": "Renders",
-        "pages": [
-          "api-reference/renders/create",
-          "api-reference/renders/bulk",
-          "api-reference/renders/list"
-        ]
-      },
-      {
-        "group": "IA - Auto Edit",
-        "pages": [
-          "api-reference/auto-edit/generate",
-          "api-reference/auto-edit/status",
-          "api-reference/auto-edit/apply"
-        ]
-      },
-      {
-        "group": "IA - Dublagem",
-        "pages": [
-          "api-reference/dubbing/languages",
-          "api-reference/dubbing/create",
-          "api-reference/dubbing/show",
-          "api-reference/dubbing/list",
-          "api-reference/dubbing/timeline"
-        ]
-      },
-      {
-        "group": "IA - Tradução de Legendas",
-        "pages": [
-          "api-reference/translations/languages",
-          "api-reference/translations/short-create",
-          "api-reference/translations/short-list",
-          "api-reference/translations/timeline",
-          "api-reference/translations/source-timeline",
-          "api-reference/translations/project-create",
-          "api-reference/translations/project-list"
-        ]
-      },
-      {
-        "group": "IA - Imagens",
-        "pages": [
-          "api-reference/images/models",
-          "api-reference/images/pricing",
-          "api-reference/images/create",
-          "api-reference/images/show",
-          "api-reference/images/queue"
-        ]
-      },
-      {
-        "group": "IA - Vídeos",
-        "pages": [
-          "api-reference/videos/models",
-          "api-reference/videos/pricing",
-          "api-reference/videos/create",
-          "api-reference/videos/show",
-          "api-reference/videos/list",
-          "api-reference/videos/delete",
-          "api-reference/videos/final",
-          "api-reference/videos/download",
-          "api-reference/videos/refund-request"
-        ]
-      },
-      {
-        "group": "IA - Avatares",
-        "pages": [
-          "api-reference/avatars/list",
-          "api-reference/avatars/create",
-          "api-reference/avatars/update",
-          "api-reference/avatars/delete"
-        ]
-      },
-      {
-        "group": "IA - Thumbnails",
-        "pages": [
-          "api-reference/thumbnails/sessions-create",
-          "api-reference/thumbnails/sessions-list",
-          "api-reference/thumbnails/sessions-show",
-          "api-reference/thumbnails/generations-create",
-          "api-reference/thumbnails/generations-hide",
-          "api-reference/thumbnails/cover-set",
-          "api-reference/thumbnails/cover-remove"
-        ]
-      },
-      {
-        "group": "Uploads de Mídia",
-        "pages": [
-          "api-reference/uploads/create",
-          "api-reference/uploads/complete",
-          "api-reference/uploads/abort"
-        ]
-      },
-      {
-        "group": "Embed",
-        "pages": [
-          "api-reference/embed"
-        ]
-      },
-      {
-        "group": "Lives - Monitoramento",
-        "pages": [
-          "api-reference/lives/monitor",
-          "api-reference/lives/pause",
-          "api-reference/lives/resume",
-          "api-reference/lives/delete"
-        ]
-      },
-      {
-        "group": "Lives - Listagem",
-        "pages": [
-          "api-reference/lives/list-monitors",
-          "api-reference/lives/monitor-detail",
-          "api-reference/lives/public",
-          "api-reference/lives/detail",
-          "api-reference/lives/shorts"
-        ]
-      },
-      {
-        "group": "Lives - Shorts & Outros",
-        "pages": [
-          "api-reference/lives/copy-short",
-          "api-reference/lives/my-shorts",
-          "api-reference/lives/favorite",
-          "api-reference/lives/clips"
-        ]
-      },
-      {
-        "group": "Social - Contas",
-        "pages": [
-          "api-reference/social-accounts/connect",
-          "api-reference/social-accounts/list",
-          "api-reference/social-accounts/disconnect"
-        ]
-      },
-      {
-        "group": "Social - Publicações",
-        "pages": [
-          "api-reference/social-posts/list",
-          "api-reference/social-posts/create",
-          "api-reference/social-posts/show",
-          "api-reference/social-posts/update",
-          "api-reference/social-posts/delete",
-          "api-reference/social-posts/retry",
-          "api-reference/social-posts/retry-destination"
-        ]
-      },
-      {
-        "group": "Social - Launchers",
-        "pages": [
-          "api-reference/launchers/list",
-          "api-reference/launchers/create",
-          "api-reference/launchers/show",
-          "api-reference/launchers/update",
-          "api-reference/launchers/delete",
-          "api-reference/launchers/update-slots",
-          "api-reference/launchers/suggest-slots",
-          "api-reference/launchers/suggest-description",
-          "api-reference/launchers/add-item",
-          "api-reference/launchers/reorder-items",
-          "api-reference/launchers/reschedule-items",
-          "api-reference/launchers/remove-item"
-        ]
-      },
-      {
-        "group": "Conteúdo - Brand Kits",
-        "pages": [
-          "api-reference/brand-kits/list",
-          "api-reference/brand-kits/create",
-          "api-reference/brand-kits/show",
-          "api-reference/brand-kits/update",
-          "api-reference/brand-kits/duplicate",
-          "api-reference/brand-kits/delete"
-        ]
-      },
-      {
-        "group": "Conteúdo - Templates",
-        "pages": [
-          "api-reference/templates/mine",
-          "api-reference/templates/public",
-          "api-reference/templates/show",
-          "api-reference/templates/create",
-          "api-reference/templates/copy",
-          "api-reference/templates/update",
-          "api-reference/templates/delete",
-          "api-reference/templates/publish",
-          "api-reference/templates/unpublish",
-          "api-reference/templates/use"
-        ]
-      },
-      {
-        "group": "Conteúdo - Biblioteca",
-        "pages": [
-          "api-reference/library/folders-list",
-          "api-reference/library/folders-create",
-          "api-reference/library/folders-show",
-          "api-reference/library/folders-update",
-          "api-reference/library/folders-delete",
-          "api-reference/library/folder-items",
-          "api-reference/library/items-list",
-          "api-reference/library/items-create",
-          "api-reference/library/items-show",
-          "api-reference/library/items-update",
-          "api-reference/library/items-delete",
-          "api-reference/library/public-folders",
-          "api-reference/library/public-folder-items",
-          "api-reference/library/public-items"
-        ]
-      },
-      {
-        "group": "Guias de Recursos",
-        "pages": [
-          "api-reference/auto-edit",
-          "api-reference/dubbing",
-          "api-reference/translations",
-          "api-reference/images",
-          "api-reference/videos",
-          "api-reference/avatars",
-          "api-reference/thumbnails",
-          "api-reference/social-accounts",
-          "api-reference/social-posts",
-          "api-reference/launchers",
-          "api-reference/brand-kits",
-          "api-reference/templates",
-          "api-reference/caption-templates",
-          "api-reference/library"
-        ]
-      },
-      {
-        "group": "Analytics",
-        "pages": [
-          "api-reference/analytics"
-        ]
-      },
-      {
-        "group": "Contrato da API",
-        "pages": [
-          "api-reference/openapi",
-          "api-reference/limitations"
+        "tab": "Referência da API",
+        "groups": [
+          {
+            "group": "Cortes",
+            "pages": [
+              {
+                "group": "Projetos",
+                "pages": [
+                  "api-reference/projects/video-metadata",
+                  "api-reference/projects/create",
+                  "api-reference/projects/create-empty",
+                  "api-reference/projects/list"
+                ]
+              },
+              {
+                "group": "Shorts",
+                "pages": [
+                  "api-reference/shorts/list",
+                  "api-reference/shorts/preview",
+                  "api-reference/shorts/timeline",
+                  "api-reference/shorts/transcript"
+                ]
+              },
+              {
+                "group": "Renders",
+                "pages": [
+                  "api-reference/renders/create",
+                  "api-reference/renders/bulk",
+                  "api-reference/renders/list"
+                ]
+              },
+              "api-reference/caption-templates"
+            ]
+          },
+          {
+            "group": "IA",
+            "pages": [
+              {
+                "group": "Auto Edit",
+                "pages": [
+                  "api-reference/auto-edit",
+                  "api-reference/auto-edit/generate",
+                  "api-reference/auto-edit/status",
+                  "api-reference/auto-edit/apply"
+                ]
+              },
+              {
+                "group": "Dublagem",
+                "pages": [
+                  "api-reference/dubbing",
+                  "api-reference/dubbing/languages",
+                  "api-reference/dubbing/create",
+                  "api-reference/dubbing/show",
+                  "api-reference/dubbing/list",
+                  "api-reference/dubbing/timeline"
+                ]
+              },
+              {
+                "group": "Tradução de legendas",
+                "pages": [
+                  "api-reference/translations",
+                  "api-reference/translations/languages",
+                  "api-reference/translations/short-create",
+                  "api-reference/translations/short-list",
+                  "api-reference/translations/timeline",
+                  "api-reference/translations/source-timeline",
+                  "api-reference/translations/project-create",
+                  "api-reference/translations/project-list"
+                ]
+              },
+              {
+                "group": "Imagens",
+                "pages": [
+                  "api-reference/images",
+                  "api-reference/images/models",
+                  "api-reference/images/pricing",
+                  "api-reference/images/create",
+                  "api-reference/images/show",
+                  "api-reference/images/queue"
+                ]
+              },
+              {
+                "group": "Vídeos",
+                "pages": [
+                  "api-reference/videos",
+                  "api-reference/videos/models",
+                  "api-reference/videos/pricing",
+                  "api-reference/videos/create",
+                  "api-reference/videos/show",
+                  "api-reference/videos/list",
+                  "api-reference/videos/delete",
+                  "api-reference/videos/final",
+                  "api-reference/videos/download",
+                  "api-reference/videos/refund-request"
+                ]
+              },
+              {
+                "group": "Avatares",
+                "pages": [
+                  "api-reference/avatars",
+                  "api-reference/avatars/list",
+                  "api-reference/avatars/create",
+                  "api-reference/avatars/update",
+                  "api-reference/avatars/delete"
+                ]
+              },
+              {
+                "group": "Thumbnails",
+                "pages": [
+                  "api-reference/thumbnails",
+                  "api-reference/thumbnails/sessions-create",
+                  "api-reference/thumbnails/sessions-list",
+                  "api-reference/thumbnails/sessions-show",
+                  "api-reference/thumbnails/generations-create",
+                  "api-reference/thumbnails/generations-hide",
+                  "api-reference/thumbnails/cover-set",
+                  "api-reference/thumbnails/cover-remove"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Publicação",
+            "pages": [
+              {
+                "group": "Contas sociais",
+                "pages": [
+                  "api-reference/social-accounts",
+                  "api-reference/social-accounts/connect",
+                  "api-reference/social-accounts/list",
+                  "api-reference/social-accounts/disconnect"
+                ]
+              },
+              {
+                "group": "Publicações",
+                "pages": [
+                  "api-reference/social-posts",
+                  "api-reference/social-posts/list",
+                  "api-reference/social-posts/create",
+                  "api-reference/social-posts/show",
+                  "api-reference/social-posts/update",
+                  "api-reference/social-posts/delete",
+                  "api-reference/social-posts/retry",
+                  "api-reference/social-posts/retry-destination"
+                ]
+              },
+              {
+                "group": "Launchers",
+                "pages": [
+                  "api-reference/launchers",
+                  "api-reference/launchers/list",
+                  "api-reference/launchers/create",
+                  "api-reference/launchers/show",
+                  "api-reference/launchers/update",
+                  "api-reference/launchers/delete",
+                  "api-reference/launchers/update-slots",
+                  "api-reference/launchers/suggest-slots",
+                  "api-reference/launchers/suggest-description",
+                  "api-reference/launchers/add-item",
+                  "api-reference/launchers/reorder-items",
+                  "api-reference/launchers/reschedule-items",
+                  "api-reference/launchers/remove-item"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Conteúdo",
+            "pages": [
+              {
+                "group": "Brand Kits",
+                "pages": [
+                  "api-reference/brand-kits",
+                  "api-reference/brand-kits/list",
+                  "api-reference/brand-kits/create",
+                  "api-reference/brand-kits/show",
+                  "api-reference/brand-kits/update",
+                  "api-reference/brand-kits/duplicate",
+                  "api-reference/brand-kits/delete"
+                ]
+              },
+              {
+                "group": "Templates",
+                "pages": [
+                  "api-reference/templates",
+                  "api-reference/templates/mine",
+                  "api-reference/templates/public",
+                  "api-reference/templates/show",
+                  "api-reference/templates/create",
+                  "api-reference/templates/copy",
+                  "api-reference/templates/update",
+                  "api-reference/templates/delete",
+                  "api-reference/templates/publish",
+                  "api-reference/templates/unpublish",
+                  "api-reference/templates/use"
+                ]
+              },
+              {
+                "group": "Biblioteca",
+                "pages": [
+                  "api-reference/library",
+                  "api-reference/library/folders-list",
+                  "api-reference/library/folders-create",
+                  "api-reference/library/folders-show",
+                  "api-reference/library/folders-update",
+                  "api-reference/library/folders-delete",
+                  "api-reference/library/folder-items",
+                  "api-reference/library/items-list",
+                  "api-reference/library/items-create",
+                  "api-reference/library/items-show",
+                  "api-reference/library/items-update",
+                  "api-reference/library/items-delete",
+                  "api-reference/library/public-folders",
+                  "api-reference/library/public-folder-items",
+                  "api-reference/library/public-items"
+                ]
+              },
+              {
+                "group": "Uploads de mídia",
+                "pages": [
+                  "api-reference/uploads/create",
+                  "api-reference/uploads/complete",
+                  "api-reference/uploads/abort"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Lives",
+            "pages": [
+              {
+                "group": "Monitoramento",
+                "pages": [
+                  "api-reference/lives/monitor",
+                  "api-reference/lives/pause",
+                  "api-reference/lives/resume",
+                  "api-reference/lives/delete"
+                ]
+              },
+              {
+                "group": "Listagem",
+                "pages": [
+                  "api-reference/lives/list-monitors",
+                  "api-reference/lives/monitor-detail",
+                  "api-reference/lives/public",
+                  "api-reference/lives/detail",
+                  "api-reference/lives/shorts"
+                ]
+              },
+              {
+                "group": "Shorts e outros",
+                "pages": [
+                  "api-reference/lives/copy-short",
+                  "api-reference/lives/my-shorts",
+                  "api-reference/lives/favorite",
+                  "api-reference/lives/clips"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Conta",
+            "pages": [
+              {
+                "group": "Autenticação",
+                "pages": [
+                  "api-reference/auth/login",
+                  "api-reference/auth/user",
+                  "api-reference/auth/profile"
+                ]
+              },
+              "api-reference/analytics"
+            ]
+          }
         ]
       }
     ]

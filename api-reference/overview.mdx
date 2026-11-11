@@ -1,41 +1,36 @@
 ---
-title: 'Visão Geral'
-description: 'Referência completa da API Real Oficial'
+title: 'Convenções da API'
+description: 'URL base, headers, workspaces, IDs e paginação: o que vale para todos os endpoints'
 ---
 
-## Base URL
-
-Todas as requisições devem ser feitas para:
+## URL base
 
 ```
 https://api.realoficial.com.br/api/v1
 ```
 
-<Info>
-A API pode ser usada por contas gratuitas, contas com pacote de créditos e por todos os
-planos. Os requisitos de saldo, assinatura e permissão continuam sendo avaliados em cada
-operação. Consulte [Planos e acesso à API](/plans).
-</Info>
+Todos os caminhos desta documentação são relativos a essa URL.
 
-## Headers Padrão
+## Headers
 
-Todas as requisições devem incluir os seguintes headers:
+| Header | Valor | Quando enviar |
+|---|---|---|
+| `Authorization` | `Bearer {token}` | Sempre, exceto em `POST /login` e nos endpoints públicos de preço |
+| `Accept` | `application/json` | Sempre |
+| `Content-Type` | `application/json` | Em requisições com corpo |
+| `X-Workspace-Id` | ULID do workspace | Só para operar em um workspace de equipe |
 
-| Header | Valor | Obrigatório |
-|--------|-------|-------------|
-| `Authorization` | `Bearer {token}` | Sim (exceto login) |
-| `Content-Type` | `application/json` | Sim para POST/PUT |
-| `Accept` | `application/json` | Sim |
-| `X-Workspace-Id` | ULID do workspace | Somente para operar em um workspace de equipe |
+Sem `Accept: application/json`, erros de validação voltam como redirect `302` em vez de
+JSON. Veja [Erros](/errors).
 
-## Contexto de Workspace
+## Workspace da requisição
 
 Toda requisição autenticada opera em exatamente um workspace:
 
 - sem `X-Workspace-Id`, ou com o header vazio, usa o espaço pessoal;
 - com `X-Workspace-Id: {ulid}`, usa o workspace de equipe indicado;
-- o usuário autenticado precisa ser o dono ou um membro ativo desse workspace;
-- recursos de outro workspace não são procurados automaticamente.
+- o usuário precisa ser o dono ou um membro ativo desse workspace;
+- recursos de outro workspace não são procurados automaticamente e respondem `404`.
 
 ```bash
 curl "https://api.realoficial.com.br/api/v1/projects" \
@@ -44,61 +39,56 @@ curl "https://api.realoficial.com.br/api/v1/projects" \
   -H "Accept: application/json"
 ```
 
-Use `GET /workspaces` para listar os espaços acessíveis e obter o ID correto. Consulte
-[Workspaces](/api-reference/workspaces) para isolamento de recursos, papéis, saldo e
-endpoints de gestão.
+`GET /workspaces` lista os espaços acessíveis. Papéis, saldo e isolamento estão em
+[Workspaces](/api-reference/workspaces).
 
-## Formato de Resposta
+## IDs
 
-Envie `Accept: application/json` em todas as requisições. Sem esse header, erros de
-validação ou autenticação podem seguir o comportamento padrão do Laravel e retornar um
-redirect HTTP em vez do JSON esperado.
+Projetos, shorts, renders e a maioria dos recursos usam ULID: 26 caracteres, como
+`01k3ab12yqtsyrzjb0fveqy5zx`. Trate IDs como texto.
 
-Os endpoints históricos da API possuem envelopes diferentes. Use o contrato descrito na
-página de cada endpoint; não presuma que toda resposta usa obrigatoriamente `message` e
-`data`.
+## Operações assíncronas
 
-### Resposta de Sucesso
+Processar um vídeo, renderizar e gerar com IA não terminam na mesma requisição. O
+endpoint devolve o recurso com um status inicial e o resultado aparece depois.
 
-```json
-{
-  "message": "Operação realizada com sucesso",
-  "data": { ... }
-}
-```
+- **Polling**: consulte o endpoint de status indicado na página de cada recurso.
+- **Webhook**: para projetos e renders, configure uma URL em
+  [Atualizar Perfil](/api-reference/auth/profile#webhooks) e receba `project.ready` e
+  `render.completed`. Os recursos de IA não têm webhook.
 
-### Resposta de Erro
+## Respostas
 
-```json
-{
-  "error": "Descrição do erro"
-}
-```
+Os endpoints da v1 não compartilham um envelope único. Alguns devolvem `message` e
+`data`, outros devolvem o recurso direto. Siga o exemplo de resposta da página de cada
+endpoint em vez de presumir um formato.
 
-## Códigos HTTP
-
-| Código | Descrição |
-|--------|-----------|
-| `200` | Sucesso |
-| `201` | Criado com sucesso |
-| `202` | Aceito (processamento assíncrono) |
-| `208` | Recurso já existente e reutilizado |
-| `400` | Requisição inválida |
-| `401` | Não autenticado |
-| `403` | Sem permissão |
-| `404` | Não encontrado |
-| `422` | Erro de validação ou regra de negócio |
-| `429` | Muitas requisições (rate limit) |
-| `500` | Erro interno do servidor |
+Os formatos de erro e os status HTTP estão em [Erros](/errors).
 
 ## Paginação
 
-Endpoints que retornam listas podem utilizar paginação. Os nomes dos campos, o limite
-máximo e o valor padrão variam por recurso; confira a página do endpoint.
+Listas são paginadas com `page` e com `limit` ou `per_page`, conforme o endpoint. O
+tamanho padrão e o máximo também variam; confira a página do endpoint.
 
-```json
+Existem dois formatos de resposta paginada:
+
+<CodeGroup>
+```json Paginador dentro de data
 {
-  "data": [...],
+  "message": "Lista de shorts obtida com sucesso.",
+  "data": {
+    "current_page": 1,
+    "data": [],
+    "last_page": 3,
+    "per_page": 10,
+    "total": 24
+  }
+}
+```
+
+```json links e meta
+{
+  "data": [],
   "links": {
     "first": "https://api.realoficial.com.br/api/v1/projects?page=1",
     "last": "https://api.realoficial.com.br/api/v1/projects?page=10",
@@ -107,72 +97,19 @@ máximo e o valor padrão variam por recurso; confira a página do endpoint.
   },
   "meta": {
     "current_page": 1,
-    "from": 1,
     "last_page": 10,
     "per_page": 20,
-    "to": 20,
     "total": 200
   }
 }
 ```
+</CodeGroup>
 
-### Parâmetros de Paginação
+No primeiro formato, os itens ficam em `data.data`. É o caso de
+[Listar Shorts](/api-reference/shorts/list) e [Listar Renders](/api-reference/renders/list).
+No segundo, ficam em `data`, como em [Listar Projetos](/api-reference/projects/list).
 
-| Parâmetro | Tipo | Descrição | Padrão |
-|-----------|------|-----------|--------|
-| `page` | integer | Número da página | 1 |
-| `per_page` ou `limit` | integer | Itens por página; limite depende do endpoint | Consulte o endpoint |
+## Limites
 
-## Endpoints Disponíveis
-
-<CardGroup cols={2}>
-  <Card title="Autenticação" icon="key" href="/api-reference/auth/login">
-    - POST /login
-    - POST /social/callback/email
-    - GET /user
-  </Card>
-  <Card title="Workspaces" icon="users" href="/api-reference/workspaces">
-    - GET /workspaces
-    - GET /workspace
-    - POST /workspace
-  </Card>
-  <Card title="Projetos" icon="folder" href="/api-reference/projects/list">
-    - POST /projects — cria um projeto vazio
-    - GET /projects
-    - POST /createShorts — processa um vídeo com IA
-  </Card>
-  <Card title="Shorts" icon="scissors" href="/api-reference/shorts/list">
-    - GET /shorts/{projectId}
-    - GET /shorts/{projectId}/{shortId}
-    - POST /shorts/{projectId}/{shortId}/updateTimeline
-  </Card>
-  <Card title="Renders" icon="video" href="/api-reference/renders/list">
-    - POST /shorts/{projectId}/{shortId}/render
-    - POST /renders/bulk
-    - GET /renders
-  </Card>
-  <Card title="Lives" icon="signal-stream" href="/api-reference/lives/monitor">
-    - POST /lives/monitor
-    - GET /lives/monitors
-    - GET /lives/public
-    - POST /lives/shorts/{id}/copy
-  </Card>
-  <Card title="Publicação" icon="share-nodes" href="/api-reference/social-posts">
-    - POST /social/connect
-    - GET /social/accounts
-    - POST /social/posts
-    - GET /launchers
-  </Card>
-  <Card title="Imagem e Vídeo com IA" icon="wand-magic-sparkles" href="/api-reference/ai-pricing">
-    - POST /ai-usage/image
-    - POST /ai-usage/video
-    - GET /ai-usage/video/models
-    - GET /landing/video-pricing — preços sem login
-  </Card>
-  <Card title="Conteúdo e Analytics" icon="chart-line" href="/api-reference/analytics">
-    - GET /library/items
-    - GET /dashboard/analytics/overview
-    - GET /brand-kits
-    - GET /templates/public
-  </Card>
-</CardGroup>
+Limites de requisição, renders por hora e cotas de IA estão em
+[Limites e cotas](/limits).

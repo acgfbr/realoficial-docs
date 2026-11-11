@@ -69,7 +69,7 @@ Para criar apenas um projeto vazio, sem vídeo, processamento ou consumo de cré
   </Warning>
 
   O modo escolhido muda as regras de duração do intervalo — veja
-  [Validações](#validacoes).
+  [Validações](#validações).
 </ParamField>
 
 <ParamField body="title" type="string">
@@ -180,6 +180,7 @@ curl -X POST "https://api.realoficial.com.br/api/v1/createShorts" \
     "startTime": 0,
     "endTime": 1800,
     "aspect_ratio": "vertical",
+    "video_type": "shorts",
     "layout": "single"
   }'
 ```
@@ -198,12 +199,13 @@ const response = await fetch('https://api.realoficial.com.br/api/v1/createShorts
     startTime: 0,
     endTime: 1800,
     aspect_ratio: 'vertical',
+    video_type: 'shorts',
     layout: 'single'
   })
 });
 
 const project = await response.json();
-console.log(project.id); // ID do projeto criado
+console.log(project.data.id); // ID do projeto criado
 ```
 
 ```python Python
@@ -221,6 +223,7 @@ data = {
     'startTime': 0,
     'endTime': 1800,
     'aspect_ratio': 'vertical',
+    'video_type': 'shorts',
     'layout': 'single'
 }
 
@@ -251,6 +254,7 @@ curl_setopt_array($ch, [
         'startTime' => 0,
         'endTime' => 1800,
         'aspect_ratio' => 'vertical',
+        'video_type' => 'shorts',
         'layout' => 'single'
     ])
 ]);
@@ -345,7 +349,7 @@ incorporar a página via iframe e entender os cuidados de segurança.
   <Accordion title="YouTube">
     - `https://www.youtube.com/watch?v=VIDEO_ID`
     - `https://youtu.be/VIDEO_ID`
-    - Vídeos com duração suficiente para o intervalo mínimo (veja [Validações](#validacoes))
+    - Vídeos com duração suficiente para o intervalo mínimo (veja [Validações](#validações))
     - YouTube Shorts **não** são suportados
   </Accordion>
   <Accordion title="Google Drive">

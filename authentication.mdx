@@ -1,102 +1,50 @@
 ---
 title: 'Autenticação'
-description: 'Aprenda como autenticar suas requisições na API'
+description: 'Onde pegar o token da API e como enviá-lo nas requisições'
 ---
 
-## Método de Autenticação
+A API usa um **Bearer Token** por conta. O mesmo token vale para todos os planos e para
+todos os workspaces a que a conta tem acesso.
 
-A API do Real Oficial utiliza **Bearer Token** para autenticação. Após fazer login, você receberá um token que deve ser enviado em todas as requisições subsequentes.
+## Obtenha o token
 
-<Info>
-O uso da API está disponível em todos os planos e também para contas gratuitas ou com
-somente pacote de créditos. O plano não altera o formato da autenticação. Consulte
-[Planos e acesso à API](/plans) para entender os requisitos específicos das operações.
-</Info>
+Há duas formas, e as duas devolvem o mesmo token:
 
-## Obtendo seu Token
+- **Pelo dashboard**: em [app.realoficial.com.br](https://app.realoficial.com.br), abra
+  **Configurações > Segurança** e copie o token.
+- **Pela API**: envie email e senha para [`POST /login`](/api-reference/auth/login) e leia
+  `user.token` na resposta.
 
-<Steps>
-  <Step title="Crie uma conta">
-    Registre-se em [app.realoficial.com.br](https://app.realoficial.com.br).
-  </Step>
-  <Step title="Obtenha seu token">
-    Use o endpoint `/login` para obter seu token ou acesse **Configurações > Segurança** no dashboard.
-  </Step>
-  <Step title="Use o token">
-    Inclua o token no header `Authorization` de todas as requisições.
-  </Step>
-</Steps>
+O token não expira. Guarde uma vez e reutilize; não é preciso fazer login a cada
+requisição.
 
-## Formato do Header
+## Envie o token
 
-Todas as requisições autenticadas devem incluir o header `Authorization`:
+Inclua estes headers em toda requisição autenticada:
 
 ```bash
 Authorization: Bearer SEU_TOKEN_AQUI
-```
-
-## Header `Accept` (obrigatório)
-
-<Warning>
-Envie sempre `Accept: application/json`. Sem esse header, requisições que falham na
-validação **não retornam JSON** — elas respondem com um **redirect `302`**, que é o
-comportamento padrão do framework para clientes que não pedem JSON explicitamente.
-</Warning>
-
-```bash
 Accept: application/json
 ```
 
-O sintoma é enganoso porque nem todo erro se comporta igual: falhas de autenticação
-(`401`) retornam JSON mesmo sem o header, enquanto erros de validação viram `302`. Um
-SDK que esqueça o `Accept` funciona até a primeira requisição inválida e então recebe um
-redirect sem corpo útil para parsear.
-
-<CodeGroup>
-```bash Sem o header (incorreto)
-curl -X POST "https://api.realoficial.com.br/api/v1/createShorts" \
-  -H "Authorization: Bearer seu_token_aqui" \
-  -H "Content-Type: application/json" \
-  -d '{ "url": "..." }'
-
-# HTTP/2 302  — redirect, sem JSON
-```
-
-```bash Com o header (correto)
-curl -X POST "https://api.realoficial.com.br/api/v1/createShorts" \
-  -H "Authorization: Bearer seu_token_aqui" \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json" \
-  -d '{ "url": "..." }'
-
-# HTTP/2 201 — ou 422 com os erros por campo
-```
-</CodeGroup>
-
-<Note>
-`Content-Type: application/json` descreve o **corpo que você envia** e é necessário em
-requisições com body (`POST`, `PUT`). `Accept: application/json` descreve a **resposta que
-você espera** e deve ser enviado em todas as requisições, inclusive `GET`.
-</Note>
-
-## Exemplo de Requisição
+<Warning>
+`Accept: application/json` é obrigatório na prática. Sem ele, um erro de validação volta
+como redirect `302` em vez de JSON. Veja [Erros](/errors).
+</Warning>
 
 <CodeGroup>
 ```bash cURL
-curl -X GET "https://api.realoficial.com.br/api/v1/user" \
+curl "https://api.realoficial.com.br/api/v1/user" \
   -H "Authorization: Bearer seu_token_aqui" \
-  -H "Content-Type: application/json" \
   -H "Accept: application/json"
 ```
 
 ```javascript JavaScript
 const response = await fetch('https://api.realoficial.com.br/api/v1/user', {
-  method: 'GET',
   headers: {
-    'Authorization': 'Bearer seu_token_aqui',
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
+    Authorization: 'Bearer seu_token_aqui',
+    Accept: 'application/json',
+  },
 });
 
 const data = await response.json();
@@ -105,15 +53,12 @@ const data = await response.json();
 ```python Python
 import requests
 
-headers = {
-    'Authorization': 'Bearer seu_token_aqui',
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-}
-
 response = requests.get(
     'https://api.realoficial.com.br/api/v1/user',
-    headers=headers
+    headers={
+        'Authorization': 'Bearer seu_token_aqui',
+        'Accept': 'application/json',
+    },
 )
 
 data = response.json()
@@ -127,73 +72,43 @@ curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_HTTPHEADER => [
         'Authorization: Bearer seu_token_aqui',
-        'Content-Type: application/json',
-        'Accept: application/json'
-    ]
+        'Accept: application/json',
+    ],
 ]);
 
-$response = curl_exec($ch);
-$data = json_decode($response, true);
+$data = json_decode(curl_exec($ch), true);
 ```
 </CodeGroup>
 
-## Tokens e Segurança
+Uma resposta `200` com os dados da conta confirma que o token está correto. Veja os
+campos em [Detalhes do Usuário](/api-reference/auth/user).
 
-<Info>
-  **Seu token é permanente.** Uma vez gerado, seu token não expira e permanece o mesmo. Guarde-o em um local seguro.
-</Info>
+## Workspaces de equipe
 
-<Warning>
-  **Mantenha seu token seguro!** Nunca compartilhe ou exponha seu token em código público, repositórios Git ou logs.
-</Warning>
+Sem nenhum header extra, a requisição opera no espaço pessoal da conta. Para operar em um
+workspace de equipe, envie também `X-Workspace-Id`. Veja
+[Workspaces](/api-reference/workspaces).
 
-### Boas práticas
+## Proteja o token
 
-<CardGroup cols={2}>
-  <Card title="Variáveis de ambiente" icon="lock">
-    Armazene tokens em variáveis de ambiente, nunca no código
-  </Card>
-  <Card title="HTTPS apenas" icon="shield">
-    Sempre use HTTPS para todas as requisições
-  </Card>
-  <Card title="Token fixo" icon="lock-keyhole">
-    Seu token é permanente e não expira, guarde-o com segurança
-  </Card>
-  <Card title="Monitoramento" icon="eye">
-    Monitore o uso da sua conta para detectar acessos não autorizados
-  </Card>
-</CardGroup>
+Como o token não expira, quem tiver acesso a ele tem acesso à conta.
 
-## Códigos de Erro de Autenticação
+- Guarde o token em variável de ambiente ou em um cofre de segredos, nunca no código.
+- Não envie o token para o navegador nem para apps de cliente. Faça as chamadas pelo seu
+  servidor.
+- Não registre o header `Authorization` em logs.
 
-| Código | Descrição |
-|--------|-----------|
-| `401` | Token inválido ou ausente |
-| `403` | Token válido mas sem permissão para o recurso |
+## Quando a autenticação falha
 
-### Exemplo de resposta de erro
+| Status | Causa |
+|---|---|
+| `401` | Token ausente ou inválido |
+| `403` | Token válido, mas a operação exige um plano ou um papel no workspace que a conta não tem |
 
-```json
+```json 401
 {
   "error": "Token invalido ou expirado"
 }
 ```
 
-## Próximos passos
-
-<CardGroup cols={2}>
-  <Card
-    title="Login"
-    icon="right-to-bracket"
-    href="/api-reference/auth/login"
-  >
-    Faça login e obtenha seu token
-  </Card>
-  <Card
-    title="Criar Projeto"
-    icon="folder-plus"
-    href="/api-reference/projects/create"
-  >
-    Comece criando seu primeiro projeto
-  </Card>
-</CardGroup>
+Os demais formatos de erro estão em [Erros](/errors).
