@@ -58,8 +58,8 @@ A renderização em lote (`POST /renders/bulk`) não aceita `dub_id`.
 
 ## Rate Limits
 
-A quantidade de renders por hora depende do plano, de 3 (contas que nunca fizeram uma
-compra) a 90 (Viral e Business), e vale por membro do workspace. Ao ultrapassar o limite,
+A quantidade de renders por hora depende do plano, de 15 (contas que nunca fizeram uma
+compra) a 300 (Business), e vale por membro do workspace. Ao ultrapassar o limite,
 a API responde `429` com `code: "render_hourly_limit_exceeded"`. A tabela completa está em
 [Limites e cotas](/limits#renders-por-hora).
 
@@ -188,7 +188,7 @@ $data = json_decode($response, true);
 
 ```json 429 - Limite Horário Atingido
 {
-  "error": "Você já gerou 30 cortes nesta hora. Seu plano permite 30 cortes por hora. Aguarde para fazer mais renderizações.",
+  "error": "Você já gerou 60 cortes nesta hora. Seu plano permite 60 cortes por hora. Aguarde para fazer mais renderizações.",
   "code": "render_hourly_limit_exceeded"
 }
 ```
